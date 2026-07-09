@@ -1,0 +1,62 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<h2 mat-dialog-title>{{ 'PROJECTS.EDIT_TITLE' | translate }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="save()">
+  <mat-dialog-content class="dialog-grid">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PROJECTS.PROJECT_NAME' | translate }}</mat-label>
+      <input matInput formControlName="workEffortName" autocomplete="off">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PROJECTS.STATUS' | translate }}</mat-label>
+      <input matInput formControlName="currentStatusId" autocomplete="off">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PROJECTS.PERCENT_COMPLETE' | translate }}</mat-label>
+      <input matInput formControlName="percentComplete" type="number">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PROJECTS.BAC' | translate }}</mat-label>
+      <input matInput formControlName="totalMoneyAllowed" type="number">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PROJECTS.CURRENCY' | translate }}</mat-label>
+      <input matInput formControlName="moneyUomId" autocomplete="off">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-span">
+      <mat-label>{{ 'PROJECTS.DESCRIPTION' | translate }}</mat-label>
+      <textarea matInput rows="4" formControlName="description"></textarea>
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-flat-button color="primary" type="submit" [disabled]="isSaving()">
+      {{ 'COMMON.SAVE' | translate }}
+    </button>
+    <button mat-stroked-button type="button" (click)="cancel()">
+      {{ 'COMMON.CANCEL' | translate }}
+    </button>
+  </mat-dialog-actions>
+</form>

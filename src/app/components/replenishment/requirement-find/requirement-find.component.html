@@ -1,0 +1,143 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-header>
+    <mat-card-title>{{ 'REPLENISHMENT.FIND_REQUIREMENTS' | translate }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="filter-row">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'REQUIREMENT.TYPE' | translate }}</mat-label>
+        <mat-select [(ngModel)]="requirementTypeId">
+          <mat-option *ngFor="let t of requirementTypes" [value]="t.id">{{ t.label }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'COMMON.FACILITY' | translate }}</mat-label>
+        <mat-select [(ngModel)]="facilityId">
+          <mat-option value="">{{ 'COMMON.ALL' | translate }}</mat-option>
+          <mat-option *ngFor="let facility of facilities()" [value]="facility.facilityId">
+            {{ getFacilityLabel(facility) }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="filter-actions">
+        <button mat-raised-button color="primary" (click)="search()" [disabled]="isLoading()">
+          {{ 'COMMON.SEARCH' | translate }}
+        </button>
+        <button mat-stroked-button (click)="clearFilters()">
+          {{ 'COMMON.CLEAR' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <mat-progress-spinner *ngIf="isLoading()" [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+
+      <table mat-table [dataSource]="requirements()" *ngIf="!isLoading()" class="desktop-table">
+        <ng-container matColumnDef="requirementId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'REPLENISHMENT.REQUIREMENT_ID' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let row">
+            <a [routerLink]="['/requirements', row?.id]">{{ row?.requirementId || row?.id }}</a>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="productId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.PRODUCT_ID' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let row">{{ row.productId || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="productName">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.PRODUCT_NAME' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let row">{{ row.productName || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="facilityId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.FACILITY' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let row">{{ row.facilityId || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell class="text-right" *matHeaderCellDef>{{ 'COMMON.QUANTITY' | translate }}</th>
+          <td mat-cell class="text-right" *matCellDef="let row">{{ row.quantity ?? '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="statusId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let row">{{ row.statusDescription || row.statusId || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="requiredByDate">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'REPLENISHMENT.REQUIRED_BY_DATE' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let row">
+            {{ row.requiredByDate ? (row.requiredByDate | userDate : 'mediumDate') : '-' }}
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+
+      <!-- Mobile card list -->
+      <div class="requirement-mobile-list" *ngIf="!isLoading()">
+        <div class="requirement-mobile-card" *ngFor="let row of requirements()">
+          <div class="requirement-mobile-id">
+            <a [routerLink]="['/requirements', row?.id]">{{ row?.requirementId || row?.id }}</a>
+          </div>
+          <div class="requirement-mobile-grid">
+            <div class="requirement-mobile-field">
+              <span class="requirement-mobile-label">{{ 'COMMON.PRODUCT_ID' | translate }}</span>
+              <span>{{ row.productId || '-' }}</span>
+            </div>
+            <div class="requirement-mobile-field">
+              <span class="requirement-mobile-label">{{ 'COMMON.PRODUCT_NAME' | translate }}</span>
+              <span>{{ row.productName || '-' }}</span>
+            </div>
+            <div class="requirement-mobile-field">
+              <span class="requirement-mobile-label">{{ 'COMMON.FACILITY' | translate }}</span>
+              <span>{{ row.facilityId || '-' }}</span>
+            </div>
+            <div class="requirement-mobile-field">
+              <span class="requirement-mobile-label">{{ 'COMMON.QUANTITY' | translate }}</span>
+              <span>{{ row.quantity ?? '-' }}</span>
+            </div>
+            <div class="requirement-mobile-field">
+              <span class="requirement-mobile-label">{{ 'COMMON.STATUS' | translate }}</span>
+              <span>{{ row.statusDescription || row.statusId || '-' }}</span>
+            </div>
+            <div class="requirement-mobile-field">
+              <span class="requirement-mobile-label">{{ 'REPLENISHMENT.REQUIRED_BY_DATE' | translate }}</span>
+              <span>{{ row.requiredByDate ? (row.requiredByDate | userDate : 'mediumDate') : '-' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <mat-paginator
+        [length]="total()"
+        [pageIndex]="pagination.page"
+        [pageSize]="pagination.size"
+        [pageSizeOptions]="[10, 20, 50, 100]"
+        (page)="onPageChange($event)">
+      </mat-paginator>
+    </div>
+  </mat-card-content>
+</mat-card>

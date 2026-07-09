@@ -1,0 +1,211 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.mat-form-field {
+  width: 100%;
+}
+
+.field-cell {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.location-field-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.location-select-field {
+  width: 100%;
+}
+
+.qty-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.35;
+}
+
+.qty-label {
+  font-weight: 600;
+}
+
+.receive-qty-field {
+  width: 80px;
+}
+
+.po-receive-scanner {
+  display: block;
+  margin-bottom: 20px;
+}
+
+.po-receive-scanned-row {
+  background: rgba(63, 81, 181, 0.08);
+}
+
+.po-receive-mobile-list {
+  display: none;
+}
+
+.receive-submit-button {
+  min-height: 56px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 56px;
+}
+
+.customs-card {
+  margin-top: 20px;
+  padding-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .po-receive-desktop-table {
+    display: none;
+  }
+
+  .po-receive-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .po-receive-mobile-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  }
+
+  .po-receive-mobile-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .po-receive-mobile-product {
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .po-receive-mobile-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    line-height: 1.4;
+  }
+
+  .po-receive-mobile-card mat-form-field {
+    width: 100%;
+  }
+
+  .po-receive-mobile-card--scanned {
+    border-color: #3f51b5;
+    box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.18);
+  }
+
+  .location-field-row {
+    align-items: stretch;
+  }
+
+  .location-field-row .location-select-field {
+    flex: 1 1 auto;
+  }
+
+  .receive-submit-button {
+    width: 100%;
+  }
+}
+
+/* Desktop-specific column sizes to fit all fields */
+@media (min-width: 769px) {
+  .po-receive-desktop-table {
+    width: 100%;
+    table-layout: auto;
+  }
+
+  .po-receive-desktop-table th.mat-header-cell,
+  .po-receive-desktop-table td.mat-cell {
+    padding: 0 4px !important;
+  }
+
+  .po-receive-desktop-table th.mat-header-cell:first-child,
+  .po-receive-desktop-table td.mat-cell:first-child {
+    padding-left: 8px !important;
+  }
+
+  .po-receive-desktop-table th.mat-header-cell:last-child,
+  .po-receive-desktop-table td.mat-cell:last-child {
+    padding-right: 8px !important;
+  }
+
+  /* Set target widths for table inputs on desktop */
+  .po-receive-desktop-table .mat-column-qtySummary {
+    width: 80px;
+    min-width: 80px;
+  }
+
+  .po-receive-desktop-table .mat-column-receiveQuantity .mat-form-field {
+    width: 80px !important;
+  }
+
+  .po-receive-desktop-table .mat-column-unitAmount .mat-form-field {
+    width: 80px !important;
+  }
+
+  .po-receive-desktop-table .mat-column-lotId .mat-form-field {
+    width: 140px !important;
+  }
+
+  .po-receive-desktop-table .mat-column-expirationDate .mat-form-field {
+    width: 140px !important;
+  }
+
+  .po-receive-desktop-table .mat-column-ownerPartyId .mat-form-field {
+    width: 140px !important;
+  }
+
+  .po-receive-desktop-table .mat-column-locationSeqId .location-select-field {
+    width: 140px !important;
+  }
+
+  /* Make sure form inputs and components are slightly smaller to look better */
+  .po-receive-desktop-table input {
+    font-size: 13px !important;
+  }
+}
+.serialized-badge {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: #e3f2fd;
+  color: #1565c0;
+  font-size: 11px;
+  font-weight: 500;
+  vertical-align: middle;
+  white-space: nowrap;
+}

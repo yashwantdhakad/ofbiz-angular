@@ -1,0 +1,148 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.table-container {
+  overflow-x: auto;
+}
+
+.picker-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.picklist-bin-mobile-summary,
+.picklist-bin-mobile-list {
+  display: none;
+}
+
+.picklist-bin-mobile-card {
+  margin-bottom: 12px;
+}
+
+.picklist-bin-mobile-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.picklist-bin-mobile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.picklist-bin-mobile-field .label {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+.picklist-overview-grid {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.picklist-overview-grid > mat-card {
+  flex: 1 1 calc(50% - 8px);
+  min-width: 0;
+}
+
+.picklist-action-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+:host ::ng-deep .mat-expansion-panel-header-title,
+:host ::ng-deep .mat-expansion-panel-header-description {
+  min-width: 0;
+}
+
+.picklist-bin-table-container {
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  mat-card-header,
+  mat-card-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .picklist-action-row {
+    width: 100%;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: stretch;
+  }
+
+  .picklist-action-row button {
+    width: 100%;
+  }
+
+  .picklist-overview-grid {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .picklist-overview-grid > mat-card {
+    width: 100%;
+    margin: 0;
+  }
+
+  .picker-row {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .table-container table {
+    min-width: 980px;
+  }
+
+  .picklist-bin-mobile-summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin: 12px 0;
+  }
+
+  .picklist-bin-mobile-list {
+    display: block;
+  }
+
+  .picklist-bin-mobile-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .picklist-bin-header-description {
+    display: none;
+  }
+
+  .picklist-bin-table-container {
+    display: none;
+  }
+}

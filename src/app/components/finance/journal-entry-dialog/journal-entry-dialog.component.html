@@ -1,0 +1,93 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<h2 mat-dialog-title>{{ (data.transaction ? 'FINANCE.EDIT_JOURNAL_ENTRY' : 'FINANCE.NEW_JOURNAL_ENTRY') | translate }}</h2>
+<form [formGroup]="form" (ngSubmit)="save()">
+  <mat-dialog-content class="dialog-content">
+    <div class="header-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'FINANCE.TRANSACTION_ID' | translate }}</mat-label>
+        <input matInput formControlName="acctgTransId" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'FINANCE.TRANSACTION_DATE' | translate }}</mat-label>
+        <input matInput formControlName="transactionDate" type="date" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="wide">
+        <mat-label>{{ 'FINANCE.DESCRIPTION' | translate }}</mat-label>
+        <input matInput formControlName="description" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'FINANCE.JOURNAL_ID' | translate }}</mat-label>
+        <input matInput formControlName="glJournalId" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'FINANCE.VOUCHER_REF' | translate }}</mat-label>
+        <input matInput formControlName="voucherRef" />
+      </mat-form-field>
+      <mat-checkbox formControlName="isPosted" class="wide">{{ 'FINANCE.POSTED' | translate }}</mat-checkbox>
+    </div>
+
+    <div class="lines-header">
+      <h3>{{ 'FINANCE.ENTRY_LINES' | translate }}</h3>
+      <button mat-stroked-button type="button" (click)="addLine()">
+        <mat-icon>add</mat-icon>
+        {{ 'FINANCE.ADD_LINE' | translate }}
+      </button>
+    </div>
+
+    <div formArrayName="entries" class="lines">
+      <div class="line-grid" *ngFor="let line of entries.controls; let i = index" [formGroupName]="i">
+        <mat-form-field appearance="outline" class="wide">
+          <mat-label>{{ 'FINANCE.ACCOUNT' | translate }}</mat-label>
+          <mat-select formControlName="glAccountId">
+            <mat-option *ngFor="let account of accountOptions" [value]="account.glAccountId">
+              {{ displayAccount(account) }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FINANCE.DEBIT' | translate }}</mat-label>
+          <input matInput type="number" formControlName="debitAmount" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FINANCE.CREDIT' | translate }}</mat-label>
+          <input matInput type="number" formControlName="creditAmount" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="wide">
+          <mat-label>{{ 'FINANCE.LINE_DESCRIPTION' | translate }}</mat-label>
+          <input matInput formControlName="description" />
+        </mat-form-field>
+        <button mat-icon-button type="button" (click)="removeLine(i)" [disabled]="entries.length <= 1" matTooltip="{{ 'COMMON.DELETE' | translate }}">
+          <mat-icon color="warn">delete</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="totals">
+      <span>{{ 'FINANCE.DEBIT_TOTAL' | translate }}: {{ debitTotal() | amountWithCurrency : 'USD' }}</span>
+      <span>{{ 'FINANCE.CREDIT_TOTAL' | translate }}: {{ creditTotal() | amountWithCurrency : 'USD' }}</span>
+      <span *ngIf="form.errors?.['unbalanced']" class="error">{{ 'FINANCE.TOTALS_MUST_MATCH' | translate }}</span>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-stroked-button type="button" (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
+    <button mat-raised-button color="primary" type="submit">{{ 'COMMON.SAVE' | translate }}</button>
+  </mat-dialog-actions>
+</form>

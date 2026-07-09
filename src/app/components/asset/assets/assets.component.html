@@ -1,0 +1,209 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+<ng-template #content>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header class="card-header-with-action">
+      <mat-card-title>
+        {{ (isInspectionQueue() ? 'ASSET.INSPECTION_QUEUE' : 'ASSET.LIST_TITLE') | translate }}
+      </mat-card-title>
+      <button *ngIf="!isInspectionQueue()" mat-raised-button color="primary" routerLink="/assets/create">
+        <mat-icon>add</mat-icon> {{ 'MENU.CREATE_ASSET' | translate }}
+      </button>
+    </mat-card-header>
+    <mat-card-actions class="assets-actions">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'COMMON.FACILITY_ID' | translate }}</mat-label>
+        <mat-select [value]="selectedFacilityId" (selectionChange)="onFacilityChange($event.value)">
+          <mat-option *ngFor="let facility of facilities()" [value]="facility.facilityId">
+            {{ facility.facilityName || facility.facilityId }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" *ngIf="!isInspectionQueue()">
+        <mat-label>{{ 'COMMON.STATUS' | translate }}</mat-label>
+        <mat-select [(ngModel)]="selectedStatusId">
+          <mat-option *ngFor="let s of statusOptions" [value]="s.id">
+            {{ s.label | translate }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'COMMON.SEARCH' | translate }}</mat-label>
+        <input matInput [(ngModel)]="queryString" />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+      <button mat-raised-button color="primary" class="search-btn" (click)="onSearch()">
+        {{ 'COMMON.SEARCH' | translate }}
+      </button>
+      <button *ngIf="isInspectionQueue()" mat-raised-button color="primary" class="search-btn"
+        [disabled]="isBulkUpdating() || selectedAssetIds().size === 0" (click)="runBulkInspection('ACCEPT')">
+        {{ 'COMMON.ACCEPT' | translate }}
+      </button>
+      <button *ngIf="isInspectionQueue()" mat-raised-button color="accent" class="search-btn"
+        [disabled]="isBulkUpdating() || selectedAssetIds().size === 0" (click)="runBulkInspection('REPAIR')">
+        {{ 'ASSET.STATUS_IN_REPAIR' | translate }}
+      </button>
+      <button *ngIf="isInspectionQueue()" mat-raised-button color="warn" class="search-btn" style="background-color: #e65100; color: white;"
+        [disabled]="isBulkUpdating() || selectedAssetIds().size === 0" (click)="runBulkInspection('DEFECTIVE')">
+        {{ 'ASSET.STATUS_DEFECTIVE' | translate }}
+      </button>
+      <button *ngIf="isInspectionQueue()" mat-raised-button color="warn" class="search-btn"
+        [disabled]="isBulkUpdating() || selectedAssetIds().size === 0" (click)="runBulkInspection('REJECT')">
+        {{ 'COMMON.REJECT' | translate }}
+      </button>
+    </mat-card-actions>
+    <mat-card-content>
+      <div *ngIf="!hasSearched()" class="empty-state">
+        {{
+          (isInspectionQueue() ? 'COMMON.SEARCH_TO_LOAD' : 'COMMON.SEARCH_TO_LOAD')
+            | translate
+        }}
+      </div>
+
+      <div class="table-container" *ngIf="hasSearched()">
+        <table mat-table [dataSource]="items()">
+          <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column.key">
+            <th mat-header-cell *matHeaderCellDef class="text-left">
+              <ng-container [ngSwitch]="column.key">
+                <mat-checkbox *ngSwitchCase="'select'" [checked]="isAllSelected()"
+                  (change)="toggleSelectAll($event.checked)"></mat-checkbox>
+                <ng-container *ngSwitchDefault>{{ column.header | translate }}</ng-container>
+              </ng-container>
+            </th>
+            <td mat-cell *matCellDef="let item" class="text-left">
+              <ng-container [ngSwitch]="column.key">
+                <ng-container *ngSwitchCase="'select'">
+                  <mat-checkbox [checked]="isSelected(item.inventoryItemId)"
+                    (change)="toggleAssetSelection(item.inventoryItemId, $event.checked)"></mat-checkbox>
+                </ng-container>
+                <ng-container *ngSwitchCase="'inventoryItemId'">
+                  <a [routerLink]="['/assets', item.inventoryItemId]">{{ item.inventoryItemId }}</a>
+                </ng-container>
+                <ng-container *ngSwitchCase="'datetimeReceived'">
+                  {{ item.datetimeReceived | userDate: 'MMMM d, y' }}
+                </ng-container>
+                <ng-container *ngSwitchCase="'datetimeManufactured'">
+                  {{ item.datetimeManufactured | userDate: 'MMMM d, y' }}
+                </ng-container>
+                <ng-container *ngSwitchCase="'expireDate'">
+                  {{ item.expireDate | userDate: 'MMMM d, y' }}
+                </ng-container>
+                <ng-container *ngSwitchCase="'inventoryItemTypeId'">
+                  {{ getInventoryItemTypeLabel(item.inventoryItemTypeId || item.inventoryItemTypeEnumId) }}
+                </ng-container>
+                <ng-container *ngSwitchCase="'statusId'">
+                  {{ getStatusLabel(item) }}
+                </ng-container>
+                <ng-container *ngSwitchCase="'facilityId'">
+                  {{ getFacilityLabel(item) }}
+                </ng-container>
+                <ng-container *ngSwitchCase="'unitCost'">
+                  {{ item.unitCost | amountWithCurrency : (item.currencyUomId || 'USD') }}
+                </ng-container>
+                <ng-container *ngSwitchCase="'actions'">
+                  <button mat-icon-button [matMenuTriggerFor]="menu">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
+                  <mat-menu #menu="matMenu">
+                    <a mat-menu-item [routerLink]="['/assets', item.inventoryItemId]">
+                      <mat-icon>visibility</mat-icon>
+                      <span>{{ 'COMMON.VIEW' | translate }}</span>
+                    </a>
+                    <button mat-menu-item *ngIf="item.statusId === 'INV_IN_REPAIR'" (click)="openDisassemblyDialog(item)">
+                      <mat-icon>call_split</mat-icon>
+                      <span>Disassemble</span>
+                    </button>
+                  </mat-menu>
+                </ng-container>
+                <ng-container *ngSwitchDefault>
+                  {{ item[column.key] }}
+                </ng-container>
+              </ng-container>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumnKeys"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumnKeys"></tr>
+        </table>
+      </div>
+
+      <div class="asset-mobile-list" *ngIf="hasSearched()">
+        <mat-card *ngFor="let item of items()" class="asset-mobile-card">
+          <mat-card-content>
+            <div class="asset-mobile-header">
+              <div class="asset-mobile-title">
+                <a [routerLink]="['/assets', item.inventoryItemId]">{{ item.inventoryItemId }}</a>
+                <span>{{ item.productId || '--' }}</span>
+              </div>
+              <div class="asset-mobile-select" *ngIf="isInspectionQueue()">
+                <mat-checkbox
+                  [checked]="isSelected(item.inventoryItemId)"
+                  (change)="toggleAssetSelection(item.inventoryItemId, $event.checked)"
+                ></mat-checkbox>
+              </div>
+            </div>
+            <div class="asset-mobile-fields">
+              <div class="asset-mobile-field">
+                <span class="label">{{ 'COMMON.FACILITY_ID' | translate }}</span>
+                <span>{{ getFacilityLabel(item) || item.facilityId || '--' }}</span>
+              </div>
+              <div class="asset-mobile-field">
+                <span class="label">{{ 'ASSET.ASSET_TYPE_ENUM_ID' | translate }}</span>
+                <span>{{ getInventoryItemTypeLabel(item.inventoryItemTypeId || item.inventoryItemTypeEnumId) }}</span>
+              </div>
+              <div class="asset-mobile-field">
+                <span class="label">{{ 'COMMON.STATUS_ID' | translate }}</span>
+                <span>{{ getStatusLabel(item) }}</span>
+              </div>
+              <div class="asset-mobile-field">
+                <span class="label">{{ 'ASSET.QUANTITY_ON_HAND_TOTAL' | translate }}</span>
+                <span>{{ item.quantityOnHandTotal || 0 }}</span>
+              </div>
+              <div class="asset-mobile-field">
+                <span class="label">{{ 'ASSET.AVAILABLE_TO_PROMISE_TOTAL' | translate }}</span>
+                <span>{{ item.availableToPromiseTotal || 0 }}</span>
+              </div>
+              <div class="asset-mobile-field">
+                <span class="label">{{ 'ASSET.ACQUIRE_COST' | translate }}</span>
+                <span>{{ item.unitCost | amountWithCurrency : (item.currencyUomId || 'USD') }}</span>
+              </div>
+              <div class="asset-mobile-field">
+                <span class="label">{{ 'ASSET.SERIAL_NUMBER' | translate }}</span>
+                <span>{{ item.serialNumber || '--' }}</span>
+              </div>
+              <div class="asset-mobile-field">
+                <span class="label">{{ 'ASSET.RECEIVED_DATE' | translate }}</span>
+                <span>{{ item.datetimeReceived | userDate : 'MMMM d, y' }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <mat-paginator *ngIf="hasSearched()" [pageIndex]="pagination.page - 1" [pageSize]="pagination.rowsPerPage" [length]="pages()"
+        (page)="onPageChange($event.pageIndex)">
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

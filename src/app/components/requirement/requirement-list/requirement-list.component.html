@@ -1,0 +1,163 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-header class="card-header-with-action">
+    <mat-card-title>{{ 'REQUIREMENT.TITLE' | translate }}</mat-card-title>
+    <button mat-raised-button color="primary" routerLink="/requirements/create">
+      <mat-icon>add</mat-icon> {{ 'REQUIREMENT.CREATE_TITLE' | translate }}
+    </button>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="filters">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'REQUIREMENT.TYPE' | translate }}</mat-label>
+        <mat-select [(ngModel)]="selectedTypeId" (ngModelChange)="onTypeChange($event)">
+          <mat-option *ngFor="let type of requirementTypes" [value]="type.id">
+            {{ type.label | translate }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'COMMON.FACILITY_ID' | translate }}</mat-label>
+        <mat-select [(ngModel)]="selectedFacilityId" (ngModelChange)="onFacilityChange($event)">
+          <mat-option value="">{{ 'COMMON.ALL' | translate }}</mat-option>
+          <mat-option *ngFor="let facility of facilities()" [value]="facility?.facilityId">
+            {{ getFacilityLabel(facility) }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'COMMON.PRODUCT_ID' | translate }}</mat-label>
+        <input matInput [formControl]="productControl" [matAutocomplete]="productAuto"
+          (input)="onProductSearchChange(productControl.value || '')" />
+        <mat-autocomplete #productAuto="matAutocomplete" (optionSelected)="selectProduct($event.option.value)">
+          <mat-option *ngFor="let product of productSuggestions()" [value]="product">
+            {{ product?.name || product?.productName || product?.productId }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <div class="actions">
+        <button mat-raised-button color="primary" class="field-action-btn" (click)="loadRequirements()">
+          {{ 'COMMON.SEARCH' | translate }}
+        </button>
+        <button mat-button color="primary" class="field-link-btn" (click)="clearFilters()">
+          {{ 'COMMON.CLEAR' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <p *ngIf="!hasSearched()" class="search-hint">{{ 'COMMON.SEARCH_TO_LOAD' | translate }}</p>
+
+    <div class="requirement-table-container" *ngIf="hasSearched()">
+      <table mat-table [dataSource]="requirements()">
+        <ng-container matColumnDef="requirementId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'REQUIREMENT.REQUIREMENT_ID' | translate }}</th>
+          <td mat-cell *matCellDef="let row">
+            <a [routerLink]="['/requirements', row?.id]">{{ row?.requirementId || row?.id }}</a>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="requirementTypeId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'REQUIREMENT.TYPE' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row?.requirementTypeDescription || row?.requirementTypeId || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="facilityId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.FACILITY_ID' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row?.facilityDisplay || row?.facilityId || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="productId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.PRODUCT_ID' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row?.productId || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.QUANTITY' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row?.quantity || 0 }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="statusId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row?.statusDescription || row?.statusId || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="requiredByDate">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.REQUIRED_BY_DATE' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row?.requiredByDate ? (row?.requiredByDate | userDate : 'mediumDate') :
+            '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="createdDate">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.CREATED' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row?.createdDate ? (row?.createdDate | userDate : 'medium') : '-' }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <!-- Mobile card list -->
+    <div class="requirement-mobile-list" *ngIf="hasSearched()">
+      <div class="requirement-mobile-card" *ngFor="let row of requirements()">
+        <a class="requirement-mobile-id" [routerLink]="['/requirements', row?.id]">
+          {{ row?.requirementId || row?.id }}
+        </a>
+        <div class="requirement-mobile-grid">
+          <div class="requirement-mobile-field">
+            <span class="requirement-mobile-label">{{ 'REQUIREMENT.TYPE' | translate }}</span>
+            <span>{{ row?.requirementTypeDescription || row?.requirementTypeId || '-' }}</span>
+          </div>
+          <div class="requirement-mobile-field">
+            <span class="requirement-mobile-label">{{ 'COMMON.FACILITY_ID' | translate }}</span>
+            <span>{{ row?.facilityDisplay || row?.facilityId || '-' }}</span>
+          </div>
+          <div class="requirement-mobile-field">
+            <span class="requirement-mobile-label">{{ 'COMMON.PRODUCT_ID' | translate }}</span>
+            <span>{{ row?.productId || '-' }}</span>
+          </div>
+          <div class="requirement-mobile-field">
+            <span class="requirement-mobile-label">{{ 'COMMON.QUANTITY' | translate }}</span>
+            <span>{{ row?.quantity || 0 }}</span>
+          </div>
+          <div class="requirement-mobile-field">
+            <span class="requirement-mobile-label">{{ 'COMMON.STATUS' | translate }}</span>
+            <span>{{ row?.statusDescription || row?.statusId || '-' }}</span>
+          </div>
+          <div class="requirement-mobile-field">
+            <span class="requirement-mobile-label">{{ 'COMMON.REQUIRED_BY_DATE' | translate }}</span>
+            <span>{{ row?.requiredByDate ? (row?.requiredByDate | userDate : 'mediumDate') : '-' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <mat-paginator
+      *ngIf="hasSearched()"
+      [length]="totalRequirements()"
+      [pageIndex]="pagination.page"
+      [pageSize]="pagination.size"
+      [pageSizeOptions]="[10, 20, 50, 100]"
+      (page)="onPageChange($event)">
+    </mat-paginator>
+  </mat-card-content>
+</mat-card>

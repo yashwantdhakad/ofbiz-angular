@@ -1,0 +1,178 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<div class="dialog-container">
+  <h2 mat-dialog-title class="dialog-title">
+    <mat-icon class="title-icon">content_cut</mat-icon>
+    Steel Cutting — Record Cut Sections
+  </h2>
+
+  <mat-dialog-content class="dialog-content">
+    <!-- Source Plate Lookup -->
+    <div class="source-plate-section">
+      <div class="section-label">Source Plate (InventoryItem)</div>
+      <div class="plate-lookup-row">
+        <mat-form-field appearance="outline" class="plate-id-field">
+          <mat-label>Source Plate Inventory Item ID</mat-label>
+          <input matInput [formControl]="$any(form.get('sourcePlateId'))" placeholder="e.g. 10040" />
+        </mat-form-field>
+        <button mat-stroked-button color="primary" type="button" (click)="lookupPlate()" [disabled]="isLookingUpPlate()">
+          <mat-spinner *ngIf="isLookingUpPlate()" diameter="18"></mat-spinner>
+          <mat-icon *ngIf="!isLookingUpPlate()">search</mat-icon>
+          Look Up
+        </button>
+      </div>
+
+      <!-- Source Plate Info Panel -->
+      <div class="plate-info-card" *ngIf="sourcePlate">
+        <div class="plate-info-grid">
+          <div class="plate-info-item">
+            <span class="info-label">Inventory Item</span>
+            <span class="info-value monospace">{{ sourcePlate.inventoryItemId || '-' }}</span>
+          </div>
+          <div class="plate-info-item">
+            <span class="info-label">Product</span>
+            <span class="info-value">{{ sourcePlate.productId || '-' }}</span>
+          </div>
+          <div class="plate-info-item">
+            <span class="info-label">Lot ID</span>
+            <span class="info-value monospace">{{ sourcePlate.lotId || '-' }}</span>
+          </div>
+          <div class="plate-info-item">
+            <span class="info-label">Heat Number</span>
+            <span class="info-value heat-badge">{{ sourcePlate.heatNumber || '-' }}</span>
+          </div>
+          <div class="plate-info-item">
+            <span class="info-label">Steel Grade</span>
+            <span class="info-value grade-badge">{{ sourcePlate.steelGrade || '-' }}</span>
+          </div>
+          <div class="plate-info-item">
+            <span class="info-label">Facility</span>
+            <span class="info-value">{{ sourcePlate.facilityId || '-' }}</span>
+          </div>
+          <div class="plate-info-item">
+            <span class="info-label">QOH</span>
+            <span class="info-value">{{ sourcePlate.quantityOnHandTotal ?? '-' }}</span>
+          </div>
+          <div class="plate-info-item" *ngIf="sourcePlate.manufacturer">
+            <span class="info-label">Manufacturer</span>
+            <span class="info-value">{{ sourcePlate.manufacturer }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <mat-divider class="divider"></mat-divider>
+
+    <!-- Cut Sections Form -->
+    <div class="sections-header">
+      <span class="section-label">Cut Sections / Output Items</span>
+      <div class="section-buttons">
+        <button mat-stroked-button color="primary" type="button" (click)="addSection('CUT_SECTION')">
+          <mat-icon>add</mat-icon> Add Cut Section
+        </button>
+        <button mat-stroked-button color="warn" type="button" (click)="addSection('SCRAP')">
+          <mat-icon>delete_sweep</mat-icon> Add Scrap
+        </button>
+      </div>
+    </div>
+
+    <div class="no-sections" *ngIf="sections.length === 0">
+      No sections added yet. Click "Add Cut Section" to begin.
+    </div>
+
+    <div class="sections-list" [formGroup]="form">
+      <div class="section-row" *ngFor="let section of sections.controls; let i = index" [formGroup]="$any(section)"
+           [class.is-scrap]="section.get('sectionType')?.value === 'SCRAP'">
+        <div class="row-badge" [class.scrap-badge]="section.get('sectionType')?.value === 'SCRAP'">
+          <mat-icon>{{ section.get('sectionType')?.value === 'SCRAP' ? 'delete_sweep' : 'content_cut' }}</mat-icon>
+          {{ section.get('sectionType')?.value === 'SCRAP' ? 'Scrap' : 'Cut #' + (i + 1) }}
+        </div>
+        <div class="section-fields">
+          <div class="section-main-row">
+            <mat-form-field appearance="outline" class="serial-field">
+              <mat-label>Serial Number</mat-label>
+              <input matInput formControlName="serialNumber" [placeholder]="section.get('sectionType')?.value === 'SCRAP' ? 'SCR-001' : 'FS-001'" />
+              <mat-error *ngIf="section.get('serialNumber')?.hasError('required')">Required</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="product-field">
+              <mat-label>Product ID</mat-label>
+              <input matInput formControlName="productId" placeholder="e.g. FRAME_SECTION_4M" />
+              <mat-error *ngIf="section.get('productId')?.hasError('required')">Required</mat-error>
+            </mat-form-field>
+            <button mat-icon-button color="warn" type="button" (click)="removeSection(i)" [attr.aria-label]="'Remove section ' + (i+1)">
+              <mat-icon>remove_circle_outline</mat-icon>
+            </button>
+          </div>
+          <!-- Dimension fields (optional) -->
+          <div class="section-dim-row" *ngIf="section.get('sectionType')?.value !== 'SCRAP'">
+            <mat-form-field appearance="outline" class="dim-field">
+              <mat-label>Length (mm)</mat-label>
+              <input matInput formControlName="lengthMm" placeholder="e.g. 4000" type="number" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="dim-field">
+              <mat-label>Width (mm)</mat-label>
+              <input matInput formControlName="widthMm" placeholder="e.g. 250" type="number" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="dim-field">
+              <mat-label>Thickness (mm)</mat-label>
+              <input matInput formControlName="thicknessMm" placeholder="e.g. 12" type="number" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="dim-field">
+              <mat-label>Weight (kg)</mat-label>
+              <input matInput formControlName="weightKg" placeholder="e.g. 94.2" type="number" />
+            </mat-form-field>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generated IDs (after execution) -->
+    <div class="generated-ids" *ngIf="generatedIds.length > 0">
+      <mat-divider class="divider"></mat-divider>
+      <div class="success-header">
+        <mat-icon color="primary">check_circle</mat-icon>
+        <strong>{{ generatedIds.length }} inventory item(s) created:</strong>
+      </div>
+      <div class="id-chips">
+        <mat-chip *ngFor="let id of generatedIds" class="id-chip">{{ id }}</mat-chip>
+      </div>
+    </div>
+
+    <div class="error-message" *ngIf="errorMessage">
+      <mat-icon>error_outline</mat-icon>
+      {{ errorMessage }}
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-button type="button" (click)="onClose()">
+      {{ generatedIds.length > 0 ? 'Close' : 'Cancel' }}
+    </button>
+    <button
+      mat-raised-button color="primary"
+      type="button"
+      (click)="onConfirm()"
+      [disabled]="isLoading() || generatedIds.length > 0 || sections.length === 0"
+    >
+      <mat-spinner *ngIf="isLoading()" diameter="18"></mat-spinner>
+      <mat-icon *ngIf="!isLoading()">content_cut</mat-icon>
+      {{ isLoading() ? 'Processing...' : 'Execute Cutting' }}
+    </button>
+  </mat-dialog-actions>
+</div>

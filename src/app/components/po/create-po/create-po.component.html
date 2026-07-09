@@ -1,0 +1,234 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-header>
+    <mat-card-title>
+      <h1>{{ createTitleKey | translate }}</h1>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form
+      id="poCreateForm"
+      [formGroup]="poForm"
+      (ngSubmit)="createPO()"
+      fxLayout="row wrap"
+      fxLayoutAlign="start"
+      fxLayoutGap="16px"
+      autocomplete="off"
+    >
+      <!-- Supplier Autocomplete -->
+      <mat-form-field appearance="outline" fxFlex="48%">
+        <mat-label>{{ 'PO.SUPPLIER' | translate }}</mat-label>
+        <input
+          matInput
+          #supplierAutocompleteTrigger="matAutocompleteTrigger"
+          [placeholder]="'PO.SUPPLIER' | translate"
+          [matAutocomplete]="auto"
+          formControlName="vendorPartyId"
+        />
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          [attr.aria-label]="'COMMON.ADD_SUPPLIER' | translate"
+          (mousedown)="onAddSupplierMouseDown($event)"
+          (click)="addSupplier()"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displaySupplier" (optionSelected)="onSupplierSelected($event)">
+          <mat-option
+            *ngFor="let supplier of filteredSuppliers$ | async; trackBy: trackBySupplier"
+            [value]="supplier"
+          >
+            {{ supplier.groupName || supplier.name || supplier.partyId }}
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error *ngIf="poForm.get('vendorPartyId')?.hasError('required')">
+          {{ 'PO.SUPPLIER_REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="48%">
+        <mat-label>{{ 'PO.TRANSACTION_CURRENCY' | translate }}</mat-label>
+        <mat-select formControlName="currencyUomId">
+          <mat-option *ngFor="let currency of currencies" [value]="currency">{{ currency }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Facility Dropdown -->
+      <mat-form-field appearance="outline" fxFlex="48%">
+        <mat-label>{{ 'COMMON.FACILITY' | translate }}</mat-label>
+        <mat-select [placeholder]="'COMMON.FACILITY' | translate" formControlName="facilityId">
+          <mat-option
+            *ngFor="let facility of facilities(); trackBy: trackByFacility"
+            [value]="facility.facilityId"
+            >{{ facility.label }}</mat-option
+          >
+        </mat-select>
+        <mat-error *ngIf="poForm.get('facilityId')?.hasError('required')">
+          {{ 'PO.FACILITY_REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Ship Before Date -->
+      <mat-form-field appearance="outline" fxFlex="48%">
+        <mat-label>{{ 'PO.SHIP_BEFORE_DATE' | translate }}</mat-label>
+        <input
+          matInput
+          [matDatepicker]="shipBeforePicker"
+          formControlName="shipBeforeDate"
+          [placeholder]="'PO.SHIP_BEFORE_DATE' | translate"
+          (click)="shipBeforePicker.open()"
+        />
+        <mat-datepicker-toggle matSuffix [for]="shipBeforePicker"></mat-datepicker-toggle>
+        <mat-datepicker #shipBeforePicker></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Estimated Delivery Date -->
+      <mat-form-field appearance="outline" fxFlex="48%">
+        <mat-label>{{ 'PO.EST_DELIVERY_DATE' | translate }}</mat-label>
+        <input
+          matInput
+          [matDatepicker]="deliveryPicker"
+          [placeholder]="'PO.EST_DELIVERY_DATE' | translate"
+          formControlName="estimatedDeliveryDate"
+          (click)="deliveryPicker.open()"
+        />
+        <mat-datepicker-toggle matSuffix [for]="deliveryPicker"></mat-datepicker-toggle>
+        <mat-datepicker #deliveryPicker></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Shipping Instructions -->
+      <mat-form-field appearance="outline" fxFlex="100%">
+        <mat-label>{{ 'COMMON.SHIPPING_INSTRUCTIONS' | translate }}</mat-label>
+        <textarea
+          matInput
+          rows="3"
+          [placeholder]="'COMMON.SHIPPING_INSTRUCTIONS' | translate"
+          formControlName="shippingInstructions"
+        ></textarea>
+      </mat-form-field>
+
+      <!-- Shipping Amount -->
+      <mat-form-field appearance="outline" fxFlex="48%">
+        <mat-label>{{ 'PO.SHIPPING_AMOUNT' | translate }}</mat-label>
+        <input
+          matInput
+          type="number"
+          min="0"
+          step="0.01"
+          formControlName="shippingAmount"
+        />
+      </mat-form-field>
+
+      <!-- Discount Amount -->
+      <mat-form-field appearance="outline" fxFlex="48%">
+        <mat-label>{{ 'PO.DISCOUNT_AMOUNT' | translate }}</mat-label>
+        <input
+          matInput
+          type="number"
+          min="0"
+          step="0.01"
+          formControlName="discountAmount"
+        />
+      </mat-form-field>
+
+    </form>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="mat-elevation-z10" style="margin-top: 16px;">
+  <mat-card-header>
+    <mat-card-title>
+      {{ 'COMMON.ITEMS' | translate }}
+      <button mat-stroked-button type="button" color="primary" (click)="addItemRow()">
+        {{ 'COMMON.ADD_ITEM' | translate }}
+      </button>
+    </mat-card-title>
+  </mat-card-header>
+  <br/>
+  <mat-card-content>
+    <div [formGroup]="poForm">
+      <div formArrayName="items">
+        <div
+          class="po-item-row"
+          *ngFor="let item of items.controls; let i = index; trackBy: trackByFormIndex"
+          [formGroupName]="i"
+        >
+          <mat-form-field appearance="outline" class="po-item-product" fxFlex="35%">
+            <mat-label>{{ 'COMMON.PRODUCT' | translate }}</mat-label>
+            <input matInput formControlName="productId" [matAutocomplete]="productAuto" />
+            <mat-autocomplete #productAuto="matAutocomplete" [displayWith]="displayProduct" (optionSelected)="onProductSelected($event, i)">
+              <mat-option *ngFor="let product of filteredProducts[i] | async; trackBy: trackByProduct" [value]="product">
+                {{ product.productId }} - {{ product.productName }}
+              </mat-option>
+            </mat-autocomplete>
+          </mat-form-field>
+          <div class="po-item-numbers" fxFlex="35%">
+            <mat-form-field appearance="outline" fxFlex="15%">
+              <mat-label>{{ 'COMMON.QTY' | translate }}</mat-label>
+              <input matInput type="number" formControlName="quantity" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" fxFlex="20%">
+              <mat-label>{{ 'PO.FOREIGN_UNIT_PRICE' | translate:{currency: poForm.get('currencyUomId')?.value} }}</mat-label>
+              <input matInput type="number" formControlName="unitAmount" />
+            </mat-form-field>
+          </div>
+          <div class="po-item-type-row" fxFlex="25%">
+            <mat-form-field appearance="outline" fxFlex="20%" class="po-item-type-field">
+              <mat-label>{{ 'COMMON.ITEM_TYPE' | translate }}</mat-label>
+              <mat-select formControlName="itemTypeEnumId">
+                <mat-option *ngFor="let type of itemTypes; trackBy: trackByItemType" [value]="type.id">
+                  {{ type.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+            <button
+              mat-icon-button
+              color="warn"
+              type="button"
+              data-testid="po-create-remove-item"
+              [attr.aria-label]="'COMMON.REMOVE_ITEM' | translate"
+              (click)="removeItemRow(i)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+  <mat-card-actions>
+    <div class="po-actions-row" fxFlex="100%" fxLayoutAlign="start">
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        form="poCreateForm"
+        class="me-4"
+        data-testid="po-create-save"
+        [disabled]="isLoading()"
+      >
+        <span *ngIf="!isLoading()">{{ createActionKey | translate }}</span>
+        <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+      </button>
+    </div>
+  </mat-card-actions>
+</mat-card>

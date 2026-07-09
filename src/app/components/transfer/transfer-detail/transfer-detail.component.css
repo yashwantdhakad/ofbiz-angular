@@ -1,0 +1,339 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.transfer-overview-card {
+  min-height: 220px;
+}
+
+.overview-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.transfer-overview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.transfer-overview-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.transfer-overview-label {
+  font-weight: 600;
+  min-width: 140px;
+}
+
+.transfer-overview-value {
+  text-align: left;
+}
+
+.no-items {
+  padding: 16px 0;
+  color: #666;
+}
+
+.custom-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.custom-list-item {
+  padding: 6px 0;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.custom-mat-icon {
+  vertical-align: middle;
+  font-size: 18px !important;
+  height: 18px !important;
+  width: 18px !important;
+}
+
+.quantity-column-container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 180px;
+}
+
+.quantity-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: flex-start;
+}
+
+.quantity-label {
+  font-size: 0.8em;
+  color: #666;
+  white-space: nowrap;
+  min-width: 108px;
+  text-align: left;
+}
+
+.quantity-value {
+  font-weight: 500;
+  min-width: 24px;
+  text-align: left;
+}
+
+.item-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+:host ::ng-deep .mat-column-quantity {
+  min-width: 180px;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+:host ::ng-deep .mat-mdc-cell.mat-column-quantity,
+:host ::ng-deep .mat-mdc-header-cell.mat-column-quantity,
+:host ::ng-deep .mat-cell.mat-column-quantity,
+:host ::ng-deep .mat-header-cell.mat-column-quantity {
+  text-align: left;
+}
+
+.part-items-mobile-list {
+  display: none;
+}
+
+.related-mobile-list {
+  display: none;
+}
+
+.transfer-tables-container {
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  mat-list {
+    padding: 0 4px;
+  }
+
+  mat-card-header,
+  mat-card-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .overview-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .action-buttons button {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  .transfer-overview-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .transfer-overview-label {
+    min-width: 0;
+    color: rgba(0, 0, 0, 0.6);
+    font-size: 0.9em;
+  }
+
+  .transfer-overview-value {
+    font-weight: 500;
+  }
+
+  .quantity-column-container {
+    min-width: 0;
+  }
+
+  .quantity-row {
+    flex-wrap: wrap;
+  }
+
+  table {
+    display: none;
+  }
+
+  .transfer-tables-container table {
+    display: table;
+  }
+
+  .part-items-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .transfer-tables-container {
+    display: none;
+  }
+
+  .related-mobile-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .related-mobile-card {
+    display: grid;
+    gap: 12px;
+    padding: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+  }
+
+  .related-mobile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .related-mobile-card-header strong {
+    color: var(--mat-sys-primary, #1976d2);
+    font-size: 1.05em;
+  }
+
+  .related-mobile-card-header span {
+    color: rgba(0, 0, 0, 0.65);
+  }
+
+  .related-mobile-card-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+  }
+
+  .related-mobile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .related-mobile-card button {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .part-item-mobile-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    background-color: var(--mat-sys-surface, #fff);
+  }
+
+  .part-item-mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding-bottom: 8px;
+  }
+
+  .part-item-mobile-title {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 1.1em;
+    font-weight: 500;
+    color: var(--mat-sys-primary, #1976d2);
+  }
+
+  .part-item-mobile-type {
+    font-size: 0.8em;
+    color: rgba(0, 0, 0, 0.55);
+  }
+
+  .part-item-mobile-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .part-item-mobile-details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 8px;
+    background-color: rgba(0, 0, 0, 0.02);
+    padding: 8px;
+    border-radius: 6px;
+  }
+
+  .part-item-mobile-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .detail-label {
+    font-size: 0.75em;
+    color: rgba(0, 0, 0, 0.55);
+    text-transform: uppercase;
+  }
+
+  .detail-value {
+    font-size: 0.9em;
+    font-weight: 500;
+  }
+}

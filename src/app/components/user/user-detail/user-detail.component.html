@@ -1,0 +1,208 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+<ng-template #content>
+  <mat-card class="mat-card mat-elevation-z10">
+    <mat-list>
+      <mat-list-item>
+        <a [routerLink]="['/users']">{{ 'USER.TITLE' | translate }}</a>
+        / {{ userLoginId }}
+      </mat-list-item>
+    </mat-list>
+    <mat-card-header>
+      <mat-card-title>
+        {{ 'USER.OVERVIEW' | translate }}
+      </mat-card-title>
+    </mat-card-header>
+
+    <div class="user-overview-grid">
+      <mat-card class="card-margin mat-elevation-z10">
+        <mat-card-header>
+          <mat-card-title>
+            {{ 'USER.DETAILS' | translate }}
+            <button mat-icon-button type="button" color="primary" class="custom-icon-align"
+              data-testid="user-detail-edit-details"
+              [attr.aria-label]="'COMMON.EDIT' | translate" (click)="openEditDialog()">
+              <mat-icon class="custom-mat-icon">edit</mat-icon>
+            </button>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <ul class="custom-list">
+            <li class="custom-list-item">
+              <strong>{{ 'USER.ID' | translate }}:</strong>
+              {{ userDetail()?.user?.userLoginId }}
+            </li>
+            <li class="custom-list-item">
+              <strong>{{ 'USER.NAME' | translate }}:</strong>
+              {{ userDetail()?.user?.firstName || '' }} {{ userDetail()?.user?.lastName || '' }}
+            </li>
+            <li class="custom-list-item">
+              <strong>{{ 'USER.STATUS' | translate }}:</strong>
+              {{ userDetail()?.user?.enabled ? ('USER.ENABLED' | translate) : ('USER.DISABLED' | translate) }}
+            </li>
+            <li class="custom-list-item">
+              <strong>{{ 'USER.REQUIRE_PASSWORD_CHANGE' | translate }}:</strong>
+              {{ userDetail()?.user?.requirePasswordChange ? ('COMMON.YES' | translate) : ('COMMON.NO' | translate) }}
+            </li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Party Roles -->
+      <mat-card class="card-margin mat-elevation-z10">
+        <mat-card-header>
+          <mat-card-title>
+            {{ 'CUSTOMER.ROLES' | translate }}
+            <button mat-icon-button type="button" color="primary" class="custom-icon-align"
+              data-testid="user-detail-add-party-role"
+              [attr.aria-label]="'COMMON.ADD' | translate" (click)="addPartyRoleDialog()">
+              <mat-icon class="custom-mat-icon">add</mat-icon>
+            </button>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="scrollable-list">
+            <ul class="custom-list">
+              <li class="custom-list-item font-medium flex justify-between align-center" *ngFor="let role of partyRoles()">
+                <span>{{ role?.roleTypeId }}</span>
+                <button mat-icon-button type="button" color="warn" class="custom-icon-align"
+                  data-testid="user-detail-delete-party-role"
+                  [attr.aria-label]="'COMMON.DELETE' | translate"
+                  (click)="deletePartyRoleDialog(role)">
+                  <mat-icon class="custom-mat-icon">delete</mat-icon>
+                </button>
+              </li>
+              <li class="custom-list-item" *ngIf="!partyRoles().length">
+                -
+              </li>
+            </ul>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- PO Approval Policy -->
+    <mat-card class="card-margin mat-elevation-z10">
+      <mat-card-header>
+        <mat-card-title>
+          {{ 'USER.PO_APPROVAL_ASSIGNMENT' | translate }}
+          <button mat-icon-button type="button" color="primary" class="custom-icon-align"
+            data-testid="user-detail-edit-po-approval"
+            [attr.aria-label]="'COMMON.EDIT' | translate" (click)="openPoApprovalDialog()">
+            <mat-icon class="custom-mat-icon">edit</mat-icon>
+          </button>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div>
+          <strong>{{ 'COMMON.STATUS' | translate }}:</strong>
+          {{ poApprovalPolicy()?.enabled ? ('COMMON.ACTIVE' | translate) : ('COMMON.INACTIVE' | translate) }}
+        </div>
+        <div>
+          <strong>{{ 'USER.PO_APPROVAL_LIMIT' | translate }}:</strong>
+          <ng-container *ngIf="poApprovalAssignment()?.bandId; else noPoApprovalAssignment">
+            {{ poApprovalAssignment()?.label || poApprovalAssignment()?.bandId }}
+            <span *ngIf="poApprovalAssignment()?.unlimited">
+              ({{ 'USER.PO_APPROVAL_UNLIMITED' | translate }})
+            </span>
+            <span *ngIf="!poApprovalAssignment()?.unlimited && poApprovalAssignment()?.maxAmount !== null && poApprovalAssignment()?.maxAmount !== undefined">
+              ({{ poApprovalAssignment()?.maxAmount | number:'1.2-2' }})
+            </span>
+          </ng-container>
+          <ng-template #noPoApprovalAssignment>-</ng-template>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Access Control Section -->
+    <div style="margin: 24px 8px 12px 8px;">
+      <h3 style="font-size: 1.2rem; font-weight: 500; margin: 0;">{{ 'USER.ACCESS_CONTROL' | translate }}</h3>
+    </div>
+
+    <div class="user-overview-grid">
+      <!-- Security Groups -->
+      <mat-card class="card-margin mat-elevation-z10">
+        <mat-card-header>
+          <mat-card-title>
+            {{ 'USER.SECURITY_GROUPS' | translate }}
+            <button mat-icon-button type="button" color="primary" class="custom-icon-align"
+              data-testid="user-detail-add-role"
+              [attr.aria-label]="'COMMON.ADD' | translate" (click)="openRoleDialog()">
+              <mat-icon class="custom-mat-icon">add</mat-icon>
+            </button>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="scrollable-list">
+            <ul class="custom-list">
+              <li class="custom-list-item font-medium flex justify-between align-center" *ngFor="let role of userDetail()?.roles">
+                <span>{{ role?.groupName || role?.groupId }}</span>
+                <button *ngIf="(userDetail()?.roles || []).length > 1" mat-icon-button type="button" color="warn" class="custom-icon-align"
+                  data-testid="user-detail-delete-role"
+                  [attr.aria-label]="'COMMON.DELETE' | translate"
+                  (click)="removeSecurityGroup(role.groupId)">
+                  <mat-icon class="custom-mat-icon">delete</mat-icon>
+                </button>
+              </li>
+              <li class="custom-list-item" *ngIf="!userDetail()?.roles?.length">
+                -
+              </li>
+            </ul>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Permissions -->
+      <mat-card class="card-margin mat-elevation-z10">
+        <mat-card-header>
+          <mat-card-title>
+            {{ 'USER.PERMISSIONS' | translate }}
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="scrollable-list">
+            <ul class="custom-list">
+              <li class="custom-list-item font-medium flex justify-between align-center" *ngFor="let perm of activePermissions()">
+                <div class="flex align-center flex-wrap" style="gap: 8px;">
+                  <strong>{{ perm.permissionId }}</strong>
+                  <span style="opacity: 0.85;">- {{ perm.description }}</span>
+                  <span *ngIf="perm.isInherited" class="inherited-badge">{{ 'USER.INHERITED' | translate }}</span>
+                </div>
+                <button *ngIf="!perm.isInherited" mat-icon-button type="button" color="warn" class="custom-icon-align"
+                  data-testid="user-detail-delete-permission"
+                  [attr.aria-label]="'COMMON.DELETE' | translate"
+                  (click)="removePermission(perm.permissionId)">
+                  <mat-icon class="custom-mat-icon">delete</mat-icon>
+                </button>
+              </li>
+              <li class="custom-list-item" *ngIf="!activePermissions().length">
+                -
+              </li>
+            </ul>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-card>
+</ng-template>

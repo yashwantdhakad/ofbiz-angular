@@ -1,0 +1,177 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10 requirement-detail-card" *ngIf="requirement">
+  <mat-list>
+    <mat-list-item>
+      <a routerLink="/requirements">{{ 'REQUIREMENT.TITLE' | translate }}</a>
+      / {{ requirement?.requirementId || requirement?.id }}
+    </mat-list-item>
+  </mat-list>
+
+  <mat-card-content>
+    <div class="top-actions">
+      <button
+        *ngIf="canApprove()"
+        mat-raised-button
+        color="primary"
+        (click)="approve()"
+        [disabled]="isApproving() || isLoading()"
+      >
+        {{ 'COMMON.APPROVE' | translate }}
+      </button>
+      <button
+        *ngIf="canCreatePo()"
+        mat-raised-button
+        color="accent"
+        (click)="createPurchaseOrder()"
+        [disabled]="isCreatingPo() || isLoading()"
+      >
+        <mat-icon>receipt_long</mat-icon>
+        {{ 'REQUIREMENT.CREATE_PO' | translate }}
+      </button>
+      <button
+        *ngIf="canCreateJob()"
+        mat-raised-button
+        color="accent"
+        (click)="createJob()"
+        [disabled]="isCreatingJob() || isLoading()"
+      >
+        <mat-icon>work</mat-icon>
+        {{ 'REQUIREMENT.CREATE_JOB' | translate }}
+      </button>
+    </div>
+
+    <h3 class="overview-title">{{ 'COMMON.OVERVIEW' | translate }}</h3>
+    <div class="overview-cards">
+      <mat-card class="overview-card mat-elevation-z2">
+        <mat-card-content>
+          <ul class="custom-list">
+            <li class="custom-list-item">
+              <strong>{{ 'COMMON.PRODUCT' | translate }}:</strong>
+              <a class="value-link" *ngIf="requirement?.productId; else plainProduct" [routerLink]="['/products', requirement?.productId]">
+                {{ productLabel }}
+              </a>
+              <ng-template #plainProduct>{{ productLabel }}</ng-template>
+            </li>
+            <li class="custom-list-item">
+              <strong>{{ 'COMMON.FACILITY' | translate }}:</strong>
+              <a class="value-link" *ngIf="requirement?.facilityId; else plainFacility" [routerLink]="['/facilities', requirement?.facilityId]">
+                {{ facilityLabel }}
+              </a>
+              <ng-template #plainFacility>{{ facilityLabel }}</ng-template>
+            </li>
+            <li class="custom-list-item"><strong>{{ 'REQUIREMENT.TYPE' | translate }}:</strong> {{ getTypeLabel() }}</li>
+            <li class="custom-list-item">
+              <strong>{{ 'COMMON.SUPPLIER' | translate }}:</strong>
+              <a class="value-link" *ngIf="supplierPartyId; else supplierText" [routerLink]="['/suppliers', supplierPartyId]">{{ supplierLabel }}</a>
+              <ng-template #supplierText>{{ supplierLabel }}</ng-template>
+              <mat-icon
+                class="custom-mat-icon custom-icon-align"
+                color="primary"
+                (click)="openSupplierDialog()"
+                [title]="(hasSupplier() ? 'COMMON.EDIT' : 'COMMON.ADD') | translate"
+              >
+                {{ hasSupplier() ? 'edit' : 'add' }}
+              </mat-icon>
+            </li>
+            <li class="custom-list-item" *ngIf="supplierAddress">
+              <strong>{{ 'COMMON.ADDRESS' | translate }}:</strong> {{ supplierAddress }}
+            </li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="overview-card mat-elevation-z2">
+        <mat-card-content>
+          <ul class="custom-list">
+            <li class="custom-list-item"><strong>{{ 'COMMON.QUANTITY' | translate }}:</strong> {{ requirement?.quantity || 0 }}</li>
+            <li class="custom-list-item">
+              <strong>{{ 'COMMON.STATUS' | translate }}:</strong> {{ getStatusLabel() }}
+              <app-status-history-icon [entries]="statusHistoryEntries()"></app-status-history-icon>
+            </li>
+            <li class="custom-list-item">
+              <strong>{{ 'COMMON.REQUIRED_BY_DATE' | translate }}:</strong>
+              {{ requirement?.requiredByDate ? (requirement?.requiredByDate | userDate:'mediumDate') : '-' }}
+            </li>
+            <li class="custom-list-item">
+              <strong>{{ 'COMMON.CREATED' | translate }}:</strong>
+              {{ requirement?.createdDate ? (requirement?.createdDate | userDate:'mediumDate') : '-' }}
+            </li>
+            <li class="custom-list-item"><strong>{{ 'COMMON.CREATED_BY' | translate }}:</strong> {{ requirement?.createdByUserLogin || '-' }}</li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<br />
+
+<mat-card class="mat-elevation-z10" *ngIf="requirement">
+  <mat-card-header>
+    <mat-card-title>{{ 'COMMON.REFERENCE' | translate }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <table mat-table [dataSource]="references">
+      <ng-container matColumnDef="id">
+        <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.ID' | translate }}</th>
+        <td mat-cell class="text-left" *matCellDef="let row">
+          <a [routerLink]="getReferenceLink(row)">{{ row?.referenceId }}</a>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="type">
+        <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.TYPE' | translate }}</th>
+        <td mat-cell class="text-left" *matCellDef="let row">{{ getReferenceTypeLabel(row?.referenceType) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="status">
+        <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+        <td mat-cell class="text-left" *matCellDef="let row">{{ row?.statusId || '-' }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="['id', 'type', 'status']"></tr>
+      <tr mat-row *matRowDef="let row; columns: ['id', 'type', 'status']"></tr>
+    </table>
+  </mat-card-content>
+</mat-card>
+
+<br />
+
+<mat-card class="mat-elevation-z10" *ngIf="requirement">
+  <mat-card-header>
+    <mat-card-title>{{ 'COMMON.TIMELINE' | translate }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="timeline-row">
+      <div class="timeline-item">
+        <strong>{{ 'REQUIREMENT.STATUS_PROPOSED' | translate }}:</strong>
+        {{ timeline?.proposedDate ? (timeline?.proposedDate | userDate:'mediumDate') : '-' }}
+      </div>
+      <div class="timeline-item">
+        <strong>{{ 'REQUIREMENT.STATUS_APPROVED' | translate }}:</strong>
+        {{ timeline?.approvedDate ? (timeline?.approvedDate | userDate:'mediumDate') : '-' }}
+      </div>
+      <div class="timeline-item">
+        <strong>{{ 'REQUIREMENT.STATUS_ORDERED' | translate }}:</strong>
+        {{ timeline?.orderedDate ? (timeline?.orderedDate | userDate:'mediumDate') : '-' }}
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

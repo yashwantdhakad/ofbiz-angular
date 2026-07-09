@@ -1,0 +1,96 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-accordion>
+  <mat-expansion-panel class="mat-elevation-z10" [(expanded)]="storesExpanded">
+    <mat-expansion-panel-header>
+      <mat-panel-title>{{ 'COMPANY.PRODUCT_STORES' | translate }}</mat-panel-title>
+    </mat-expansion-panel-header>
+    <div class="table-scroll-wrapper">
+      <table mat-table [dataSource]="context().stores || []" [trackBy]="trackByStore">
+        <ng-container matColumnDef="productStoreId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMPANY.STORE_ID' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            <a [routerLink]="['/company/product-stores', item.id]">{{ item.productStoreId }}</a>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="storeName">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMPANY.STORE_NAME' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">{{ item.storeName || '--' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="companyName">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMPANY.COMPANY_NAME' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">{{ item.companyName || '--' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="defaultCurrencyUomId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMPANY.DEFAULT_CURRENCY' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">{{ item.defaultCurrencyUomId || 'USD' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="payToPartyId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMPANY.PAY_TO_PARTY' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">{{ item.payToPartyId || '--' }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="storeColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: storeColumns"></tr>
+      </table>
+    </div>
+  </mat-expansion-panel>
+</mat-accordion>
+
+<br />
+
+<mat-accordion>
+  <mat-expansion-panel class="mat-elevation-z10" [(expanded)]="facilitiesExpanded">
+    <mat-expansion-panel-header>
+      <mat-panel-title>{{ 'COMPANY.FACILITIES' | translate }}</mat-panel-title>
+    </mat-expansion-panel-header>
+    <div class="table-scroll-wrapper">
+      <table mat-table [dataSource]="facilityRows()" [trackBy]="trackByFacility">
+        <ng-container matColumnDef="storeId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMPANY.STORE_ID' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">{{ item.storeId }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="facilityId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.ID' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            <a [routerLink]="['/facilities', item.facilityId]">{{ item.facilityId }}</a>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="facilityName">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.NAME' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">{{ item.facilityName }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="facilityTypeId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.TYPE' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">{{ item.facilityTypeId }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="facilityColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: facilityColumns"></tr>
+      </table>
+    </div>
+  </mat-expansion-panel>
+</mat-accordion>

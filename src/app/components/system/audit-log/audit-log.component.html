@@ -1,0 +1,178 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<div class="page-shell">
+  <div class="breadcrumb-row">
+    <a [routerLink]="['/home']">{{ 'MENU.HOME' | translate }}</a>
+    <span>/</span>
+    <span>{{ 'MENU.SETTINGS' | translate }}</span>
+    <span>/</span>
+    <a [routerLink]="['/system']">{{ 'MENU.SYSTEM' | translate }}</a>
+    <span>/</span>
+    <span>{{ 'MENU.AUDIT_LOG' | translate }}</span>
+  </div>
+
+  <mat-card class="header-card">
+    <div class="header-row">
+      <div>
+        <h1>{{ 'SYSTEM.AUDIT_LOG_TITLE' | translate }}</h1>
+        <p>{{ 'SYSTEM.AUDIT_LOG_SUBTITLE' | translate }}</p>
+      </div>
+      <button mat-raised-button color="primary" type="button" (click)="load()" [disabled]="isLoading()">
+        {{ 'COMMON.REFRESH' | translate }}
+      </button>
+    </div>
+  </mat-card>
+
+  <mat-card class="filter-card">
+    <form [formGroup]="filterForm" class="filter-form" (ngSubmit)="search()">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'SYSTEM.ENTITY_TYPE' | translate }}</mat-label>
+        <mat-select formControlName="entityType">
+          <mat-option value="">{{ 'COMMON.ALL' | translate }}</mat-option>
+          <mat-option *ngFor="let entityType of availableEntityTypes()" [value]="entityType">
+            {{ entityType }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'SYSTEM.ENTITY_ID' | translate }}</mat-label>
+        <input matInput formControlName="entityId" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'SYSTEM.AUDIT_ACTION' | translate }}</mat-label>
+        <mat-select formControlName="action">
+          <mat-option value="">{{ 'COMMON.ALL' | translate }}</mat-option>
+          <mat-option *ngFor="let action of actionOptions" [value]="action">
+            {{ action }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'SYSTEM.CHANGED_BY' | translate }}</mat-label>
+        <input matInput formControlName="changedBy" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'SYSTEM.FROM_DATE' | translate }}</mat-label>
+        <input matInput [matDatepicker]="fromDatePicker" formControlName="fromDate" />
+        <mat-datepicker-toggle matSuffix [for]="fromDatePicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromDatePicker></mat-datepicker>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'SYSTEM.TO_DATE' | translate }}</mat-label>
+        <input matInput [matDatepicker]="toDatePicker" formControlName="toDate" />
+        <mat-datepicker-toggle matSuffix [for]="toDatePicker"></mat-datepicker-toggle>
+        <mat-datepicker #toDatePicker></mat-datepicker>
+      </mat-form-field>
+      <div class="filter-actions">
+        <button mat-raised-button color="primary" type="submit" class="action-button" [disabled]="isLoading()">
+          {{ 'COMMON.SEARCH' | translate }}
+        </button>
+        <button mat-stroked-button type="button" class="action-button" (click)="clear()" [disabled]="isLoading()">
+          {{ 'COMMON.CLEAR' | translate }}
+        </button>
+        <button mat-stroked-button type="button" class="action-button" (click)="loadConfig()" [disabled]="isConfigLoading()">
+          {{ 'SYSTEM.LOAD_AUDIT_CONFIG' | translate }}
+        </button>
+      </div>
+    </form>
+  </mat-card>
+
+  <mat-card class="config-card">
+    <div class="config-header">
+      <div>
+        <h2>{{ 'SYSTEM.AUDITED_ENTITIES' | translate }}</h2>
+        <p>
+          {{ usingDefaultConfig() ? ('SYSTEM.AUDIT_CONFIG_DEFAULT' | translate) : ('SYSTEM.AUDIT_CONFIG_CUSTOM' | translate) }}
+        </p>
+      </div>
+      <button mat-raised-button color="primary" type="button" (click)="saveConfig()" [disabled]="isConfigSaving()">
+        {{ 'COMMON.SAVE' | translate }}
+      </button>
+    </div>
+    <form [formGroup]="configForm">
+      <mat-form-field appearance="outline" class="entity-config-field">
+        <mat-label>{{ 'SYSTEM.ENTITY_TYPES_TO_AUDIT' | translate }}</mat-label>
+        <mat-select formControlName="entityTypes" multiple>
+          <mat-option *ngFor="let entityType of availableEntityTypes()" [value]="entityType">
+            {{ entityType }}
+          </mat-option>
+        </mat-select>
+        <mat-hint>{{ 'SYSTEM.AUDIT_ENTITY_PICKER_HINT' | translate }}</mat-hint>
+      </mat-form-field>
+    </form>
+  </mat-card>
+
+  <mat-card class="table-card">
+    <div class="loading-row" *ngIf="isLoading()">{{ 'COMMON.LOADING' | translate }}</div>
+
+    <table mat-table [dataSource]="entries()" *ngIf="!isLoading() && entries().length">
+      <ng-container matColumnDef="changedAt">
+        <th mat-header-cell *matHeaderCellDef>{{ 'SYSTEM.CHANGED_AT' | translate }}</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.changedAt | date:'short' }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="action">
+        <th mat-header-cell *matHeaderCellDef>{{ 'SYSTEM.AUDIT_ACTION' | translate }}</th>
+        <td mat-cell *matCellDef="let entry">{{ entry.action }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="entity">
+        <th mat-header-cell *matHeaderCellDef>{{ 'SYSTEM.ENTITY' | translate }}</th>
+        <td mat-cell *matCellDef="let entry">
+          <div class="entity-cell">
+            <strong>{{ entry.entityType }}</strong>
+            <span>{{ entry.entityId }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="changedBy">
+        <th mat-header-cell *matHeaderCellDef>{{ 'SYSTEM.CHANGED_BY' | translate }}</th>
+        <td mat-cell *matCellDef="let entry">{{ formatValue(entry.changedBy) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="oldValue">
+        <th mat-header-cell *matHeaderCellDef>{{ 'SYSTEM.OLD_VALUE' | translate }}</th>
+        <td mat-cell *matCellDef="let entry" class="value-cell">{{ formatValue(entry.oldValue) }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="newValue">
+        <th mat-header-cell *matHeaderCellDef>{{ 'SYSTEM.NEW_VALUE' | translate }}</th>
+        <td mat-cell *matCellDef="let entry" class="value-cell">{{ formatValue(entry.newValue) }}</td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+
+    <div class="empty-state" *ngIf="!isLoading() && !entries().length">
+      {{ 'SYSTEM.NO_AUDIT_EVENTS' | translate }}
+    </div>
+
+    <div class="pagination-row">
+      <button mat-stroked-button type="button" (click)="previousPage()" [disabled]="page() === 0 || isLoading()">
+        {{ 'COMMON.PREVIOUS' | translate }}
+      </button>
+      <span>{{ 'SYSTEM.PAGE_NUMBER' | translate:{ page: page() + 1 } }}</span>
+      <button mat-stroked-button type="button" (click)="nextPage()" [disabled]="!hasNextPage() || isLoading()">
+        {{ 'COMMON.NEXT' | translate }}
+      </button>
+    </div>
+  </mat-card>
+</div>

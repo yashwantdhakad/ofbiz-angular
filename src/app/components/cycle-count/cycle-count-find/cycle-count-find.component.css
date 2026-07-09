@@ -1,0 +1,187 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.section-block {
+  margin-bottom: 24px;
+}
+
+/* ─── Filter bar ─────────────────────────────────────────────── */
+.session-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.filter-field {
+  flex: 0 1 240px;
+  min-width: 0;
+}
+
+.search-btn {
+  height: 56px;
+  min-width: 130px;
+  flex-shrink: 0;
+}
+
+/* ─── Table ─────────────────────────────────────────────────── */
+.table-wrap {
+  overflow: auto;
+}
+
+.full-width-table {
+  width: 100%;
+}
+
+.mobile-session-list {
+  display: none;
+}
+
+/* ─── Loader ─────────────────────────────────────────────────── */
+.loader-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+/* ─── Tablet ─────────────────────────────────────────────────── */
+@media (max-width: 1200px) {
+  .filter-field {
+    flex-basis: 200px;
+  }
+}
+
+/* ─── Mobile ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  .session-filters {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .filter-field {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .search-btn {
+    width: 100%;
+    min-width: unset;
+    margin-top: 4px;
+  }
+
+  /* Hide desktop table, show mobile cards */
+  .table-wrap {
+    display: none;
+  }
+
+  .mobile-session-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .mobile-session-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 10px;
+    background: var(--mat-sys-surface, #fff);
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .mobile-session-card:hover,
+  .mobile-session-card:active {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-color: var(--mat-sys-primary, #1976d2);
+  }
+
+  .mobile-session-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mobile-session-id {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--mat-sys-primary, #1976d2);
+  }
+
+  .mobile-session-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .mobile-session-row {
+    display: flex;
+    gap: 6px;
+    font-size: 0.875rem;
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .mobile-session-label {
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.55);
+    white-space: nowrap;
+  }
+
+  .mobile-session-progress {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    font-size: 0.82rem;
+    color: rgba(0, 0, 0, 0.5);
+  }
+
+  .progress-bar-track {
+    flex: 1;
+    height: 5px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--mat-sys-primary, #1976d2);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+  }
+
+  .mobile-empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: rgba(0, 0, 0, 0.4);
+    font-size: 0.9rem;
+  }
+}
+

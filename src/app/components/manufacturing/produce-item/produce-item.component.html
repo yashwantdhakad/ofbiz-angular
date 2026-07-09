@@ -1,0 +1,98 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<div class="dialog-container">
+  <mat-card>
+    <mat-card-title mat-dialog-title>{{ 'MANUFACTURING.PRODUCE_ITEM' | translate }}</mat-card-title>
+    <mat-card-content>
+      <form [formGroup]="produceForm" class="produce-form">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'COMMON.PRODUCT' | translate }}</mat-label>
+          <input matInput [readonly]="true" [value]="productLabel" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'COMMON.LOCATION' | translate }}</mat-label>
+          <mat-select formControlName="locationSeqId">
+            <mat-option *ngFor="let location of facilityLocations; trackBy: trackByLocation" [value]="location.locationSeqId">
+              {{ location.locationSeqId }}
+            </mat-option>
+          </mat-select>
+          <mat-error *ngIf="produceForm.get('locationSeqId')?.hasError('required')">
+            {{ 'COMMON.LOCATION_REQUIRED' | translate }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'COMMON.QTY' | translate }}</mat-label>
+          <input matInput type="number" formControlName="quantity" min="1" />
+          <mat-hint>
+            {{ 'MANUFACTURING.REMAINING_TO_PRODUCE' | translate }}: {{ remainingQuantity }}
+          </mat-hint>
+          <mat-error *ngIf="produceForm.get('quantity')?.hasError('required')">
+            {{ 'COMMON.QTY_REQUIRED' | translate }}
+          </mat-error>
+          <mat-error *ngIf="produceForm.get('quantity')?.hasError('max')">
+            {{ 'MANUFACTURING.QTY_EXCEEDS_REMAINING' | translate }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'MANUFACTURING.SCRAP_QTY' | translate }}</mat-label>
+          <input matInput type="number" formControlName="quantityScrapped" min="0" />
+          <mat-hint>{{ 'MANUFACTURING.SCRAP_QTY_HINT' | translate }}</mat-hint>
+          <mat-error *ngIf="produceForm.get('quantityScrapped')?.hasError('exceedsRemaining')">
+            {{ 'MANUFACTURING.QTY_EXCEEDS_REMAINING' | translate }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'MANUFACTURING.LOT_ID' | translate }}</mat-label>
+          <input matInput formControlName="lotId" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'MANUFACTURING.CONTAINER_ID' | translate }}</mat-label>
+          <input matInput formControlName="containerId" />
+        </mat-form-field>
+      </form>
+    </mat-card-content>
+
+    <div class="cost-preview" *ngIf="totalJobCost > 0">
+      <div class="cost-preview-label">Cost Distribution Preview</div>
+      <div class="cost-preview-row">
+        <span>Total Job Cost:</span>
+        <strong>{{ totalJobCost | number:'1.2-2' }}</strong>
+      </div>
+      <div class="cost-preview-row" *ngIf="produceForm.get('quantity')?.value">
+        <span>Qty to produce:</span>
+        <strong>{{ produceForm.get('quantity')?.value }}</strong>
+      </div>
+      <div class="cost-preview-row highlight" *ngIf="produceForm.get('quantity')?.value">
+        <span>Unit cost per item:</span>
+        <strong>{{ totalJobCost / (produceForm.get('quantity')?.value || 1) | number:'1.2-4' }}</strong>
+      </div>
+    </div>
+    <mat-card-actions align="start">
+      <button mat-raised-button color="primary" (click)="produce()" [disabled]="isLoading()">
+        {{ 'MANUFACTURING.PRODUCE' | translate }}
+      </button>
+      <button mat-stroked-button (click)="dialogRef.close()">{{ 'COMMON.CANCEL' | translate }}</button>
+    </mat-card-actions>
+  </mat-card>
+</div>

@@ -1,0 +1,63 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+    <mat-card-header>
+        <mat-card-title>{{ 'ASSET.VARIANCE.ADD_TITLE' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content class="dialog-content">
+        <form [formGroup]="varianceForm" (ngSubmit)="save()">
+            <div fxLayout="column" fxLayoutGap="16px">
+                <mat-form-field appearance="outline" fxFlex>
+                    <mat-label>{{ 'COMMON.REASON' | translate }}</mat-label>
+                    <mat-select formControlName="varianceReasonId">
+                        <mat-option *ngFor="let reason of reasons(); trackBy: trackByReason" [value]="reason.varianceReasonId">
+                            {{ reason.description }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-error *ngIf="varianceForm.get('varianceReasonId')?.hasError('required')">
+                        {{ 'COMMON.REASON_REQUIRED' | translate }}
+                    </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" fxFlex>
+                    <mat-label>{{ 'ASSET.VARIANCE.QOH_VAR' | translate }}</mat-label>
+                    <input matInput type="number" formControlName="quantityOnHandVar">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" fxFlex>
+                    <mat-label>{{ 'ASSET.VARIANCE.ATP_VAR' | translate }}</mat-label>
+                    <input matInput type="number" formControlName="availableToPromiseVar">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" fxFlex>
+                    <mat-label>{{ 'COMMON.COMMENTS' | translate }}</mat-label>
+                    <textarea matInput formControlName="comments" rows="3"></textarea>
+                </mat-form-field>
+            </div>
+        </form>
+    </mat-card-content>
+    <mat-card-actions align="start">
+        <button mat-raised-button color="primary" (click)="save()" [disabled]="isLoading() || varianceForm.invalid">
+            <mat-spinner *ngIf="isLoading()" diameter="20" color="accent"
+                style="display:inline-block; margin-right: 5px;"></mat-spinner>
+            {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button mat-stroked-button (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
+    </mat-card-actions>
+</mat-card>

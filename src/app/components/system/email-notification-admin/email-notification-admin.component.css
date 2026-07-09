@@ -1,0 +1,156 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.page-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.breadcrumb-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+}
+
+.header-card,
+.list-card,
+.form-card,
+.history-card {
+  padding: 24px;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.header-row h1 {
+  margin: 0 0 8px;
+}
+
+.header-row p {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.72);
+}
+
+.header-actions,
+.history-actions,
+.action-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.preview-controls-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.9fr) minmax(480px, 1.4fr);
+  gap: 16px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.loading-row {
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+}
+
+.preview-card {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fffdf8 0%, #fff 100%);
+}
+
+.preview-card h3 {
+  margin-top: 0;
+}
+
+.preview-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 8px 16px;
+  margin-bottom: 12px;
+}
+
+.preview-body {
+  margin-top: 12px;
+}
+
+.preview-locale-field {
+  min-width: 180px;
+}
+
+.test-email-field {
+  flex: 1 1 260px;
+  min-width: 240px;
+}
+
+.action-button {
+  height: 56px;
+  min-height: 56px;
+}
+
+.single-line-actions {
+  flex-wrap: nowrap;
+}
+
+table {
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .header-row {
+    flex-direction: column;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .single-line-actions {
+    flex-wrap: wrap;
+  }
+}

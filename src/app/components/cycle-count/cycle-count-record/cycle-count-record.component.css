@@ -1,0 +1,259 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.breadcrumb-list {
+  margin-bottom: 8px;
+}
+
+.header-card,
+.content-card {
+  margin-bottom: 20px;
+}
+
+.header-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.header-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.actions-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ─── Desktop table ─────────────────────────────────────────── */
+.table-wrap {
+  overflow: auto;
+}
+
+.full-width-table {
+  width: 100%;
+}
+
+.count-input {
+  width: 180px;
+  margin: 0;
+}
+
+.count-cell,
+.row-action-cell {
+  vertical-align: middle;
+}
+
+.row-action-cell {
+  white-space: nowrap;
+}
+
+.session-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+}
+
+:host ::ng-deep .count-input .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+:host ::ng-deep .count-input .mat-mdc-text-field-wrapper {
+  height: 44px;
+}
+
+:host ::ng-deep .count-input .mat-mdc-form-field-infix {
+  min-height: 44px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.loader-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+/* Mobile cards hidden on desktop */
+.mobile-items-list {
+  display: none;
+}
+
+/* ─── Tablet ────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .header-top-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* ─── Mobile ────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  /* Breadcrumb compact */
+  .breadcrumb-list {
+    margin-bottom: 4px;
+  }
+
+  /* Header card compact */
+  .header-top-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .session-meta {
+    gap: 12px;
+    font-size: 0.85rem;
+    color: rgba(0, 0, 0, 0.65);
+  }
+
+  /* Action buttons stacked full-width */
+  .actions-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .actions-row button {
+    width: 100%;
+  }
+
+  /* Hide desktop table */
+  .table-wrap {
+    display: none;
+  }
+
+  /* Mobile item cards */
+  .mobile-items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .mobile-item-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 10px;
+    background: var(--mat-sys-surface, #fff);
+    transition: box-shadow 0.2s ease;
+  }
+
+  .mobile-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .mobile-item-ltn {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--mat-sys-primary, #1976d2);
+  }
+
+  .mobile-item-part {
+    font-size: 0.82rem;
+    color: rgba(0, 0, 0, 0.55);
+  }
+
+  .mobile-item-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 0.82rem;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .mobile-item-meta span strong {
+    color: rgba(0, 0, 0, 0.75);
+    font-weight: 600;
+  }
+
+  /* Big count input for thumb use */
+  .mobile-count-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mobile-count-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.65);
+    white-space: nowrap;
+  }
+
+  .mobile-count-field {
+    flex: 1;
+    margin: 0;
+  }
+
+  :host ::ng-deep .mobile-count-field .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  :host ::ng-deep .mobile-count-field .mat-mdc-text-field-wrapper {
+    height: 52px;
+  }
+
+  :host ::ng-deep .mobile-count-field .mat-mdc-form-field-infix {
+    min-height: 52px;
+    padding-top: 13px;
+    padding-bottom: 13px;
+    font-size: 1.1rem;
+  }
+
+  .mobile-save-btn {
+    height: 52px;
+    width: 52px;
+    flex-shrink: 0;
+  }
+
+  .mobile-variance {
+    font-size: 0.8rem;
+    color: rgba(0, 0, 0, 0.5);
+    text-align: right;
+  }
+
+  .mobile-variance.negative {
+    color: #c62828;
+  }
+
+  .mobile-variance.positive {
+    color: #2e7d32;
+  }
+}
+

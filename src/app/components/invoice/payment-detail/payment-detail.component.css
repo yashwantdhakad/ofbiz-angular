@@ -1,0 +1,138 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+:host { display: block; padding: 16px; }
+
+.action-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 16px;
+  padding: 10px 16px;
+  background: #f5f5f5;
+  border-radius: 6px;
+}
+.action-group { display: flex; gap: 8px; align-items: center; }
+
+.section-card { margin-bottom: 16px; }
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 280px;
+  gap: 24px;
+  padding: 8px 0;
+}
+.overview-col { display: flex; flex-direction: column; gap: 10px; }
+.overview-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.label { font-weight: 600; min-width: 100px; color: #555; font-size: 13px; }
+.value { color: #222; font-size: 14px; }
+.party-name { font-weight: 500; color: #1565c0; }
+.ref-num { font-family: monospace; font-size: 14px; }
+.inline-edit-btn { width: 28px; height: 28px; line-height: 28px; }
+
+.ref-input { max-width: 200px; }
+.ref-input ::ng-deep .mat-mdc-form-field-infix { padding: 4px 0; min-height: 36px; }
+
+.status-chip {
+  font-size: 12px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.status-pmnt_not_paid { background: #fff3e0; color: #e65100; }
+.status-pmnt_sent { background: #e3f2fd; color: #1565c0; }
+.status-pmnt_received { background: #e8f5e9; color: #2e7d32; }
+.status-pmnt_confirmed { background: #e8f5e9; color: #1b5e20; }
+.status-pmnt_cancelled { background: #fce4ec; color: #880e4f; }
+.status-pmnt_void { background: #f3e5f5; color: #4a148c; }
+
+.amount-col { justify-content: center; align-items: flex-end; }
+.amount-box {
+  text-align: right;
+  padding: 12px 0;
+}
+.amount-label { font-size: 12px; color: #777; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+.amount-value { font-size: 28px; font-weight: 700; color: #1565c0; margin-top: 4px; }
+
+.section-panel { margin-bottom: 12px; }
+.full-width { width: 100%; }
+.text-right { text-align: right; }
+.empty-msg { color: #888; padding: 16px; font-style: italic; }
+
+.invoice-link-button {
+  background: none;
+  border: 0;
+  color: #1976d2;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.table-container {
+  overflow-x: auto;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  :host {
+    padding: 8px;
+  }
+
+  .action-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .action-group {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .action-group button {
+    width: 100%;
+  }
+
+  .overview-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .amount-col {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .amount-box {
+    text-align: center;
+    padding: 8px 0;
+  }
+
+  .overview-row {
+    justify-content: space-between;
+  }
+
+  .overview-row .label {
+    min-width: auto;
+  }
+}
+

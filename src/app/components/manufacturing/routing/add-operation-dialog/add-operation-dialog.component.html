@@ -1,0 +1,72 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<h2 mat-dialog-title>{{ 'MANUFACTURING.ADD_OPERATION' | translate }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="dialog-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'MANUFACTURING.OPERATION' | translate }}</mat-label>
+      <input
+        matInput
+        formControlName="operationSearch"
+        [matAutocomplete]="operationAuto"
+        [placeholder]="'MANUFACTURING.TYPE_OPERATION_ID_OR_NAME' | translate"
+        (input)="onOperationInputChange(form.get('operationSearch')?.value)"
+      />
+      <mat-autocomplete
+        #operationAuto="matAutocomplete"
+        [displayWith]="displayOperation.bind(this)"
+        (optionSelected)="selectOperation($event.option.value)"
+      >
+        <mat-option *ngFor="let item of filteredOperations$ | async" [value]="item">
+          {{ item.workEffortName || item.workEffortId }} ({{ item.workEffortId }})
+        </mat-option>
+      </mat-autocomplete>
+      <mat-error *ngIf="form.get('operationWorkEffortId')?.hasError('required')">
+        {{ 'MANUFACTURING.OPERATION_REQUIRED' | translate }}
+      </mat-error>
+    </mat-form-field>
+
+    <div class="step-from-row">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'MANUFACTURING.STEP_NO' | translate }}</mat-label>
+        <input matInput type="number" min="0" step="1" formControlName="sequenceNum" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'BOM.FROM_DATE' | translate }}</mat-label>
+        <input matInput [matDatepicker]="fromDatePicker" formControlName="fromDate" />
+        <mat-datepicker-toggle matSuffix [for]="fromDatePicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromDatePicker></mat-datepicker>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'BOM.THRU_DATE' | translate }}</mat-label>
+      <input matInput [matDatepicker]="thruDatePicker" formControlName="thruDate" />
+      <mat-datepicker-toggle matSuffix [for]="thruDatePicker"></mat-datepicker-toggle>
+      <mat-datepicker #thruDatePicker></mat-datepicker>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="start">
+  <button mat-raised-button color="primary" (click)="save()">{{ 'MANUFACTURING.ADD_OPERATION' | translate }}</button>
+  <button mat-stroked-button (click)="close()">{{ 'COMMON.CANCEL' | translate }}</button>
+</mat-dialog-actions>

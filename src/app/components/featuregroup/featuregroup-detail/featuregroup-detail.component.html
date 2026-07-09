@@ -1,0 +1,169 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+<ng-template #content>
+  <mat-list>
+    <mat-list-item>
+      <a [routerLink]="['/features']">{{ 'FEATUREGROUP.TITLE' | translate }}</a>
+      / {{ featureGroupDetail()?.productFeatureGroupId }}
+    </mat-list-item>
+  </mat-list>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title> {{ 'FEATUREGROUP.OVERVIEW_TITLE' | translate }} </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div fxLayout="row wrap" fxLayout.xs="column">
+        <mat-card fxFlex.gt-xs="32%" class="card-margin mat-elevation-z10">
+          <mat-card-content>
+            <ul class="custom-list">
+              <li class="custom-list-item">
+                <strong>{{ 'COMMON.DESCRIPTION' | translate }}:</strong>
+                {{ featureGroupDetail()?.description }}
+                <mat-icon
+                  matListIcon
+                  class="custom-mat-icon custom-icon-align"
+                  color="primary"
+                  (click)="editFeatureGroupDialog()"
+                  >edit</mat-icon
+                >
+              </li>
+            </ul>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <br />
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>
+        {{ 'FEATUREGROUP.CATEGORIES_TITLE' | translate }}
+        <mat-icon
+          matListIcon
+          class="custom-mat-icon custom-icon-align"
+          color="primary"
+          (click)="createProductCategoryFeatGrpApplDialog()"
+          >add</mat-icon
+        >
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <table mat-table [dataSource]="categories()">
+        <ng-container matColumnDef="productCategoryId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'FEATUREGROUP.CATEGORY_ID' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item?.productCategoryId }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="categoryName">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FEATUREGROUP.CATEGORY_NAME' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item?.category?.categoryName }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="applTypeEnumId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FEATURE.APPL_TYPE' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.applTypeEnumId }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="fromDate">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.FROM_DATE' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.fromDate | userDate : "MMMM d, y" }}
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="categoriesColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: categoriesColumns"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+  <br />
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>
+        {{ 'FEATUREGROUP.FEATURES_TITLE' | translate }}
+        <mat-icon
+          matListIcon
+          class="custom-mat-icon custom-icon-align"
+          color="primary"
+          (click)="createProductFeatureGroupApplDialog()"
+          >add</mat-icon
+        >
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <table mat-table [dataSource]="features()">
+        <ng-container matColumnDef="productFeatureId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'FEATURE.ID' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item?.productFeatureId }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="description">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'COMMON.DESCRIPTION' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item?.feature?.description }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="abbrev">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'FEATURE.ABBREV' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item?.feature?.abbrev }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="productFeatureTypeEnumId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.TYPE_ID' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item?.feature?.productFeatureTypeEnumId }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="sequenceNum">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'FEATURE.SEQUENCE_NUM' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item?.sequenceNum }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="fromDate">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FEATURE.FROM_DATE' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item?.fromDate | userDate : "MMMM d, y" }}
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="featuresColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: featuresColumns"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

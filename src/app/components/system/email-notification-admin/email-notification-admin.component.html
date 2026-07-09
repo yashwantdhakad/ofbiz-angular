@@ -1,0 +1,228 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<div class="page-shell">
+  <div class="breadcrumb-row">
+    <a [routerLink]="['/home']">{{ 'MENU.HOME' | translate }}</a>
+    <span>/</span>
+    <span>{{ 'MENU.SETTINGS' | translate }}</span>
+    <span>/</span>
+    <a [routerLink]="['/system']">{{ 'MENU.SYSTEM' | translate }}</a>
+    <span>/</span>
+    <span>{{ 'MENU.EMAIL_NOTIFICATIONS' | translate }}</span>
+  </div>
+
+  <mat-card class="header-card">
+    <div class="header-row">
+      <div>
+        <h1>{{ 'SYSTEM.EMAIL_NOTIFICATIONS_TITLE' | translate }}</h1>
+        <p>{{ 'SYSTEM.EMAIL_NOTIFICATIONS_SUBTITLE' | translate }}</p>
+      </div>
+      <div class="header-actions">
+        <button mat-stroked-button type="button" (click)="createNew()">
+          {{ 'SYSTEM.NEW_TEMPLATE' | translate }}
+        </button>
+        <button mat-raised-button color="primary" type="button" (click)="saveTemplate()" [disabled]="isSaving()">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+      </div>
+    </div>
+  </mat-card>
+
+  <div class="content-grid">
+    <mat-card class="list-card">
+      <mat-card-title>{{ 'SYSTEM.TEMPLATES' | translate }}</mat-card-title>
+      <mat-card-content>
+        <div class="loading-row" *ngIf="isTemplatesLoading()">{{ 'COMMON.LOADING' | translate }}</div>
+        <table mat-table [dataSource]="templates()" *ngIf="!isTemplatesLoading()">
+          <ng-container matColumnDef="emailType">
+            <th mat-header-cell *matHeaderCellDef>{{ 'SYSTEM.EMAIL_TYPE' | translate }}</th>
+            <td mat-cell *matCellDef="let item">
+              <button mat-button type="button" (click)="selectTemplate(item)">
+                {{ item.emailType }}
+              </button>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.DESCRIPTION' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.description }}</td>
+          </ng-container>
+          <ng-container matColumnDef="active">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ACTIVE' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.active ? ('COMMON.YES' | translate) : ('COMMON.NO' | translate) }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedTemplateColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedTemplateColumns"></tr>
+        </table>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="form-card">
+      <mat-card-title>{{ 'SYSTEM.TEMPLATE_EDITOR' | translate }}</mat-card-title>
+      <mat-card-content>
+        <form [formGroup]="templateForm" class="form-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'SYSTEM.EMAIL_TYPE' | translate }}</mat-label>
+            <input matInput formControlName="emailType" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'COMMON.DESCRIPTION' | translate }}</mat-label>
+            <input matInput formControlName="description" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'COMMON.SUBJECT' | translate }}</mat-label>
+            <input matInput formControlName="subject" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'SYSTEM.CONTENT_TYPE' | translate }}</mat-label>
+            <input matInput formControlName="contentType" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'SYSTEM.FROM_ADDRESS' | translate }}</mat-label>
+            <input matInput formControlName="fromAddress" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'SYSTEM.CC_ADDRESS' | translate }}</mat-label>
+            <input matInput formControlName="ccAddress" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'SYSTEM.BCC_ADDRESS' | translate }}</mat-label>
+            <input matInput formControlName="bccAddress" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'SYSTEM.TEMPLATE_VARIABLES' | translate }}</mat-label>
+            <input matInput formControlName="templateVariables" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ 'SYSTEM.BODY_SCREEN_LOCATION' | translate }}</mat-label>
+            <input matInput formControlName="bodyScreenLocation" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ 'SYSTEM.ATTACHMENT_SCREEN_LOCATION' | translate }}</mat-label>
+            <input matInput formControlName="xslfoAttachScreenLocation" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ 'SYSTEM.TEMPLATE_BODY' | translate }}</mat-label>
+            <textarea matInput rows="12" formControlName="templateBody"></textarea>
+          </mat-form-field>
+          <mat-checkbox formControlName="active">{{ 'COMMON.ACTIVE' | translate }}</mat-checkbox>
+        </form>
+
+        <div class="preview-controls-row">
+            <mat-form-field appearance="outline" class="test-email-field">
+              <mat-label>{{ 'SYSTEM.TEST_EMAIL_ADDRESS' | translate }}</mat-label>
+              <input matInput [formControl]="testEmailForm.controls.toAddress" type="email" />
+              <mat-error *ngIf="testEmailForm.controls.toAddress.hasError('required')">
+                {{ 'COMMON.EMAIL_REQUIRED' | translate }}
+              </mat-error>
+              <mat-error *ngIf="testEmailForm.controls.toAddress.hasError('email')">
+                {{ 'COMMON.EMAIL_INVALID' | translate }}
+              </mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="preview-locale-field">
+              <mat-label>{{ 'SYSTEM.PREVIEW_LOCALE' | translate }}</mat-label>
+              <mat-select [value]="previewLocale()" (valueChange)="previewLocale.set($event)">
+                <mat-option value="en">{{ 'LANGUAGE.ENGLISH' | translate }}</mat-option>
+                <mat-option value="es">{{ 'LANGUAGE.SPANISH' | translate }}</mat-option>
+                <mat-option value="fr">{{ 'LANGUAGE.FRENCH' | translate }}</mat-option>
+                <mat-option value="hi">{{ 'LANGUAGE.HINDI' | translate }}</mat-option>
+                <mat-option value="ja">{{ 'LANGUAGE.JAPANESE' | translate }}</mat-option>
+                <mat-option value="zh">{{ 'LANGUAGE.CHINESE' | translate }}</mat-option>
+                <mat-option value="de">{{ 'LANGUAGE.GERMAN' | translate }}</mat-option>
+              </mat-select>
+            </mat-form-field>
+        </div>
+
+        <div class="action-row single-line-actions">
+          <button mat-raised-button color="primary" type="button" class="action-button" (click)="saveTemplate()" [disabled]="isSaving()">
+            {{ 'COMMON.SAVE' | translate }}
+          </button>
+          <button mat-stroked-button type="button" class="action-button" (click)="previewTemplate()" [disabled]="!templateForm.get('id')?.value">
+            {{ 'SYSTEM.TEMPLATE_PREVIEW' | translate }}
+          </button>
+          <button
+            mat-stroked-button
+            type="button"
+            class="action-button"
+            (click)="sendTestEmail()"
+            [disabled]="!templateForm.get('id')?.value || isSendingTest()"
+          >
+            {{ 'SYSTEM.SEND_TEST_EMAIL' | translate }}
+          </button>
+          <button mat-stroked-button type="button" class="action-button" (click)="deleteTemplate()" [disabled]="!templateForm.get('id')?.value">
+            {{ 'COMMON.DELETE' | translate }}
+          </button>
+        </div>
+
+        <div class="preview-card" *ngIf="preview() as previewItem">
+          <h3>{{ 'SYSTEM.TEMPLATE_PREVIEW' | translate }}</h3>
+          <div class="preview-meta">
+            <div><strong>{{ 'SYSTEM.RESOLVED_LOCALE' | translate }}:</strong> {{ previewItem.resolvedLocale }}</div>
+            <div><strong>{{ 'SYSTEM.SUBJECT_SOURCE' | translate }}:</strong> {{ previewSourceLabel(previewItem.subjectSource) }}</div>
+            <div><strong>{{ 'SYSTEM.BODY_SOURCE' | translate }}:</strong> {{ previewSourceLabel(previewItem.bodySource) }}</div>
+          </div>
+          <div><strong>{{ 'COMMON.SUBJECT' | translate }}:</strong> {{ previewItem.subject }}</div>
+          <div class="preview-body" [innerHTML]="previewHtml()"></div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-card class="history-card">
+    <mat-card-title>{{ 'SYSTEM.COMMUNICATION_HISTORY' | translate }}</mat-card-title>
+    <mat-card-content>
+      <div class="history-actions">
+        <button mat-raised-button color="primary" type="button" (click)="loadHistory()">
+          {{ 'COMMON.REFRESH' | translate }}
+        </button>
+      </div>
+      <div class="loading-row" *ngIf="isHistoryLoading()">{{ 'COMMON.LOADING' | translate }}</div>
+      <div class="loading-row" *ngIf="!isHistoryLoading() && !history().length">
+        {{ 'SYSTEM.NO_COMMUNICATION_EVENTS' | translate }}
+      </div>
+      <table mat-table [dataSource]="history()" *ngIf="!isHistoryLoading() && history().length">
+        <ng-container matColumnDef="entryDate">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.DATE' | translate }}</th>
+          <td mat-cell *matCellDef="let item">{{ item.entryDate | userDate:'MM/dd/yyyy HH:mm' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="emailType">
+          <th mat-header-cell *matHeaderCellDef>{{ 'SYSTEM.EMAIL_TYPE' | translate }}</th>
+          <td mat-cell *matCellDef="let item">{{ item.emailType }}</td>
+        </ng-container>
+        <ng-container matColumnDef="statusId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+          <td mat-cell *matCellDef="let item">{{ item.statusId }}</td>
+        </ng-container>
+        <ng-container matColumnDef="reference">
+          <th mat-header-cell *matHeaderCellDef>{{ 'SYSTEM.REFERENCE' | translate }}</th>
+          <td mat-cell *matCellDef="let item">{{ historyReference(item) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="toAddress">
+          <th mat-header-cell *matHeaderCellDef>{{ 'SYSTEM.TO_ADDRESS' | translate }}</th>
+          <td mat-cell *matCellDef="let item">{{ item.toAddress }}</td>
+        </ng-container>
+        <ng-container matColumnDef="subject">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.SUBJECT' | translate }}</th>
+          <td mat-cell *matCellDef="let item">{{ item.subject }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="displayedHistoryColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedHistoryColumns"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,121 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-header class="card-header-with-action">
+    <mat-card-title>{{ 'CYCLE_COUNT.FIND_TITLE' | translate }}</mat-card-title>
+    <button mat-raised-button color="primary" routerLink="/cycle-count/create">
+      <mat-icon>add</mat-icon> {{ 'MENU.CREATE_CYCLE_COUNT' | translate }}
+    </button>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="section-block">
+      <div class="session-filters">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>{{ 'COMMON.FACILITY' | translate }}</mat-label>
+          <mat-select [value]="selectedFacilityId" (selectionChange)="onFacilityChange($event.value)">
+            <mat-option *ngFor="let facility of facilities()" [value]="facility.facilityId">
+              {{ facility.facilityName || facility.facilityId }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>{{ 'CYCLE_COUNT.SESSION_ID' | translate }}</mat-label>
+          <input matInput [(ngModel)]="sessionId" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>{{ 'COMMON.LOCATION' | translate }}</mat-label>
+          <input matInput [(ngModel)]="sessionLocation" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>{{ 'COMMON.STATUS' | translate }}</mat-label>
+          <mat-select [(ngModel)]="selectedStatus">
+            <mat-option *ngFor="let status of statusOptions" [value]="status">
+              {{ status ? getStatusLabel(status) : ('COMMON.ALL' | translate) }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button mat-raised-button color="primary" class="search-btn" (click)="sessionPageIndex.set(0); searchSessions()" [disabled]="loadingSessions()">{{ 'COMMON.SEARCH' | translate }}</button>
+      </div>
+
+      <!-- Desktop table -->
+      <div class="table-wrap" *ngIf="!loadingSessions(); else sessionLoadingTpl">
+        <table mat-table [dataSource]="sessions()" class="full-width-table">
+          <ng-container matColumnDef="sessionId"><th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.SESSION' | translate }}</th><td mat-cell *matCellDef="let row"><a class="link" href="" (click)="$event.preventDefault(); openSession(row)">{{ row.sessionId }}</a></td></ng-container>
+          <ng-container matColumnDef="facilityId"><th mat-header-cell *matHeaderCellDef>{{ 'COMMON.FACILITY' | translate }}</th><td mat-cell *matCellDef="let row">{{ row.facilityName || row.facilityId || '-' }}</td></ng-container>
+          <ng-container matColumnDef="statusId"><th mat-header-cell *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th><td mat-cell *matCellDef="let row">{{ row.statusDescription || getStatusLabel(row.statusId) }}</td></ng-container>
+          <ng-container matColumnDef="createdDate"><th mat-header-cell *matHeaderCellDef>{{ 'COMMON.CREATED' | translate }}</th><td mat-cell *matCellDef="let row">{{ row.createdDate | userDate:'medium' }}</td></ng-container>
+          <ng-container matColumnDef="locations"><th mat-header-cell *matHeaderCellDef>{{ 'COMMON.LOCATIONS' | translate }}</th><td mat-cell *matCellDef="let row">{{ (row.locations || []).join(', ') }}</td></ng-container>
+          <ng-container matColumnDef="counted"><th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.COUNTED' | translate }}</th><td mat-cell *matCellDef="let row">{{ row.countedItems }} / {{ row.totalItems }}</td></ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="sessionColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: sessionColumns"></tr>
+        </table>
+        <mat-paginator [length]="sessionTotal()" [pageIndex]="sessionPageIndex()" [pageSize]="sessionPageSize()" [pageSizeOptions]="sessionPageSizeOptions" (page)="onSessionPage($event)"></mat-paginator>
+      </div>
+
+      <!-- Mobile card list -->
+      <div class="mobile-session-list" *ngIf="!loadingSessions()">
+        <ng-container *ngIf="sessions().length > 0; else mobileEmptyTpl">
+          <div
+            class="mobile-session-card"
+            *ngFor="let row of sessions()"
+            (click)="openSession(row)"
+            role="button"
+            tabindex="0"
+            (keydown.enter)="openSession(row)"
+          >
+            <div class="mobile-session-header">
+              <span class="mobile-session-id">{{ row.sessionId }}</span>
+              <app-status-chip [status]="row.statusDescription || getStatusLabel(row.statusId)" [statusId]="row.statusId"></app-status-chip>
+            </div>
+            <div class="mobile-session-body">
+              <div class="mobile-session-row" *ngIf="row.facilityName || row.facilityId">
+                <span class="mobile-session-label">{{ 'COMMON.FACILITY' | translate }}:</span>
+                <span>{{ row.facilityName || row.facilityId }}</span>
+              </div>
+              <div class="mobile-session-row" *ngIf="row.createdDate">
+                <span class="mobile-session-label">{{ 'COMMON.CREATED' | translate }}:</span>
+                <span>{{ row.createdDate | userDate:'mediumDate' }}</span>
+              </div>
+              <div class="mobile-session-row" *ngIf="row.locations?.length">
+                <span class="mobile-session-label">{{ 'COMMON.LOCATIONS' | translate }}:</span>
+                <span>{{ (row.locations || []).join(', ') }}</span>
+              </div>
+            </div>
+            <div class="mobile-session-progress" *ngIf="row.totalItems">
+              <span>{{ row.countedItems }}/{{ row.totalItems }}</span>
+              <div class="progress-bar-track">
+                <div class="progress-bar-fill" [style.width.%]="(row.countedItems / row.totalItems) * 100"></div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #mobileEmptyTpl>
+          <div class="mobile-empty">{{ 'COMMON.NO_RESULTS' | translate }}</div>
+        </ng-template>
+      </div>
+
+      <ng-template #sessionLoadingTpl>
+        <div class="loader-wrap"><mat-progress-spinner [diameter]="48" mode="indeterminate"></mat-progress-spinner></div>
+      </ng-template>
+    </div>
+  </mat-card-content>
+</mat-card>
+

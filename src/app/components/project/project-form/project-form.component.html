@@ -1,0 +1,90 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<section class="form-page">
+  <header class="page-header">
+    <div>
+      <h1>{{ (isEditMode() ? 'PROJECTS.EDIT_TITLE' : 'PROJECTS.CREATE_TITLE') | translate }}</h1>
+      <p>{{ 'PROJECTS.SUBTITLE' | translate }}</p>
+    </div>
+  </header>
+
+  <div class="state-panel" *ngIf="isLoading()">
+    <mat-spinner diameter="32"></mat-spinner>
+  </div>
+
+  <form class="form-grid" *ngIf="!isLoading()" [formGroup]="projectForm" (ngSubmit)="save()">
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PROJECTS.PROJECT_ID' | translate }}</mat-label>
+      <input matInput formControlName="workEffortId" autocomplete="off">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PROJECTS.PROJECT_NAME' | translate }}</mat-label>
+      <input matInput formControlName="workEffortName" autocomplete="off">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PROJECTS.TYPE' | translate }}</mat-label>
+      <mat-select formControlName="workEffortTypeId">
+        <mat-option value="PROJECT">PROJECT</mat-option>
+        <mat-option value="PROJECT_PHASE">PROJECT_PHASE</mat-option>
+        <mat-option value="PROJECT_TASK">PROJECT_TASK</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PROJECTS.STATUS' | translate }}</mat-label>
+      <input matInput formControlName="currentStatusId" autocomplete="off">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PROJECTS.PERCENT_COMPLETE' | translate }}</mat-label>
+      <input matInput type="number" formControlName="percentComplete">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PROJECTS.BAC' | translate }}</mat-label>
+      <input matInput type="number" formControlName="totalMoneyAllowed">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PROJECTS.CURRENCY' | translate }}</mat-label>
+      <input matInput formControlName="moneyUomId" autocomplete="off">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-span">
+      <mat-label>{{ 'PROJECTS.PARENT_PROJECT' | translate }}</mat-label>
+      <input matInput formControlName="workEffortParentId" autocomplete="off">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-span">
+      <mat-label>{{ 'PROJECTS.DESCRIPTION' | translate }}</mat-label>
+      <textarea matInput rows="5" formControlName="description"></textarea>
+    </mat-form-field>
+
+    <div class="actions full-span">
+      <button mat-flat-button color="primary" type="submit" [disabled]="isSaving()">
+        {{ (isEditMode() ? 'COMMON.SAVE' : 'COMMON.CREATE') | translate }}
+      </button>
+      <button mat-stroked-button type="button" (click)="cancel()">
+        {{ 'COMMON.CANCEL' | translate }}
+      </button>
+    </div>
+  </form>
+</section>

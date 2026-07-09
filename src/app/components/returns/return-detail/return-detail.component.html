@@ -1,0 +1,265 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="!loading()">
+  <mat-list class="breadcrumb-list">
+    <mat-list-item>
+      <a [routerLink]="['/returns']">{{ 'MENU.RETURNS' | translate }}</a>
+      / {{ detail?.summary?.returnId || returnId }}
+    </mat-list-item>
+  </mat-list>
+</ng-container>
+
+<mat-card class="mat-elevation-z10 header-card" *ngIf="!loading() && detail">
+  <mat-card-content>
+    <div class="header-top-row">
+      <div class="header-copy">
+        <h1 class="page-title">{{ 'RETURN.TITLE_SINGULAR' | translate }} {{ detail.summary?.returnId }}</h1>
+      </div>
+      <div class="actions-row">
+        <button
+          mat-stroked-button
+          color="warn"
+          *ngIf="canReviewReturn()"
+          [disabled]="submitting()"
+          (click)="rejectReturn()"
+        >
+          {{ 'COMMON.REJECT' | translate }}
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          *ngIf="canReviewReturn()"
+          [disabled]="submitting()"
+          (click)="acceptReturn()"
+        >
+          {{ 'COMMON.ACCEPT' | translate }}
+        </button>
+        <button
+          mat-raised-button
+          color="primary"
+          *ngIf="canReceiveIntoInventory()"
+          [routerLink]="['/returns', detail.summary?.returnId, 'receive']"
+        >
+          {{ 'COMMON.RECEIVE' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <div class="overview-grid">
+      <div class="overview-card">
+        <div class="overview-item"><span>{{ 'RETURN.RETURN_ID' | translate }}</span><strong>{{ detail.summary?.returnId || '-' }}</strong></div>
+        <div class="overview-item">
+          <span>{{ 'COMMON.STATUS' | translate }}</span>
+          <strong>
+            {{ detail.summary?.statusDescription || detail.summary?.statusId || '-' }}
+            <app-status-history-icon [entries]="statusHistoryEntries()"></app-status-history-icon>
+          </strong>
+        </div>
+        <div class="overview-item"><span>{{ 'RETURN.RETURN_TYPE' | translate }}</span><strong>{{ detail.summary?.returnTypeDescription || detail.summary?.returnTypeId || '-' }}</strong></div>
+        <div class="overview-item"><span>{{ 'COMMON.ITEMS' | translate }}</span><strong>{{ detail.summary?.itemCount || 0 }}</strong></div>
+        <div class="overview-item"><span>{{ 'COMMON.DATE' | translate }}</span><strong>{{ detail.summary?.entryDate ? (detail.summary?.entryDate | userDate : 'medium') : '-' }}</strong></div>
+      </div>
+
+      <div class="overview-card">
+        <div class="overview-item">
+          <span>{{ 'COMMON.ORDER_ID' | translate }}</span>
+          <strong>
+            <ng-container *ngIf="getOrderLink(detail.summary?.orderId, detail.summary?.orderTypeId) as orderLink; else orderText">
+              <a [routerLink]="orderLink">{{ detail.summary?.orderId }}</a>
+            </ng-container>
+            <ng-template #orderText>{{ detail.summary?.orderId || '-' }}</ng-template>
+          </strong>
+        </div>
+        <div class="overview-item"><span>{{ 'COMMON.FACILITY' | translate }}</span><strong>{{ detail.summary?.destinationFacilityName || detail.summary?.destinationFacilityId || '-' }}</strong></div>
+        <div class="overview-item">
+          <span>{{ 'RETURN.FROM_PARTY' | translate }}</span>
+          <strong>
+            <ng-container *ngIf="getPartyLink(detail.summary?.fromPartyId, detail.summary?.orderTypeId, 'from') as fromPartyLink; else fromPartyText">
+              <a [routerLink]="fromPartyLink">{{ detail.summary?.fromPartyName || detail.summary?.fromPartyId }}</a>
+            </ng-container>
+            <ng-template #fromPartyText>{{ detail.summary?.fromPartyName || detail.summary?.fromPartyId || '-' }}</ng-template>
+          </strong>
+        </div>
+        <div class="overview-item">
+          <span>{{ 'RETURN.TO_PARTY' | translate }}</span>
+          <strong>
+            <ng-container *ngIf="getPartyLink(detail.summary?.toPartyId, detail.summary?.orderTypeId, 'to') as toPartyLink; else toPartyText">
+              <a [routerLink]="toPartyLink">{{ detail.summary?.toPartyName || detail.summary?.toPartyId }}</a>
+            </ng-container>
+            <ng-template #toPartyText>{{ detail.summary?.toPartyName || detail.summary?.toPartyId || '-' }}</ng-template>
+          </strong>
+        </div>
+      </div>
+
+      <div class="overview-card amount-card">
+        <div class="overview-item">
+          <span>{{ 'COMMON.TOTAL_AMOUNT' | translate }}</span>
+          <strong>{{ detail.summary?.totalAmount | amountWithCurrency : (detail.summary?.currencyUomId || 'USD') }}</strong>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="mat-elevation-z10 content-card" *ngIf="!loading() && detail">
+  <mat-card-content>
+    <!-- Desktop table -->
+    <div class="table-wrapper">
+      <table mat-table [dataSource]="detail.items || []">
+        <ng-container matColumnDef="returnItemSeqId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'RETURN.RETURN_ITEM_SEQ_ID' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.returnItemSeqId }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="orderItemSeqId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'RETURN.ORDER_ITEM_SEQ_ID' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.orderItemSeqId }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="shipmentId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.SHIPMENT' | translate }}</th>
+          <td mat-cell *matCellDef="let row">
+            <ng-container *ngIf="row.shipmentId; else noShipmentLink">
+              <a [routerLink]="['/shipments', row.shipmentId]">{{ row.shipmentId }}</a>
+            </ng-container>
+            <ng-template #noShipmentLink>-</ng-template>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="inventory">
+          <th mat-header-cell *matHeaderCellDef>{{ 'ASSET.INVENTORY_ITEM' | translate }}</th>
+          <td mat-cell *matCellDef="let row">
+            <div class="inventory-links" *ngIf="row.inventoryItemIds?.length; else noInventoryLinked">
+              <ng-container *ngFor="let inventoryItemId of row.inventoryItemIds; let last = last">
+                <a *ngIf="getInventoryLink(inventoryItemId) as inventoryLink" [routerLink]="inventoryLink">{{ inventoryItemId }}</a><span *ngIf="!last">, </span>
+              </ng-container>
+              <div class="inventory-lot" *ngIf="row.lotIds?.length">
+                {{ 'LOT.LOT_ID' | translate }}: {{ row.lotIds.join(', ') }}
+              </div>
+            </div>
+            <ng-template #noInventoryLinked>-</ng-template>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="productName">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.PRODUCT' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.productName || row.productId || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="returnType">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.TYPE' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.returnTypeDescription || row.returnTypeId || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="returnQuantity">
+          <th mat-header-cell *matHeaderCellDef>{{ 'RETURN.RETURN_QTY' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.returnQuantity }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="receivedQuantity">
+          <th mat-header-cell *matHeaderCellDef>{{ 'RETURN.RECEIVED_QTY' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.receivedQuantity }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="returnPrice">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.PRICE' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.returnPrice | amountWithCurrency : (detail.summary?.currencyUomId || 'USD') }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="lineTotal">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.TOTAL_AMOUNT' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.lineTotal | amountWithCurrency : (detail.summary?.currencyUomId || 'USD') }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.statusDescription || row.statusId }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <!-- Mobile return items cards -->
+    <div class="return-detail-mobile-list">
+      <div class="return-detail-mobile-card" *ngFor="let row of (detail.items || []); trackBy: trackByReturnItem">
+        <div class="return-detail-mobile-header">
+          <strong>#{{ row.returnItemSeqId }}</strong>
+          <app-status-chip [status]="row.statusDescription || row.statusId || ''" [statusId]="row.statusId || ''"></app-status-chip>
+        </div>
+
+        <div class="return-detail-mobile-product">
+          <strong>{{ 'COMMON.PRODUCT' | translate }}:</strong> {{ row.productName || row.productId || '-' }}
+        </div>
+
+        <div class="return-detail-mobile-meta">
+          <div class="return-detail-mobile-field" *ngIf="row.orderItemSeqId">
+            <span>{{ 'RETURN.ORDER_ITEM_SEQ_ID' | translate }}:</span>
+            <strong>{{ row.orderItemSeqId }}</strong>
+          </div>
+          <div class="return-detail-mobile-field" *ngIf="row.shipmentId">
+            <span>{{ 'COMMON.SHIPMENT' | translate }}:</span>
+            <a [routerLink]="['/shipments', row.shipmentId]">{{ row.shipmentId }}</a>
+          </div>
+          <div class="return-detail-mobile-field" *ngIf="row.inventoryItemIds?.length">
+            <span>{{ 'ASSET.INVENTORY_ITEM' | translate }}:</span>
+            <span>
+              <ng-container *ngFor="let inventoryItemId of row.inventoryItemIds; let last = last">
+                <a *ngIf="getInventoryLink(inventoryItemId) as inventoryLink" [routerLink]="inventoryLink">{{ inventoryItemId }}</a><span *ngIf="!last">, </span>
+              </ng-container>
+            </span>
+          </div>
+          <div class="return-detail-mobile-field" *ngIf="row.lotIds?.length">
+            <span>{{ 'LOT.LOT_ID' | translate }}:</span>
+            <strong>{{ row.lotIds?.join(', ') }}</strong>
+          </div>
+        </div>
+
+        <div class="return-detail-mobile-qty-row">
+          <div class="return-detail-mobile-qty-item">
+            <span class="return-detail-mobile-qty-label">{{ 'RETURN.RETURN_QTY' | translate }}</span>
+            <span class="return-detail-mobile-qty-value">{{ row.returnQuantity }}</span>
+          </div>
+          <div class="return-detail-mobile-qty-item">
+            <span class="return-detail-mobile-qty-label">{{ 'RETURN.RECEIVED_QTY' | translate }}</span>
+            <span class="return-detail-mobile-qty-value">{{ row.receivedQuantity }}</span>
+          </div>
+          <div class="return-detail-mobile-qty-item">
+            <span class="return-detail-mobile-qty-label">{{ 'COMMON.PRICE' | translate }}</span>
+            <span class="return-detail-mobile-qty-value">{{ row.returnPrice | amountWithCurrency : (detail.summary?.currencyUomId || 'USD') }}</span>
+          </div>
+        </div>
+
+        <div class="return-detail-mobile-total">
+          <span>{{ 'COMMON.TOTAL_AMOUNT' | translate }}:</span>
+          <strong>{{ row.lineTotal | amountWithCurrency : (detail.summary?.currencyUomId || 'USD') }}</strong>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-progress-spinner *ngIf="loading()" [diameter]="48" mode="indeterminate"></mat-progress-spinner>
+
+<mat-card class="mat-elevation-z10" *ngIf="!loading() && !detail">
+  <mat-card-content>
+    {{ errorMessage || ('RETURN.NO_DATA' | translate) }}
+  </mat-card-content>
+</mat-card>

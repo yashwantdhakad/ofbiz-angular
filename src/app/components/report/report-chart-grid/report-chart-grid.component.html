@@ -1,0 +1,89 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<div class="chart-grid">
+  <mat-card class="chart-card">
+    <div class="section-title">{{ 'REPORTS.SALES_TREND' | translate }}</div>
+    <div class="chart-empty" *ngIf="!salesTrend().length">{{ 'REPORTS.NO_DATA' | translate }}</div>
+    <div class="trend-table" *ngIf="salesTrend().length">
+      <div class="trend-table-header">
+        <span>{{ 'COMMON.DATE' | translate }}</span>
+        <span>{{ 'REPORTS.REVENUE' | translate }}</span>
+        <span>{{ 'COMMON.ORDERS' | translate }}</span>
+      </div>
+      <div class="trend-row" *ngFor="let item of salesTrend(); trackBy: trackByLabel">
+        <span>{{ item.bucketDate }}</span>
+        <span>{{ formatAmount(item.revenue) }}</span>
+        <span>{{ formatNumber(item.orderCount) }}</span>
+      </div>
+    </div>
+  </mat-card>
+
+  <mat-card class="chart-card">
+    <div class="section-title">{{ 'REPORTS.TOP_PRODUCTS' | translate }}</div>
+    <div class="chart-empty" *ngIf="!topProducts().length">{{ 'REPORTS.NO_DATA' | translate }}</div>
+    <div class="rank-list" *ngIf="topProducts().length">
+      <div class="rank-row" *ngFor="let item of topProducts(); trackBy: trackByLabel">
+        <div class="rank-header">
+          <span class="rank-label">{{ item.productName || item.productId }}</span>
+          <span class="rank-value">{{ formatAmount(item.revenue) }}</span>
+        </div>
+        <div class="rank-bar-shell">
+          <div class="rank-bar rank-bar-amber" [style.width]="barWidth(item.revenue, maxValue(topProducts(), 'revenue'))"></div>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+
+  <mat-card class="chart-card">
+    <div class="section-title">{{ 'REPORTS.LOW_STOCK_BY_FACILITY' | translate }}</div>
+    <div class="chart-empty" *ngIf="!lowStockByFacility().length">{{ 'REPORTS.NO_DATA' | translate }}</div>
+    <div class="rank-list" *ngIf="lowStockByFacility().length">
+      <div class="rank-row" *ngFor="let item of lowStockByFacility(); trackBy: trackByLabel">
+        <div class="rank-header">
+          <span class="rank-label">{{ item.facilityName || item.facilityId }}</span>
+          <span class="rank-value">{{ formatNumber(item.lowStockCount) }}</span>
+        </div>
+        <div class="rank-bar-shell">
+          <div class="rank-bar rank-bar-red" [style.width]="barWidth(item.lowStockCount, maxValue(lowStockByFacility(), 'lowStockCount'))"></div>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+
+  <mat-card class="chart-card">
+    <div class="section-title">{{ 'REPORTS.TOP_SUPPLIER_RISK' | translate }}</div>
+    <div class="chart-empty" *ngIf="!supplierRisk().length">{{ 'REPORTS.NO_DATA' | translate }}</div>
+    <div class="rank-list" *ngIf="supplierRisk().length">
+      <div class="rank-row" *ngFor="let item of supplierRisk(); trackBy: trackByLabel">
+        <div class="rank-header">
+          <span class="rank-label">{{ item.supplierName || item.supplierPartyId }}</span>
+          <span class="rank-value">{{ formatNumber(item.riskScore, 1) }}</span>
+        </div>
+        <div class="rank-bar-shell">
+          <div class="rank-bar rank-bar-risk" [style.width]="barWidth(item.riskScore, maxValue(supplierRisk(), 'riskScore'))"></div>
+        </div>
+        <div class="risk-meta">
+          <span>{{ 'REPORTS.LATE_PURCHASE_ORDERS' | translate }}: {{ formatNumber(item.latePurchaseOrdersCount) }}</span>
+          <span>{{ 'REPORTS.OPEN_PURCHASE_ORDERS' | translate }}: {{ formatNumber(item.openPurchaseOrdersCount) }}</span>
+          <span>{{ 'COMMON.RETURNS' | translate }}: {{ formatNumber(item.returnsCount) }}</span>
+        </div>
+      </div>
+    </div>
+  </mat-card>
+</div>

@@ -1,0 +1,208 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+/* ─── Filter grid ───────────────────────────────────────────── */
+.filters-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.filters-grid mat-form-field {
+  flex: 0 0 calc(20% - 9.6px);
+  max-width: calc(20% - 9.6px);
+}
+
+/* ─── Actions ───────────────────────────────────────────────── */
+.actions-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+/* ─── Desktop table ─────────────────────────────────────────── */
+.table-wrap {
+  overflow: auto;
+}
+
+.full-width-table {
+  width: 100%;
+}
+
+/* Mobile location cards hidden on desktop */
+.mobile-location-list {
+  display: none;
+}
+
+/* ─── Loader ─────────────────────────────────────────────────── */
+.loader-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+/* ─── Tablet (≤1100px): 3-col filter grid ───────────────────── */
+@media (max-width: 1100px) {
+  .filters-grid mat-form-field {
+    flex: 0 0 calc(33.333% - 8px);
+    max-width: calc(33.333% - 8px);
+  }
+}
+
+/* ─── Mobile (≤768px) ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  .filters-grid {
+    gap: 4px;
+    flex-direction: column;
+  }
+
+  .filters-grid mat-form-field {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .actions-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .actions-row button {
+    width: 100%;
+  }
+
+  /* Hide desktop table, show mobile cards */
+  .table-wrap {
+    display: none;
+  }
+
+  .mobile-location-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .mobile-select-all-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.65);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .mobile-location-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 10px;
+    background: var(--mat-sys-surface, #fff);
+    cursor: pointer;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-location-card.selected {
+    border-color: var(--mat-sys-primary, #1976d2);
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.12);
+    background: rgba(25, 118, 210, 0.03);
+  }
+
+  .mobile-location-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .mobile-location-id {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--mat-sys-primary, #1976d2);
+  }
+
+  .mobile-location-facility {
+    font-size: 0.82rem;
+    color: rgba(0, 0, 0, 0.55);
+  }
+
+  .mobile-location-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    font-size: 0.8rem;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .mobile-location-details span strong {
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .mobile-location-dates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 14px;
+    font-size: 0.78rem;
+    color: rgba(0, 0, 0, 0.5);
+    padding-top: 4px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+  }
+
+  .mobile-location-dates span strong {
+    font-weight: 600;
+  }
+
+  .mobile-location-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.6);
+    white-space: nowrap;
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+
+  .mobile-empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: rgba(0, 0, 0, 0.4);
+    font-size: 0.9rem;
+  }
+}
+

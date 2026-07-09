@@ -1,0 +1,250 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+
+<ng-template #content>
+  <mat-list class="transfer-receive-breadcrumb">
+    <mat-list-item>
+      <a routerLink="/transfers">{{ 'TRANSFER.LIST_TITLE' | translate }}</a>
+      / <a [routerLink]="['/transfers', orderPrimaryId]">{{ orderId }}</a>
+      / {{ 'TRANSFER.RECEIVE_TITLE' | translate }}
+    </mat-list-item>
+  </mat-list>
+
+  <!-- Context summary: from → to facility + shipping instructions -->
+  <mat-card class="mat-elevation-z10 transfer-context-card">
+    <mat-card-content>
+      <div class="transfer-context">
+        <div class="transfer-context-facility" *ngIf="fromFacilityId">
+          <strong>{{ 'TRANSFER.FROM_FACILITY' | translate }}:</strong>
+          <a [routerLink]="['/facilities', fromFacilityId]">
+            {{ fromFacilityName || fromFacilityId }}
+          </a>
+        </div>
+        <mat-icon class="transfer-context-arrow" *ngIf="fromFacilityId && facilityId">
+          arrow_forward
+        </mat-icon>
+        <div class="transfer-context-facility" *ngIf="facilityId">
+          <strong>{{ 'TRANSFER.TO_FACILITY' | translate }}:</strong>
+          <a [routerLink]="['/facilities', facilityId]">
+            {{ toFacilityName || facilityId }}
+          </a>
+        </div>
+        <div class="transfer-context-instructions" *ngIf="shippingInstructions">
+          <mat-icon>info_outline</mat-icon>
+          <span>{{ shippingInstructions }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>
+        {{ 'TRANSFER.RECEIVE_TITLE' | translate }}
+        <span *ngIf="orderId"> — {{ orderId }}</span>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="itemsForm" (ngSubmit)="receiveItems()">
+        <div formArrayName="items">
+          <table mat-table [dataSource]="items.controls" class="transfer-receive-desktop-table">
+            <ng-container matColumnDef="productId">
+              <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.PRODUCT' | translate }}</th>
+              <td mat-cell *matCellDef="let row">
+                {{ row.value.productId }} - {{ row.value.productName }}
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="qtySummary">
+              <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.QTY' | translate }}</th>
+              <td mat-cell *matCellDef="let row">
+                <div class="qty-summary">
+                  <div>
+                    <span class="qty-label">{{ 'COMMON.ORDERED' | translate }}:</span>
+                    {{ row.value.quantity }}
+                  </div>
+                  <div>
+                    <span class="qty-label">{{ 'COMMON.RECEIVED' | translate }}:</span>
+                    {{ row.value.receivedQuantity }}
+                  </div>
+                  <div>
+                    <span class="qty-label">{{ 'COMMON.REMAINING' | translate }}:</span>
+                    {{ row.value.remainingQuantity }}
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="receiveQuantity">
+              <th mat-header-cell *matHeaderCellDef>
+                {{ 'COMMON.RECEIVE' | translate }} {{ 'COMMON.QTY' | translate }}
+              </th>
+              <td mat-cell class="field-cell" *matCellDef="let row; let i = index" [formGroupName]="i">
+                <mat-form-field appearance="outline" class="receive-qty-field">
+                  <input matInput type="number" formControlName="receiveQuantity" min="0" />
+                </mat-form-field>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="lotId">
+              <th mat-header-cell *matHeaderCellDef>{{ 'LOT.LOT_ID' | translate }}</th>
+              <td mat-cell class="field-cell" *matCellDef="let row; let i = index" [formGroupName]="i">
+                <mat-form-field appearance="outline">
+                  <input matInput formControlName="lotId" />
+                </mat-form-field>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="expirationDate">
+              <th mat-header-cell *matHeaderCellDef>{{ 'LOT.EXPIRATION_DATE' | translate }}</th>
+              <td mat-cell class="field-cell" *matCellDef="let row; let i = index" [formGroupName]="i">
+                <mat-form-field appearance="outline">
+                  <input
+                    matInput
+                    [matDatepicker]="expirationDatePicker"
+                    formControlName="expirationDate"
+                    (click)="expirationDatePicker.open()"
+                    [placeholder]="'LOT.EXPIRATION_DATE' | translate"
+                  />
+                  <mat-datepicker-toggle matSuffix [for]="expirationDatePicker"></mat-datepicker-toggle>
+                  <mat-datepicker #expirationDatePicker></mat-datepicker>
+                </mat-form-field>
+              </td>
+            </ng-container>
+
+            <ng-container matColumnDef="locationSeqId">
+              <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.LOCATION' | translate }}</th>
+              <td mat-cell class="field-cell" *matCellDef="let row; let i = index" [formGroupName]="i">
+                <mat-form-field appearance="outline">
+                  <mat-select
+                    formControlName="locationSeqId"
+                    [placeholder]="'COMMON.SELECT_LOCATION' | translate"
+                  >
+                    <mat-option [value]="null">{{ 'COMMON.NONE' | translate }}</mat-option>
+                    <mat-option
+                      *ngFor="let location of getLocationsForItem(row)"
+                      [value]="location.locationSeqId"
+                    >
+                      {{ location.locationSeqId }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </td>
+            </ng-container>
+
+            <tr
+              mat-header-row
+              *matHeaderRowDef="['productId','qtySummary','receiveQuantity','lotId','expirationDate','locationSeqId']"
+            ></tr>
+            <tr
+              mat-row
+              *matRowDef="let row; columns: ['productId','qtySummary','receiveQuantity','lotId','expirationDate','locationSeqId']"
+            ></tr>
+          </table>
+
+          <div class="transfer-receive-mobile-list">
+            <div
+              class="transfer-receive-mobile-card"
+              *ngFor="let row of items.controls; let i = index; trackBy: trackByIndex"
+              [formGroupName]="i"
+            >
+              <div class="transfer-receive-mobile-product">
+                {{ row.value.productId }} - {{ row.value.productName }}
+              </div>
+
+              <div class="transfer-receive-mobile-summary">
+                <div>
+                  <span class="qty-label">{{ 'COMMON.ORDERED' | translate }}:</span>
+                  {{ row.value.quantity }}
+                </div>
+                <div>
+                  <span class="qty-label">{{ 'COMMON.RECEIVED' | translate }}:</span>
+                  {{ row.value.receivedQuantity }}
+                </div>
+                <div>
+                  <span class="qty-label">{{ 'COMMON.REMAINING' | translate }}:</span>
+                  {{ row.value.remainingQuantity }}
+                </div>
+              </div>
+
+              <mat-form-field appearance="outline">
+                <mat-label>
+                  {{ 'COMMON.RECEIVE' | translate }} {{ 'COMMON.QTY' | translate }}
+                </mat-label>
+                <input matInput type="number" formControlName="receiveQuantity" min="0" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>{{ 'LOT.LOT_ID' | translate }}</mat-label>
+                <input matInput formControlName="lotId" />
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>{{ 'LOT.EXPIRATION_DATE' | translate }}</mat-label>
+                <input
+                  matInput
+                  [matDatepicker]="mobileExpirationDatePicker"
+                  formControlName="expirationDate"
+                  (click)="mobileExpirationDatePicker.open()"
+                  [placeholder]="'LOT.EXPIRATION_DATE' | translate"
+                />
+                <mat-datepicker-toggle
+                  matSuffix
+                  [for]="mobileExpirationDatePicker"
+                ></mat-datepicker-toggle>
+                <mat-datepicker #mobileExpirationDatePicker></mat-datepicker>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>{{ 'COMMON.LOCATION' | translate }}</mat-label>
+                <mat-select
+                  formControlName="locationSeqId"
+                  [placeholder]="'COMMON.SELECT_LOCATION' | translate"
+                >
+                  <mat-option [value]="null">{{ 'COMMON.NONE' | translate }}</mat-option>
+                  <mat-option
+                    *ngFor="let location of getLocationsForItem(row)"
+                    [value]="location.locationSeqId"
+                  >
+                    {{ location.locationSeqId }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" [disabled]="isLoading()">
+            <span *ngIf="!isLoading()">{{ 'TRANSFER.RECEIVE_ACTION' | translate }}</span>
+            <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+          </button>
+          <button mat-stroked-button type="button" (click)="cancel()">
+            {{ 'COMMON.CANCEL' | translate }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

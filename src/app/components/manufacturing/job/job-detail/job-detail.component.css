@@ -1,0 +1,444 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.spacer {
+  flex: 1 1 auto;
+}
+
+.breadcrumb {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+
+.breadcrumb mat-icon {
+  color: color-mix(in srgb, currentColor 54%, transparent);
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+}
+
+.job-detail-header {
+  align-items: center;
+  gap: 8px;
+}
+
+.job-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.job-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+button + button {
+  margin-left: 6px;
+}
+
+/* Cost section */
+.cost-summary-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.cost-chip {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+}
+
+.cost-chip.material { background: #e3f2fd; color: #0d47a1; }
+.cost-chip.labor   { background: #e8f5e9; color: #1b5e20; }
+.cost-chip.misc    { background: #fff8e1; color: #e65100; }
+.cost-chip.total   { background: #fce4ec; color: #880e4f; font-weight: 700; }
+
+.cost-section-label {
+  font-weight: 600;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #555;
+  margin: 12px 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cost-subtotal-inline {
+  font-size: 0.85rem;
+  font-weight: 400;
+  text-transform: none;
+  color: #1976d2;
+}
+
+.cost-empty {
+  font-size: 0.85rem;
+  color: #999;
+  padding: 8px 0;
+}
+
+.cost-material-table {
+  width: 100%;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 8px;
+  font-size: 0.875rem;
+}
+
+.cost-mat-header,
+.cost-mat-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 0.5fr 0.8fr 0.8fr;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 8px;
+}
+
+.cost-mat-header {
+  background: #f5f5f5;
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #555;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.cost-mat-row {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.cost-mat-row:last-of-type {
+  border-bottom: none;
+}
+
+.col-product { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.col-inv     { color: #555; }
+.col-num     { text-align: right; }
+
+.cost-mat-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: #fafafa;
+  border-top: 1px solid #e0e0e0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.cost-divider {
+  margin: 12px 0;
+}
+
+.cost-adhoc-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 4px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.cost-type-badge {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  min-width: 100px;
+  text-align: center;
+}
+
+.cost-type-badge.misc {
+  background: #fff8e1;
+  color: #e65100;
+}
+
+.cost-desc {
+  flex: 1;
+  font-size: 0.9rem;
+}
+
+.cost-amount {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #1976d2;
+  min-width: 100px;
+  text-align: right;
+}
+
+.cost-total-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 4px 4px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.cost-total-amount {
+  font-size: 1.25rem;
+  color: #880e4f;
+}
+
+.cost-distribution-hint {
+  font-size: 0.8rem;
+  color: #777;
+  padding: 4px 4px 8px;
+  font-style: italic;
+}
+
+.return-field {
+  width: 160px;
+  margin-top: 8px;
+}
+
+.picker-row {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.products-to-consume-scroll {
+  max-height: 420px;
+  overflow: auto;
+}
+
+.job-mobile-list {
+  display: none;
+}
+
+.job-empty-state {
+  color: color-mix(in srgb, currentColor 62%, transparent);
+  padding: 12px 0;
+}
+
+.checklist-form {
+  align-items: flex-start;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(150px, 1fr) minmax(180px, 1fr) minmax(120px, 0.75fr) minmax(220px, 1.5fr) auto;
+  margin-bottom: 16px;
+}
+
+.checklist-form button {
+  min-height: 56px;
+}
+
+.checklist-note-field {
+  min-width: 0;
+}
+
+.note-text-cell,
+.note-mobile-body {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  mat-list {
+    padding: 0 4px;
+  }
+
+  .breadcrumb {
+    margin-left: 4px;
+  }
+
+  mat-card-header,
+  mat-card-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  mat-card-header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .job-header-actions,
+  .job-header-actions button,
+  .job-detail-header button {
+    width: 100%;
+  }
+
+  .job-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .card-title-row {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .card-title-row .spacer {
+    display: none;
+  }
+
+  .card-title-row button {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .products-to-consume-scroll {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .job-table-container {
+    display: none;
+  }
+
+  .checklist-form {
+    grid-template-columns: 1fr;
+  }
+
+  .checklist-form button {
+    min-height: 44px;
+    width: 100%;
+  }
+
+  .job-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .job-mobile-card {
+    padding: 14px;
+    border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+    border-radius: 8px;
+    background: var(--mat-sys-surface, #fff);
+  }
+
+  .job-mobile-header,
+  .job-mobile-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .job-mobile-header {
+    padding-bottom: 10px;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 8%, transparent);
+  }
+
+  .job-mobile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding-top: 12px;
+  }
+
+  .job-mobile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .job-mobile-field-wide {
+    grid-column: 1 / -1;
+  }
+
+  .job-mobile-label {
+    font-size: 0.88em;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    opacity: 0.85;
+    text-transform: uppercase;
+  }
+
+  .job-mobile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 12px;
+  }
+
+  .job-mobile-actions button {
+    flex: 1 1 140px;
+  }
+
+  .note-mobile-actions {
+    display: flex;
+    flex: 0 0 auto;
+    gap: 4px;
+  }
+
+  .note-mobile-body {
+    padding-top: 12px;
+  }
+
+  .job-mobile-footer {
+    padding-top: 10px;
+    margin-top: 12px;
+    border-top: 1px solid color-mix(in srgb, currentColor 8%, transparent);
+  }
+
+  .return-field {
+    width: 100%;
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .job-mobile-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.job-mobile-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.job-mobile-actions button {
+  flex: 1;
+}
+
+td.mat-column-taskActions button + button {
+  margin-left: 6px;
+}

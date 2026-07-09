@@ -1,0 +1,191 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.filter-field {
+  min-width: 160px;
+  max-width: 220px;
+  flex: 1 1 180px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  min-height: 56px;
+}
+
+.filter-actions button {
+  min-height: 56px;
+  line-height: 56px;
+  padding: 0 24px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.empty-state {
+  padding: 24px 12px;
+  color: rgba(0, 0, 0, 0.62);
+  text-align: center;
+}
+
+mat-paginator {
+  margin-top: 8px;
+}
+
+/* Mobile returns list hidden on desktop */
+.return-mobile-list {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+  }
+
+  .filter-field {
+    max-width: 100%;
+    width: 100%;
+    flex: 0 0 auto;
+  }
+
+  /* Pin form field to standard 48px height */
+  :host ::ng-deep .filter-row .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  :host ::ng-deep .filter-row .mat-mdc-text-field-wrapper {
+    height: 48px;
+  }
+
+  :host ::ng-deep .filter-row .mat-mdc-form-field-infix {
+    min-height: 48px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .filter-actions {
+    flex-direction: column;
+    width: 100%;
+    min-height: auto;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  /* Both Search and Clear buttons same height */
+  .filter-actions button {
+    width: 100%;
+    height: 48px;
+    min-height: 48px;
+    line-height: 48px;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  /* Hide desktop table */
+  .table-wrapper {
+    display: none;
+  }
+
+  /* Mobile card list */
+  .return-mobile-list {
+    display: grid;
+    gap: 12px;
+  }
+
+  .return-mobile-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    color: inherit;
+    text-decoration: none;
+    background-color: var(--mat-sys-surface, #fff);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .return-mobile-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-color: var(--mat-sys-primary, #1976d2);
+  }
+
+  .return-mobile-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.1em;
+  }
+
+  .return-mobile-heading strong {
+    color: var(--mat-sys-primary, #1976d2);
+  }
+
+  .return-mobile-field {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95em;
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .return-mobile-field mat-icon {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+    opacity: 0.7;
+  }
+
+  .return-mobile-value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .return-mobile-total {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+    font-size: 1.1em;
+    color: var(--mat-sys-on-surface, #000);
+  }
+
+  mat-paginator {
+    margin-top: 16px;
+  }
+}

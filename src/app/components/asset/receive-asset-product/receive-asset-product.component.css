@@ -1,0 +1,111 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.receive-hub-form {
+  width: 100%;
+}
+
+.receive-hub-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.receive-hub-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.receive-hub-panel h2 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.receive-hub-panel mat-form-field {
+  width: 100%;
+}
+
+.receive-asset-form {
+  width: 100%;
+}
+
+/* Reserve room below each field so mat-hint text does not overlap the next row */
+.receive-asset-form mat-form-field {
+  margin-bottom: 16px;
+}
+
+.receive-asset-form .mat-mdc-form-field-hint {
+  display: block;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.receive-submit-button {
+  min-height: 56px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.receive-submit-button.mat-mdc-raised-button {
+  line-height: 56px;
+}
+
+.autocomplete-spinner {
+  margin-right: 8px;
+}
+
+@media (max-width: 1100px) {
+  .receive-hub-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .receive-hub-panel {
+    padding: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    background: #fff;
+  }
+
+  .receive-hub-panel button,
+  .receive-hub-panel mat-form-field {
+    width: 100%;
+  }
+
+  .receive-hub-panel button {
+    min-height: 56px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  .receive-hub-panel .mat-mdc-raised-button {
+    line-height: 56px;
+  }
+
+  .receive-submit-button {
+    width: 100%;
+  }
+}

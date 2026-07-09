@@ -1,0 +1,68 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ul class="custom-list">
+  <ng-container *ngIf="filteredAddresses().length > 0; else noPrimaryAddressRecords">
+    <li class="custom-list-item" *ngFor="let address of visibleAddresses()">
+      <strong>{{ 'PARTY.ADDRESS' | translate }}:</strong>
+      <div>
+        {{ address?.toName }}
+        <span>
+          <mat-icon *ngIf="editable()" matListIcon class="custom-mat-icon custom-icon-align" color="primary"
+            data-testid="party-address-edit"
+            (click)="editAddress(address)">
+            edit
+          </mat-icon>
+        </span>
+      </div>
+      <div>
+        {{ address?.address1 }}
+      </div>
+      <div>{{ address?.address2 }}</div>
+      <div>
+        {{ address?.city }},
+        {{ address?.geoName }}
+        {{ address?.postalCode }}
+        {{ address?.stateProvinceGeoId }}
+        {{ address?.countryGeoId }}
+        <mat-icon matListIcon class="custom-mat-icon custom-icon-align" color="warn" data-testid="party-address-delete" (click)="
+                  deleteAddressDialog({
+                    partyId: partyId(),
+                    contactMechId: address.contactMechId,
+                    contactMechPurposeId:
+                      address.contactMechPurposeId
+                  })
+                ">delete</mat-icon>
+      </div>
+    </li>
+    <li class="custom-list-item" *ngIf="canToggleAddresses()">
+      <button mat-button color="primary" type="button" (click)="toggleAddresses()">
+        {{ (showAllAddresses() ? 'COMMON.SHOW_LESS' : 'COMMON.SHOW_MORE') | translate }}
+      </button>
+    </li>
+  </ng-container>
+
+  <ng-template #noPrimaryAddressRecords>
+    <li class="custom-list-item">
+      <strong>{{ 'PARTY.ADDRESS' | translate }}:</strong>
+      <mat-icon matListIcon class="custom-mat-icon custom-icon-align" color="primary" data-testid="party-address-add"
+        (click)="editAddress()">add</mat-icon>
+    </li>
+  </ng-template>
+
+</ul>

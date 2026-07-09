@@ -1,0 +1,287 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+
+<ng-template #content>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>{{ 'PO.RECEIVE_TITLE' | translate:{orderId: orderId} }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <app-barcode-input
+        class="po-receive-scanner"
+        labelKey="BARCODE.PRODUCT_LABEL"
+        placeholderKey="BARCODE.PRODUCT_PLACEHOLDER"
+        (valueScanned)="onProductBarcodeScanned($event)"
+      ></app-barcode-input>
+
+      <form [formGroup]="itemsForm" (ngSubmit)="receiveItems()">
+        <div formArrayName="items">
+        <table mat-table [dataSource]="items.controls" class="po-receive-desktop-table">
+          <ng-container matColumnDef="productId">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.PRODUCT' | translate }}</th>
+            <td mat-cell *matCellDef="let row">
+              {{ row.value.productId }} - {{ row.value.productName }}
+              <span class="serialized-badge" *ngIf="row.value.serialized">{{ 'PRODUCT.CONFIG_SERIALIZED' | translate }}</span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="qtySummary">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.QTY' | translate }}</th>
+            <td mat-cell *matCellDef="let row">
+              <div class="qty-summary">
+                <div><span class="qty-label">{{ 'COMMON.ORDERED' | translate }}:</span> {{ row.value.quantity }}</div>
+                <div><span class="qty-label">{{ 'COMMON.RECEIVED' | translate }}:</span> {{ row.value.receivedQuantity }}</div>
+                <div><span class="qty-label">{{ 'COMMON.REMAINING' | translate }}:</span> {{ row.value.remainingQuantity }}</div>
+              </div>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="receiveQuantity">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.RECEIVE' | translate }} {{ 'COMMON.QTY' | translate }}</th>
+            <td mat-cell class="field-cell" *matCellDef="let row; let i = index" [formGroupName]="i">
+              <mat-form-field appearance="outline" class="receive-qty-field">
+                <input matInput type="number" formControlName="receiveQuantity" />
+              </mat-form-field>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="unitAmount">
+            <th mat-header-cell *matHeaderCellDef>{{ 'PO.ITEM_UNIT_COST' | translate }}</th>
+            <td mat-cell class="field-cell" *matCellDef="let row; let i = index" [formGroupName]="i">
+              <mat-form-field appearance="outline" class="receive-qty-field">
+                <input matInput type="number" min="0" step="0.01" formControlName="unitAmount" />
+              </mat-form-field>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="lotId">
+            <th mat-header-cell *matHeaderCellDef>{{ 'LOT.LOT_ID' | translate }}</th>
+            <td mat-cell class="field-cell" *matCellDef="let row; let i = index" [formGroupName]="i">
+              <mat-form-field appearance="outline">
+                <input matInput formControlName="lotId"
+                  placeholder="Search lot..."
+                  [matAutocomplete]="autoLotRow" />
+                <mat-autocomplete #autoLotRow="matAutocomplete" [displayWith]="displayLot">
+                  <mat-option *ngFor="let lot of (filteredLotsByRow[i] | async)" [value]="lot">
+                    {{ lot.lotId }}
+                    <small *ngIf="lot.heatNumber" style="color:#888; margin-left:6px">
+                      Heat: {{ lot.heatNumber }}
+                    </small>
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="expirationDate">
+            <th mat-header-cell *matHeaderCellDef>{{ 'LOT.EXPIRATION_DATE' | translate }}</th>
+            <td mat-cell class="field-cell" *matCellDef="let row; let i = index" [formGroupName]="i">
+              <mat-form-field appearance="outline">
+                <input
+                  matInput
+                  [matDatepicker]="expirationDatePicker"
+                  formControlName="expirationDate"
+                  (click)="expirationDatePicker.open()"
+                  [placeholder]="'LOT.EXPIRATION_DATE' | translate"
+                />
+                <mat-datepicker-toggle matSuffix [for]="expirationDatePicker"></mat-datepicker-toggle>
+                <mat-datepicker #expirationDatePicker></mat-datepicker>
+              </mat-form-field>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="ownerPartyId">
+            <th mat-header-cell *matHeaderCellDef>Owner Party</th>
+            <td mat-cell class="field-cell" *matCellDef="let row; let i = index" [formGroupName]="i">
+              <mat-form-field appearance="outline">
+                <input matInput formControlName="ownerPartyId"
+                  placeholder="Owner Party"
+                  [matAutocomplete]="autoOwnerRow" />
+                <mat-autocomplete #autoOwnerRow="matAutocomplete" [displayWith]="displayParty">
+                  <mat-option *ngFor="let party of (filteredPartiesByRow[i] | async)" [value]="party">
+                    {{ party.name || party.partyId }} <small *ngIf="party.partyId" style="color:#888">({{ party.partyId }})</small>
+                  </mat-option>
+                </mat-autocomplete>
+              </mat-form-field>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="locationSeqId">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.LOCATION' | translate }}</th>
+            <td mat-cell class="field-cell" *matCellDef="let row; let i = index" [formGroupName]="i">
+              <div class="location-field-row">
+                <mat-form-field appearance="outline" class="location-select-field">
+                  <mat-select formControlName="locationSeqId" [placeholder]="'COMMON.SELECT_LOCATION' | translate">
+                    <mat-option [value]="null">{{ 'COMMON.NONE' | translate }}</mat-option>
+                    <mat-option *ngFor="let location of getLocationsForItem(row)" [value]="location.locationSeqId">
+                      {{ location.locationSeqId }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+                <button
+                  type="button"
+                  mat-icon-button
+                  color="primary"
+                  [matTooltip]="'FACILITY.ADD_LOCATION' | translate"
+                  (click)="openAddLocationDialog(i)"
+                >
+                  <mat-icon>add_circle</mat-icon>
+                </button>
+              </div>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="['productId','qtySummary','receiveQuantity','unitAmount','lotId','expirationDate','ownerPartyId','locationSeqId']"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; let i = index; columns: ['productId','qtySummary','receiveQuantity','unitAmount','lotId','expirationDate','ownerPartyId','locationSeqId']"
+            [attr.data-po-receive-item]="i"
+            [class.po-receive-scanned-row]="scannedItemIndex() === i"
+          ></tr>
+        </table>
+        <div class="po-receive-mobile-list">
+          <div
+            class="po-receive-mobile-card"
+            *ngFor="let row of items.controls; let i = index"
+            [formGroupName]="i"
+            [attr.data-po-receive-item]="i"
+            [class.po-receive-mobile-card--scanned]="scannedItemIndex() === i"
+          >
+            <div class="po-receive-mobile-card-header">
+              <div class="po-receive-mobile-product">
+                {{ row.value.productId }} - {{ row.value.productName }}
+                <span class="serialized-badge" *ngIf="row.value.serialized">{{ 'PRODUCT.CONFIG_SERIALIZED' | translate }}</span>
+              </div>
+            </div>
+
+            <div class="po-receive-mobile-summary">
+              <div><span class="qty-label">{{ 'COMMON.ORDERED' | translate }}:</span> {{ row.value.quantity }}</div>
+              <div><span class="qty-label">{{ 'COMMON.RECEIVED' | translate }}:</span> {{ row.value.receivedQuantity }}</div>
+              <div><span class="qty-label">{{ 'COMMON.REMAINING' | translate }}:</span> {{ row.value.remainingQuantity }}</div>
+            </div>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'COMMON.RECEIVE' | translate }} {{ 'COMMON.QTY' | translate }}</mat-label>
+              <input matInput type="number" formControlName="receiveQuantity" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'PO.ITEM_UNIT_COST' | translate }}</mat-label>
+              <input matInput type="number" min="0" step="0.01" formControlName="unitAmount" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'LOT.LOT_ID' | translate }}</mat-label>
+              <input matInput formControlName="lotId"
+                placeholder="Search lot..."
+                [matAutocomplete]="autoLotMobile" />
+              <mat-autocomplete #autoLotMobile="matAutocomplete" [displayWith]="displayLot">
+                <mat-option *ngFor="let lot of (filteredLotsByRow[i] | async)" [value]="lot">
+                  {{ lot.lotId }}
+                  <small *ngIf="lot.heatNumber" style="color:#888; margin-left:6px">
+                    Heat: {{ lot.heatNumber }}
+                  </small>
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline">
+              <mat-label>{{ 'LOT.EXPIRATION_DATE' | translate }}</mat-label>
+              <input
+                matInput
+                [matDatepicker]="mobileExpirationDatePicker"
+                formControlName="expirationDate"
+                (click)="mobileExpirationDatePicker.open()"
+                [placeholder]="'LOT.EXPIRATION_DATE' | translate"
+              />
+              <mat-datepicker-toggle matSuffix [for]="mobileExpirationDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #mobileExpirationDatePicker></mat-datepicker>
+            </mat-form-field>
+
+             <mat-form-field appearance="outline">
+               <mat-label>Owner Party</mat-label>
+               <input matInput formControlName="ownerPartyId"
+                 placeholder="Owner Party"
+                 [matAutocomplete]="autoOwnerMobile" />
+               <mat-autocomplete #autoOwnerMobile="matAutocomplete" [displayWith]="displayParty">
+                 <mat-option *ngFor="let party of (filteredPartiesByRow[i] | async)" [value]="party">
+                   {{ party.name || party.partyId }} <small *ngIf="party.partyId" style="color:#888">({{ party.partyId }})</small>
+                 </mat-option>
+               </mat-autocomplete>
+             </mat-form-field>
+
+             <div class="location-field-row">
+               <mat-form-field appearance="outline" class="location-select-field">
+                 <mat-label>{{ 'COMMON.LOCATION' | translate }}</mat-label>
+                 <mat-select formControlName="locationSeqId" [placeholder]="'COMMON.SELECT_LOCATION' | translate">
+                   <mat-option [value]="null">{{ 'COMMON.NONE' | translate }}</mat-option>
+                   <mat-option *ngFor="let location of getLocationsForItem(row)" [value]="location.locationSeqId">
+                     {{ location.locationSeqId }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <button
+                type="button"
+                mat-icon-button
+                color="primary"
+                [matTooltip]="'FACILITY.ADD_LOCATION' | translate"
+                (click)="openAddLocationDialog(i)"
+              >
+                <mat-icon>add_circle</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+        </div>
+
+        <mat-card formGroupName="customs" class="customs-card">
+          <mat-card-header>
+            <mat-card-title>{{ 'PO.CUSTOMS_BOE_DETAILS' | translate }}</mat-card-title>
+            <mat-card-subtitle>{{ 'PO.CUSTOMS_OPTIONAL' | translate }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content fxLayout="row wrap" fxLayoutGap="16px">
+            <mat-form-field appearance="outline" fxFlex="18%" fxFlex.xs="100%" fxFlex.sm="48%">
+              <mat-label>{{ 'PO.BOE_NUMBER' | translate }}</mat-label>
+              <input matInput formControlName="billOfEntryNumber" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" fxFlex="18%" fxFlex.xs="100%" fxFlex.sm="48%">
+              <mat-label>{{ 'PO.BOE_DATE' | translate }}</mat-label>
+              <input matInput [matDatepicker]="boeDatePicker" formControlName="billOfEntryDate" />
+              <mat-datepicker-toggle matSuffix [for]="boeDatePicker"></mat-datepicker-toggle>
+              <mat-datepicker #boeDatePicker></mat-datepicker>
+            </mat-form-field>
+            <mat-form-field appearance="outline" fxFlex="18%" fxFlex.xs="100%" fxFlex.sm="48%">
+              <mat-label>{{ 'PO.DUTY_AMOUNT' | translate }}</mat-label>
+              <input matInput type="number" min="0" step="0.01" formControlName="dutyAmount" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" fxFlex="18%" fxFlex.xs="100%" fxFlex.sm="48%">
+              <mat-label>{{ 'PO.CLEARING_FEES' | translate }}</mat-label>
+              <input matInput type="number" min="0" step="0.01" formControlName="clearingFees" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" fxFlex="18%" fxFlex.xs="100%" fxFlex.sm="48%">
+              <mat-label>{{ 'PO.IMPORT_FREIGHT' | translate }}</mat-label>
+              <input matInput type="number" min="0" step="0.01" formControlName="freightAmount" />
+            </mat-form-field>
+          </mat-card-content>
+        </mat-card>
+
+        <div style="margin-top: 16px;">
+          <button mat-raised-button color="primary" type="submit" data-testid="po-receive-submit" class="receive-submit-button">{{ 'COMMON.RECEIVE' | translate }}</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

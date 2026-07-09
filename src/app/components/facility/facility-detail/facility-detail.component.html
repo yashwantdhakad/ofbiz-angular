@@ -1,0 +1,165 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+<ng-template #content>
+  <mat-list>
+    <mat-list-item>
+      <a [routerLink]="['/facilities']">{{ 'COMMON.FACILITY' | translate }}</a> / {{ facilityDetail()?.facilityId }}
+    </mat-list-item>
+  </mat-list>
+  <mat-card class="mat-card mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>{{ 'COMMON.OVERVIEW' | translate }}</mat-card-title>
+    </mat-card-header>
+    <div class="overview-grid">
+      <mat-card class="card-margin mat-elevation-z10">
+        <mat-card-header>
+          <mat-card-title>{{ 'COMMON.DETAILS' | translate }}</mat-card-title>
+          <span class="spacer"></span>
+          <button mat-icon-button type="button" data-testid="facility-detail-edit-name" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="openFacilityNameDialog()">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <ul class="custom-list">
+            <li class="custom-list-item">
+              <strong>{{ 'COMMON.NAME' | translate }}:</strong> {{ facilityDetail()?.facilityName }}
+            </li>
+            <li class="custom-list-item">
+              <strong>{{ 'COMMON.TYPE' | translate }}:</strong> {{ facilityTypeLabel() || facilityDetail()?.facilityTypeId
+              }}
+            </li>
+            <li class="custom-list-item">
+              <mat-checkbox [checked]="isInspectionRequired()" (change)="updateRequireInspection($event.checked)">
+                {{ 'FACILITY.REQUIRE_INSPECTION' | translate }}
+              </mat-checkbox>
+            </li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+      <mat-card class="card-margin mat-elevation-z10">
+        <mat-card-header>
+          <mat-card-title>{{ 'COMMON.ADDRESS' | translate }}</mat-card-title>
+          <span class="spacer"></span>
+          <button mat-icon-button type="button" data-testid="facility-detail-edit-address" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="openFacilityAddressDialog()">
+            <mat-icon>edit</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          <ul class="custom-list" *ngIf="facilityAddress(); else noFacilityAddress">
+            <li class="custom-list-item">
+              <div>{{ facilityAddress()?.toName }}</div>
+              <div>{{ facilityAddress()?.address1 }}</div>
+              <div>{{ facilityAddress()?.address2 }}</div>
+              <div>
+                {{ facilityAddress()?.city }},
+                {{ facilityAddress()?.stateProvinceGeoName || getGeoLabel(facilityAddress()?.stateProvinceGeoId) }}
+                {{ facilityAddress()?.postalCode }}
+                {{ facilityAddress()?.countryGeoName || getGeoLabel(facilityAddress()?.countryGeoId) }}
+              </div>
+            </li>
+          </ul>
+          <ng-template #noFacilityAddress>
+            <div class="custom-list-item">{{ 'COMMON.NOT_AVAILABLE' | translate }}</div>
+          </ng-template>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </mat-card>
+  <br />
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>{{ 'FACILITY.LOCATIONS' | translate }}</mat-card-title>
+      <span class="spacer"></span>
+      <button mat-mini-fab color="primary" data-testid="facility-detail-add-location" [attr.aria-label]="'COMMON.ADD' | translate" (click)="openLocationDialog()">
+        <mat-icon>add</mat-icon>
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="location-filters">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>{{ 'FACILITY.LOCATION_ID' | translate }}</mat-label>
+          <input matInput [(ngModel)]="locationSeqIdFilter" (keyup.enter)="applyLocationFilters()" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>{{ 'FACILITY.LOCATION_NAME' | translate }}</mat-label>
+          <input matInput [(ngModel)]="locationNameFilter" (keyup.enter)="applyLocationFilters()" />
+        </mat-form-field>
+        <div class="location-filter-actions">
+          <button class="location-filter-btn" mat-flat-button color="primary" (click)="applyLocationFilters()">
+            {{ 'SEARCH' | translate }}
+          </button>
+          <button class="location-filter-btn" mat-stroked-button (click)="clearLocationFilters()">
+            {{ 'COMMON.CLEAR' | translate }}
+          </button>
+        </div>
+      </div>
+      <div class="location-table-container">
+        <table mat-table [dataSource]="dataSource">
+          <ng-container matColumnDef="locationSeqId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FACILITY.LOCATION_ID' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item.locationSeqId }}</td>
+          </ng-container>
+          <ng-container matColumnDef="locationType">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.TYPE' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">
+              {{ item.locationTypeDescription || getLocationTypeLabel(item.locationTypeEnumId) }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="areaId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FACILITY.AREA_ID' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item.areaId }}</td>
+          </ng-container>
+          <ng-container matColumnDef="aisleId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FACILITY.AISLE_ID' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item.aisleId }}</td>
+          </ng-container>
+          <ng-container matColumnDef="sectionId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FACILITY.SECTION_ID' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item.sectionId }}</td>
+          </ng-container>
+          <ng-container matColumnDef="levelId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FACILITY.LEVEL_ID' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item.levelId }}</td>
+          </ng-container>
+          <ng-container matColumnDef="positionId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FACILITY.POSITION_ID' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item.positionId }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let item">
+              <button mat-icon-button data-testid="facility-detail-edit-location" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="openLocationDialog(item)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="locationColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: locationColumns"></tr>
+        </table>
+      </div>
+      <mat-paginator [length]="locationTotal()" [pageSize]="locationPageSize" [pageIndex]="locationPageIndex"
+        [pageSizeOptions]="[5, 10, 25, 50]" (page)="onLocationPage($event)"></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

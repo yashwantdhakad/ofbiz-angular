@@ -1,0 +1,141 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+<ng-template #content>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header class="card-header-with-action">
+      <mat-card-title>{{ pageTitleKey | translate }}</mat-card-title>
+      <button mat-raised-button color="primary" routerLink="/transfers/create">
+        <mat-icon>add</mat-icon> {{ 'MENU.CREATE_TRANSFER' | translate }}
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="filter-row">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'COMMON.SEARCH' | translate }}</mat-label>
+          <input matInput [(ngModel)]="queryString" />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'COMMON.STATUS' | translate }}</mat-label>
+          <mat-select [(ngModel)]="selectedStatusId">
+            <mat-option value="">{{ 'COMMON.ALL' | translate }}</mat-option>
+            <mat-option *ngFor="let status of statusOptions()" [value]="status.statusId">
+              {{ status.description || status.statusId }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'COMMON.FACILITY' | translate }}</mat-label>
+          <mat-select [(ngModel)]="selectedFacilityId">
+            <mat-option value="">{{ 'COMMON.ALL' | translate }}</mat-option>
+            <mat-option *ngFor="let facility of facilityOptions()" [value]="facility.facilityId">
+              {{ facility.facilityName || facility.facilityId }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'COMMON.ORDER_DATE_RANGE' | translate }}</mat-label>
+          <mat-select [(ngModel)]="selectedOrderDatePreset">
+            <mat-option *ngFor="let preset of orderDatePresets" [value]="preset.value">
+              {{ preset.label | translate }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <div class="filter-actions">
+          <button mat-raised-button color="primary" (click)="onSearch()">
+            {{ 'COMMON.SEARCH' | translate }}
+          </button>
+          <button mat-stroked-button type="button" (click)="clearFilters()">
+            {{ 'COMMON.CLEAR' | translate }}
+          </button>
+        </div>
+      </div>
+      <div class="transfer-table-container">
+        <table
+          mat-table
+          [dataSource]="items()"
+          [trackBy]="trackByRow"
+          matSort
+          [matSortDisableClear]="true"
+          (matSortChange)="onSortChange($event)"
+        >
+          <ng-container
+            *ngFor="let column of displayedColumns; trackBy: trackByColumn"
+            [matColumnDef]="column.key"
+          >
+            <th mat-header-cell *matHeaderCellDef class="text-left" [mat-sort-header]="column.key">
+              {{ column.value | translate }}
+            </th>
+            <td mat-cell *matCellDef="let item" class="text-left">
+              <a *ngIf="column.key === 'id'" [routerLink]="[detailBasePath, item[column.key]]">
+                {{ item[column.key] }}
+              </a>
+              <span *ngIf="column.key !== 'id'">{{ item[column.key] }}</span>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumnKeys"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumnKeys"></tr>
+        </table>
+      </div>
+
+      <div class="transfer-mobile-list">
+        <a
+          *ngFor="let item of items(); trackBy: trackByRow"
+          class="transfer-mobile-card"
+          [routerLink]="[detailBasePath, item['id']]"
+        >
+          <div class="transfer-mobile-heading">
+            <strong>{{ item['id'] }}</strong>
+            <span class="transfer-mobile-status">
+              {{ item['statusDescription'] || item['statusId'] }}
+            </span>
+          </div>
+
+          <div class="transfer-mobile-field" *ngIf="item['orderId']">
+            <mat-icon>receipt_long</mat-icon>
+            <span class="transfer-mobile-value">{{ item['orderId'] }}</span>
+          </div>
+
+          <div class="transfer-mobile-field" *ngIf="item['facilityName']">
+            <mat-icon>warehouse</mat-icon>
+            <span class="transfer-mobile-value">{{ item['facilityName'] }}</span>
+          </div>
+
+          <div class="transfer-mobile-field" *ngIf="item['entryDate']">
+            <mat-icon>event</mat-icon>
+            <span class="transfer-mobile-value">{{ item['entryDate'] }}</span>
+          </div>
+        </a>
+      </div>
+      <mat-paginator
+        [pageIndex]="pagination.page - 1"
+        [pageSize]="pagination.rowsPerPage"
+        [length]="pages()"
+        [pageSizeOptions]="[10, 20, 50, 100]"
+        (page)="onPageChange($event.pageIndex, $event.pageSize)"
+      ></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

@@ -1,0 +1,134 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else detailContent">
+  <div class="state-panel">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+</ng-container>
+
+<ng-template #detailContent>
+  <nav class="breadcrumb" aria-label="breadcrumb">
+    <a [routerLink]="['/timesheets']">{{ 'TIMESHEET.TITLE' | translate }}</a>
+    <mat-icon>chevron_right</mat-icon>
+    <span>{{ timesheet()?.timesheetId || timesheet()?.id || '-' }}</span>
+  </nav>
+
+  <mat-card class="mat-elevation-z10" *ngIf="timesheet(); else noTimesheet">
+    <mat-card-header class="detail-header">
+      <mat-card-title>{{ 'TIMESHEET.DETAIL_TITLE' | translate }}</mat-card-title>
+      <span class="spacer"></span>
+      <button mat-stroked-button color="primary" *ngIf="canEdit()" [routerLink]="['/timesheets', timesheet()?.id, 'edit']">
+        <mat-icon>edit</mat-icon>
+        {{ 'COMMON.EDIT' | translate }}
+      </button>
+      <button mat-raised-button color="primary" *ngIf="canSubmit()" (click)="submit()">
+        {{ 'TIMESHEET.SUBMIT' | translate }}
+      </button>
+      <button mat-raised-button color="primary" *ngIf="canApproveReject()" (click)="approve()">
+        {{ 'COMMON.APPROVE' | translate }}
+      </button>
+      <button mat-stroked-button color="warn" *ngIf="canApproveReject()" (click)="reject()">
+        {{ 'TIMESHEET.REJECT' | translate }}
+      </button>
+      <button mat-icon-button color="warn" [attr.aria-label]="'COMMON.DELETE' | translate" (click)="deleteTimesheet()">
+        <mat-icon>delete</mat-icon>
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="overview-grid">
+        <div>
+          <span class="field-label">{{ 'TIMESHEET.TIMESHEET_ID' | translate }}</span>
+          <strong>{{ timesheet()?.timesheetId || '-' }}</strong>
+        </div>
+        <div>
+          <span class="field-label">{{ 'TIMESHEET.WORKER' | translate }}</span>
+          <strong>{{ timesheet()?.partyId || '-' }}</strong>
+        </div>
+        <div>
+          <span class="field-label">{{ 'COMMON.STATUS' | translate }}</span>
+          <strong>{{ statusLabel(timesheet()?.statusId) }}</strong>
+        </div>
+        <div>
+          <span class="field-label">{{ 'TIMESHEET.TOTAL_HOURS' | translate }}</span>
+          <strong>{{ timesheet()?.totalHours | fixedDecimal }}</strong>
+        </div>
+        <div>
+          <span class="field-label">{{ 'COMMON.DATE' | translate }}</span>
+          <strong>{{ timesheet()?.fromDate | userDate : 'mediumDate' }}</strong>
+        </div>
+        <div>
+          <span class="field-label">{{ 'TIMESHEET.APPROVED_BY' | translate }}</span>
+          <strong>{{ timesheet()?.approvedByUserLoginId || '-' }}</strong>
+        </div>
+        <div class="wide">
+          <span class="field-label">{{ 'COMMON.NOTE' | translate }}</span>
+          <span>{{ timesheet()?.comments || '-' }}</span>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <br />
+
+  <mat-card class="mat-elevation-z10" *ngIf="timesheet()">
+    <mat-card-header>
+      <mat-card-title>{{ 'TIMESHEET.ENTRIES' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="table-container">
+        <table mat-table [dataSource]="timesheet()?.entries || []">
+          <ng-container matColumnDef="workTypeId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'TIMESHEET.WORK_TYPE' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let row">{{ workTypeLabel(row?.workTypeId) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="workEffortId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'TIMESHEET.WORK_REFERENCE' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let row">
+              <a *ngIf="row?.workEffortId" [routerLink]="workReferenceLink(row)">{{ row?.workEffortId }}</a>
+              <span *ngIf="!row?.workEffortId">-</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="fromDate">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.DATE' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let row">{{ row?.fromDate | userDate : 'mediumDate' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="hours">
+            <th mat-header-cell class="text-right" *matHeaderCellDef>{{ 'TIMESHEET.HOURS' | translate }}</th>
+            <td mat-cell class="text-right" *matCellDef="let row">{{ row?.hours | fixedDecimal }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="comments">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.NOTE' | translate }}</th>
+            <td mat-cell class="text-left note-cell" *matCellDef="let row">{{ row?.comments || '-' }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns"></tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</ng-template>
+
+<ng-template #noTimesheet>
+  <div class="state-panel">{{ 'COMMON.NO_DATA' | translate }}</div>
+</ng-template>

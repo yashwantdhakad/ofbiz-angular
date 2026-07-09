@@ -1,0 +1,106 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<div class="dialog-header">
+  <div class="dialog-header-icon">
+    <mat-icon>build</mat-icon>
+  </div>
+  <div class="dialog-header-text">
+    <h2 class="dialog-title">{{ 'ASSET.REPAIR_WORKFLOW_TITLE' | translate }}</h2>
+    <p class="dialog-subtitle">
+      {{ 'ASSET.ASSET_ID' | translate }}: <strong>{{ data.inventoryItemId }}</strong> | 
+      Product ID: <strong>{{ data.productId }}</strong>
+    </p>
+  </div>
+</div>
+
+<mat-dialog-content class="dialog-body">
+
+  <!-- Confirmation step (before execution) -->
+  <ng-container *ngIf="!isComplete() && !isLoading()">
+    <!-- Note: We have removed the info-banner with REPAIR_WORKFLOW_INFO and OWNER_PROPAGATION_INFO per user request -->
+
+    <div class="status-flow">
+      <div class="flow-step active">
+        <mat-icon>inventory_2</mat-icon>
+        <span>Current: In Repair</span>
+      </div>
+      <mat-icon class="flow-arrow">arrow_forward</mat-icon>
+      <div class="flow-step">
+        <mat-icon>engineering</mat-icon>
+        <span>Repair Job Created &amp; Item Issued</span>
+      </div>
+      <mat-icon class="flow-arrow">arrow_forward</mat-icon>
+      <div class="flow-step">
+        <mat-icon>widgets</mat-icon>
+        <span>Add Costs, Process &amp; Produce</span>
+      </div>
+    </div>
+
+    <div class="warning-banner">
+      <mat-icon>warning_amber</mat-icon>
+      <span>{{ 'ASSET.REPAIR_IRREVERSIBLE' | translate }}</span>
+    </div>
+  </ng-container>
+
+  <!-- Loading state -->
+  <ng-container *ngIf="isLoading()">
+    <div class="loading-state">
+      <mat-progress-spinner mode="indeterminate" [diameter]="56" color="primary"></mat-progress-spinner>
+      <p class="loading-text">{{ 'ASSET.REPAIR_EXECUTING' | translate }}</p>
+    </div>
+  </ng-container>
+
+  <!-- Success state -->
+  <ng-container *ngIf="isComplete() && !isLoading()">
+    <div class="success-banner">
+      <mat-icon class="success-icon">check_circle</mat-icon>
+      <div>
+        <strong>Repair job created and approved</strong>
+        <p>The inventory item has been issued to the job. Open the job to add repair
+          costs, then produce the replacement inventory — all costs transfer to it.</p>
+      </div>
+    </div>
+
+    <div class="child-items-list" *ngIf="jobId()">
+      <div class="child-item-row">
+        <mat-icon class="child-item-icon">engineering</mat-icon>
+        <a class="child-item-link" [routerLink]="['/jobs', jobId()]" (click)="close()">
+          Repair Job: {{ jobId() }}
+        </a>
+      </div>
+    </div>
+  </ng-container>
+
+</mat-dialog-content>
+
+<mat-dialog-actions class="dialog-actions">
+  <button mat-stroked-button (click)="close()" [disabled]="isLoading()">
+    {{ isComplete() ? ('COMMON.CLOSE' | translate) : ('COMMON.CANCEL' | translate) }}
+  </button>
+  <button
+    mat-raised-button
+    color="warn"
+    *ngIf="!isComplete()"
+    [disabled]="isLoading()"
+    (click)="executeRepairJob()"
+  >
+    <mat-icon>engineering</mat-icon>
+    {{ 'ASSET.EXECUTE_REPAIR_WORKFLOW' | translate }}
+  </button>
+</mat-dialog-actions>

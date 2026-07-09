@@ -1,0 +1,98 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<div class="dialog-header">
+  <h2 mat-dialog-title>{{ labels.title | translate }}</h2>
+  <button mat-icon-button type="button" (click)="onCancel()" class="close-btn" [attr.aria-label]="'COMMON.CLOSE' | translate">
+    <mat-icon>close</mat-icon>
+  </button>
+</div>
+
+<mat-dialog-content class="dialog-content">
+  <form [formGroup]="paymentForm" class="payment-form">
+    <div class="summary-row">
+      <div class="summary-chip">{{ 'COMMON.INVOICE' | translate }}: {{ data.invoiceId }}</div>
+      <div class="summary-chip">{{ 'INVOICE.OPEN_AMOUNT' | translate }}: {{ data.defaultAmount | amountWithCurrency : data.currencyUomId }}</div>
+    </div>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'COMMON.AMOUNT' | translate }}</mat-label>
+      <span matTextPrefix class="currency-prefix">{{ data.currencyUomId }}</span>
+      <input matInput type="number" formControlName="amount" step="0.01" min="0.01">
+      <mat-error *ngIf="paymentForm.get('amount')?.hasError('required')">{{ 'PAYMENT.AMOUNT_REQUIRED' | translate }}</mat-error>
+    </mat-form-field>
+
+    <mat-tab-group [selectedIndex]="selectedTab" (selectedIndexChange)="switchTab($event)" animationDuration="0ms" class="payment-tabs">
+      <mat-tab [label]="labels.existingTab | translate">
+        <div class="tab-content">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ 'PAYMENT.AVAILABLE_PAYMENT' | translate }}</mat-label>
+            <mat-select formControlName="paymentId">
+              <mat-option *ngFor="let payment of availablePayments" [value]="payment.paymentId">
+                {{ payment.paymentId }} | {{ payment.paymentMethodLabel || payment.paymentMethodTypeId }} | {{ payment.unappliedAmount | amountWithCurrency : data.currencyUomId }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="paymentForm.get('paymentId')?.hasError('required')">{{ 'PAYMENT.SELECT_PAYMENT' | translate }}</mat-error>
+          </mat-form-field>
+
+          <p class="helper-text" *ngIf="availablePayments.length === 0">
+            {{ labels.noPayments | translate }}
+          </p>
+        </div>
+      </mat-tab>
+
+      <mat-tab [label]="labels.recordTab | translate">
+        <div class="tab-content">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ 'PAYMENT.PAYMENT_METHOD_OPTIONAL' | translate }}</mat-label>
+            <mat-select formControlName="paymentMethodId" (selectionChange)="onPaymentMethodChange($event)">
+              <mat-option value="">{{ 'PAYMENT.NO_LINKED_PAYMENT_METHOD' | translate }}</mat-option>
+              <mat-option *ngFor="let method of availablePaymentMethods" [value]="method.paymentMethodId">
+                {{ method.displayValue || method.description || method.paymentMethodId }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ 'PAYMENT.OFFLINE_METHOD' | translate }}</mat-label>
+            <mat-select formControlName="paymentMethodTypeId">
+              <mat-option *ngFor="let m of offlineMethods" [value]="m.value">{{ m.labelKey | translate }}</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ 'PAYMENT.REF_NO' | translate }}</mat-label>
+            <input matInput formControlName="referenceNo">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>{{ 'COMMON.COMMENTS' | translate }}</mat-label>
+            <textarea matInput formControlName="comments" rows="3"></textarea>
+          </mat-form-field>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="start" class="dialog-actions">
+  <button mat-raised-button color="primary" type="button" [disabled]="isSubmitting() || paymentForm.invalid" (click)="onAdd()">
+    {{ labels.applyButton | translate }}
+  </button>
+  <button mat-stroked-button type="button" (click)="onCancel()" [disabled]="isSubmitting()">{{ 'COMMON.CANCEL' | translate }}</button>
+</mat-dialog-actions>

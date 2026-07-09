@@ -1,0 +1,84 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.top-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 16px;
+}
+
+.overview-title {
+  margin: 0 0 12px;
+}
+
+.overview-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.overview-card {
+  min-height: 180px;
+}
+
+.custom-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.custom-list-item {
+  margin: 0 0 8px;
+  line-height: 1.45;
+}
+
+.value-link {
+  margin-left: 4px;
+}
+
+.custom-mat-icon {
+  cursor: pointer;
+}
+
+.custom-icon-align {
+  vertical-align: middle;
+  margin-left: 6px;
+  font-size: 20px;
+  height: 20px;
+  width: 20px;
+}
+
+.timeline-row {
+  display: flex;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+
+.timeline-item {
+  min-width: 220px;
+}
+
+.text-left {
+  text-align: left;
+}
+
+@media (max-width: 900px) {
+  .overview-cards {
+    grid-template-columns: 1fr;
+  }
+}

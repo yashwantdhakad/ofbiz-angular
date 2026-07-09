@@ -1,0 +1,112 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<section class="detail-page">
+  <div class="state-panel" *ngIf="isLoading()">
+    <mat-spinner diameter="32"></mat-spinner>
+  </div>
+
+  <div class="state-panel error" *ngIf="!isLoading() && errorKey()">
+    {{ (errorKey() || '') | translate }}
+  </div>
+
+  <ng-container *ngIf="!isLoading() && !errorKey() && opportunity() as opportunity">
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <a class="breadcrumb-link" routerLink="/crm/pipeline">
+        {{ 'CRM.PIPELINE_TITLE' | translate }}
+      </a>
+      <mat-icon class="breadcrumb-sep">chevron_right</mat-icon>
+      <span class="breadcrumb-current">{{ opportunity.salesOpportunityId || opportunity.id }}</span>
+    </nav>
+
+    <mat-card class="mat-elevation-z10 detail-header-card">
+      <mat-card-header class="detail-card-header">
+        <mat-card-title>{{ displayName() || ('CRM.UNTITLED_OPPORTUNITY' | translate) }}</mat-card-title>
+        <div class="actions">
+          <button mat-raised-button color="primary" type="button" (click)="editOpportunity()">
+            <mat-icon>edit</mat-icon>
+            {{ 'COMMON.EDIT' | translate }}
+          </button>
+          <button mat-stroked-button color="warn" type="button" (click)="deleteOpportunity()">
+            <mat-icon>delete</mat-icon>
+            {{ 'COMMON.DELETE' | translate }}
+          </button>
+          <button mat-stroked-button type="button" disabled>
+            <mat-icon>request_quote</mat-icon>
+            {{ 'CRM.CONVERT_TO_QUOTE' | translate }}
+          </button>
+          <button mat-stroked-button type="button" disabled>
+            <mat-icon>shopping_cart_checkout</mat-icon>
+            {{ 'CRM.CONVERT_TO_ORDER' | translate }}
+          </button>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="detail-description">{{ opportunity.description || ('CRM.NO_DESCRIPTION' | translate) }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="mat-elevation-z10 overview-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'COMMON.OVERVIEW' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <section class="info-grid">
+          <div>
+            <span>{{ 'CRM.STAGE' | translate }}</span>
+            <strong>{{ opportunity.opportunityStageId || '-' }}</strong>
+          </div>
+          <div>
+            <span>{{ 'CRM.VALUE' | translate }}</span>
+            <strong>{{ (opportunity.estimatedAmount || 0) | amountWithCurrency:(opportunity.currencyUomId || 'USD') }}</strong>
+          </div>
+          <div>
+            <span>{{ 'CRM.PROBABILITY' | translate }}</span>
+            <strong>{{ opportunity.estimatedProbability !== null && opportunity.estimatedProbability !== undefined ? opportunity.estimatedProbability + '%' : '-' }}</strong>
+          </div>
+          <div>
+            <span>{{ 'CRM.NEXT_STEP' | translate }}</span>
+            <strong>{{ opportunity.nextStep || '-' }}</strong>
+          </div>
+        </section>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="mat-elevation-z10 timeline-section">
+      <mat-card-header>
+        <mat-card-title>{{ 'CRM.ACTIVITY_TIMELINE' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+      <div class="empty-state" *ngIf="timeline().length === 0">{{ 'CRM.NO_ACTIVITY' | translate }}</div>
+      <ol class="timeline" *ngIf="timeline().length > 0">
+        <li *ngFor="let event of timeline(); trackBy: trackEvent">
+          <div class="timeline-dot"></div>
+          <article>
+            <header>
+              <strong>{{ event.subject || event.communicationEventTypeId || ('CRM.ACTIVITY' | translate) }}</strong>
+              <span>{{ (event.entryDate || event.datetimeStarted) | date:'medium' }}</span>
+            </header>
+            <p *ngIf="event.note || event.content">{{ event.note || event.content }}</p>
+            <small *ngIf="event.fromString || event.toString">{{ event.fromString || '-' }} -> {{ event.toString || '-' }}</small>
+          </article>
+        </li>
+      </ol>
+      </mat-card-content>
+    </mat-card>
+  </ng-container>
+</section>

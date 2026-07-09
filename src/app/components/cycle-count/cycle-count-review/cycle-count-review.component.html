@@ -1,0 +1,154 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-list class="breadcrumb-list">
+  <mat-list-item>
+    <a [routerLink]="['/cycle-count/find']">{{ 'CYCLE_COUNT.SESSIONS_TITLE' | translate }}</a> / {{ sessionIdValue() }} / {{ 'CYCLE_COUNT.REVIEW_TITLE' | translate }}
+  </mat-list-item>
+</mat-list>
+
+<mat-card class="mat-elevation-z10 header-card">
+  <mat-card-content>
+    <div class="header-top-row">
+      <div class="header-copy">
+        <h1 class="page-title">{{ 'CYCLE_COUNT.REVIEW_TITLE' | translate }}</h1>
+        <div class="session-meta">
+          <span>{{ 'CYCLE_COUNT.SESSION' | translate }}: {{ detail()?.sessionId }}</span>
+          <span>{{ 'COMMON.FACILITY' | translate }}: {{ detail()?.facilityId }}</span>
+          <span>{{ 'COMMON.STATUS' | translate }}: {{ getStatusLabel(detail()?.statusId) }}</span>
+        </div>
+      </div>
+      <div *ngIf="canReview" class="actions-row">
+        <button mat-raised-button color="primary" (click)="accept()" [disabled]="submitting() || !canReview">{{ 'COMMON.ACCEPT' | translate }}</button>
+        <button mat-raised-button color="warn" (click)="reject()" [disabled]="submitting() || !canReview">{{ 'COMMON.REJECT' | translate }}</button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="mat-elevation-z10 content-card">
+  <mat-card-content>
+    <!-- Desktop table -->
+    <div class="table-wrap" *ngIf="!loading(); else loadingTpl">
+      <table mat-table [dataSource]="detail()?.items || []" class="full-width-table">
+        <ng-container matColumnDef="select">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-checkbox
+              [checked]="isAllSelected()"
+              [disabled]="!canReview"
+              (change)="toggleAll($event.checked)"
+            ></mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let row">
+            <mat-checkbox
+              [checked]="isSelected(row.inventoryCountItemSeqId)"
+              [disabled]="!isRowSelectable(row) || !canReview"
+              (change)="toggleRow(row.inventoryCountItemSeqId, $event.checked)"
+            ></mat-checkbox>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="locationSeqId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.LOCATION' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.locationSeqId || '-' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="inventoryItemId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.LTN' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.inventoryItemId }}</td>
+        </ng-container>
+        <ng-container matColumnDef="productIdentifier">
+          <th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.PART_NUMBER' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.productIdentifier || row.productId || '-' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="itemStatusId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ getStatusLabel(row.itemStatusId) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="countedQuantity">
+          <th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.QTY_COUNTED' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.countedQuantity ?? '-' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="systemQoh">
+          <th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.SYSTEM_QOH' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.systemQoh ?? 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="variance">
+          <th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.QTY_VARIANCE' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.variance === null || row.variance === undefined ? '-' : row.variance }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <!-- Mobile review cards -->
+    <div class="mobile-review-list" *ngIf="!loading()">
+      <div
+        class="mobile-review-card"
+        *ngFor="let row of (detail()?.items || [])"
+        [class.selected]="isSelected(row.inventoryCountItemSeqId)"
+      >
+        <div class="mobile-review-header">
+          <mat-checkbox
+            *ngIf="canReview"
+            [checked]="isSelected(row.inventoryCountItemSeqId)"
+            [disabled]="!isRowSelectable(row)"
+            (change)="toggleRow(row.inventoryCountItemSeqId, $event.checked)"
+          ></mat-checkbox>
+          <div class="mobile-review-header-info">
+            <div>
+              <div class="mobile-review-ltn">{{ row.inventoryItemId }}</div>
+              <div class="mobile-review-part" *ngIf="row.productIdentifier || row.productId">
+                {{ row.productIdentifier || row.productId }}
+              </div>
+            </div>
+            <app-status-chip [status]="getStatusLabel(row.itemStatusId)" [statusId]="row.itemStatusId"></app-status-chip>
+          </div>
+        </div>
+
+        <div class="mobile-review-meta">
+          <span *ngIf="row.locationSeqId"><strong>{{ 'COMMON.LOCATION' | translate }}:</strong> {{ row.locationSeqId }}</span>
+        </div>
+
+        <div class="mobile-review-qty-row">
+          <div class="mobile-review-qty-item">
+            <span class="mobile-review-qty-label">{{ 'CYCLE_COUNT.QTY_COUNTED' | translate }}</span>
+            <span class="mobile-review-qty-value">{{ row.countedQuantity ?? '-' }}</span>
+          </div>
+          <div class="mobile-review-qty-item">
+            <span class="mobile-review-qty-label">{{ 'CYCLE_COUNT.SYSTEM_QOH' | translate }}</span>
+            <span class="mobile-review-qty-value">{{ row.systemQoh ?? 0 }}</span>
+          </div>
+          <div class="mobile-review-qty-item">
+            <span class="mobile-review-qty-label">{{ 'CYCLE_COUNT.QTY_VARIANCE' | translate }}</span>
+            <span
+              class="mobile-review-qty-value"
+              [class.variance-neg]="row.variance < 0"
+              [class.variance-pos]="row.variance > 0"
+            >{{ row.variance === null || row.variance === undefined ? '-' : row.variance }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #loadingTpl>
+      <div class="loader-wrap"><mat-progress-spinner [diameter]="48" mode="indeterminate"></mat-progress-spinner></div>
+    </ng-template>
+  </mat-card-content>
+</mat-card>
+

@@ -1,0 +1,122 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+<ng-template #content>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header class="card-header-with-action">
+      <mat-card-title>{{ 'SHIPMENT.TITLE' | translate }}</mat-card-title>
+      <button mat-raised-button color="primary" routerLink="/shipments/create">
+        <mat-icon>add</mat-icon> {{ 'MENU.CREATE_SHIPMENT' | translate }}
+      </button>
+    </mat-card-header>
+    <mat-card-actions>
+      <div class="filters-row">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>{{ 'COMMON.SEARCH' | translate }}</mat-label>
+          <input matInput [(ngModel)]="queryString" (input)="getShipments(1, queryString)" />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>{{ 'SHIPMENT.TYPE' | translate }}</mat-label>
+          <mat-select [(ngModel)]="selectedShipmentTypeId" (selectionChange)="onShipmentTypeChange()">
+            <mat-option value="">{{ 'COMMON.ALL' | translate }}</mat-option>
+            <mat-option *ngFor="let option of shipmentTypeOptions" [value]="option.shipmentTypeId">
+              {{ option.description || option.shipmentTypeId }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-actions>
+    <mat-card-content>
+      <div class="shipment-table-container">
+        <table mat-table [dataSource]="items()">
+        <ng-container matColumnDef="shipmentId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.ID' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            <a [routerLink]="['/shipments', item.shipmentId]">{{ item.shipmentId }}</a>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="statusId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ getStatusDescription(item) }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="shipmentTypeId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.TYPE' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ getShipmentTypeDescription(item.shipmentTypeId) }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="destinationFacilityId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'SHIPMENT.DESTINATION_FACILITY' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">{{ getDestinationFacilityLabel(item) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="primaryOrderId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'SHIPMENT.ORDER' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">{{ item.primaryOrderId }}</td>
+        </ng-container>
+        <ng-container matColumnDef="estimatedShipDate">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'SHIPMENT.EST_SHIP_DATE' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">{{ item.estimatedShipDate | userDate : 'MMMM d, y' }}
+          </td>
+        </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+      <div class="shipment-mobile-list">
+        <div class="shipment-mobile-card" *ngFor="let item of items()">
+          <div class="shipment-mobile-header">
+            <span class="shipment-mobile-label">{{ 'COMMON.ID' | translate }}</span>
+            <a [routerLink]="['/shipments', item.shipmentId]">{{ item.shipmentId }}</a>
+          </div>
+          <div class="shipment-mobile-grid">
+            <div class="shipment-mobile-field">
+              <span class="shipment-mobile-label">{{ 'COMMON.STATUS' | translate }}</span>
+              <span>{{ getStatusDescription(item) }}</span>
+            </div>
+            <div class="shipment-mobile-field">
+              <span class="shipment-mobile-label">{{ 'COMMON.TYPE' | translate }}</span>
+              <span>{{ getShipmentTypeDescription(item.shipmentTypeId) }}</span>
+            </div>
+            <div class="shipment-mobile-field">
+              <span class="shipment-mobile-label">{{ 'SHIPMENT.DESTINATION_FACILITY' | translate }}</span>
+              <span>{{ getDestinationFacilityLabel(item) || '-' }}</span>
+            </div>
+            <div class="shipment-mobile-field">
+              <span class="shipment-mobile-label">{{ 'SHIPMENT.ORDER' | translate }}</span>
+              <span>{{ item.primaryOrderId || '-' }}</span>
+            </div>
+            <div class="shipment-mobile-field">
+              <span class="shipment-mobile-label">{{ 'SHIPMENT.EST_SHIP_DATE' | translate }}</span>
+              <span>{{ item.estimatedShipDate | userDate : 'MMMM d, y' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <mat-paginator [pageIndex]="pagination.page - 1" [pageSize]="pagination.rowsPerPage" [length]="pages()"
+        (page)="getShipments($event.pageIndex + 1, queryString)"></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

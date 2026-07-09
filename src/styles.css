@@ -1,0 +1,797 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+/* You can add global styles to this file, and also import other style files */
+
+/* Color Palette variables matching the Flutter App Theme */
+body {
+  --primary-color: #4054b2;
+  --bg-color: #f7f8fc;
+  --surface-color: #ffffff;
+  --text-primary: #172033;
+  --text-secondary: #667085;
+  --border-color: #e3e7ef;
+  --field-bg: #f9fafc;
+  --field-border: #e3e7ef;
+  --card-shadow: 0 4px 12px rgba(16, 24, 40, 0.05);
+
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+html {
+  height: 100%;
+  background-color: var(--bg-color);
+}
+
+/* Centered full-page loading spinner — used across all list/detail views */
+.page-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 220px;
+  width: 100%;
+}
+
+/* Unified empty / zero-data state — use class="empty-state" across all components */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant, rgba(0,0,0,0.45));
+}
+
+.empty-state .empty-state-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  opacity: 0.35;
+}
+
+.empty-state .empty-state-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+  opacity: 0.75;
+}
+
+.empty-state .empty-state-subtitle {
+  font-size: 13px;
+  margin: 0;
+  opacity: 0.6;
+}
+
+/* Backward-compat alias used in older components */
+.no-data {
+  padding: 24px 16px;
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant, rgba(0,0,0,0.45));
+  font-size: 14px;
+}
+
+.card-margin {
+  margin: 5px;
+  transition: box-shadow 0.3s; /* Add a smooth transition effect */
+}
+.custom-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.custom-list-item {
+  padding: 4px;
+}
+.custom-mat-icon {
+  font-size: 20px;
+  font-weight: bold;
+}
+.custom-icon-align {
+  vertical-align: middle;
+}
+.icon-right {
+  float: right;
+}
+.mt-5 {
+  margin-top: 5px;
+}
+
+.mb-5 {
+  margin-bottom: 5px;
+}
+.mb-10 {
+  margin-bottom: 10px;
+}
+
+.me-4 {
+  margin-right: 12px !important;
+}
+
+.mat-elevation-z10 {
+  box-shadow:0px 6px 6px -3px rgba(0, 0, 0, 0.2), 0px 10px 14px 1px rgba(0, 0, 0, 0.14), 0px 4px 18px 3px rgba(0, 0, 0, 0.12)!important;
+}
+
+.custom-file-input {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+  cursor: pointer;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+  padding-right: 90%;
+}
+
+.custom-file-input::before {
+  content: 'Select File';
+  display: inline-block;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  padding: 6px 12px;
+  border-radius: 4px;
+}
+
+.custom-file-input:hover::before {
+  background-color: #e0e0e0;
+}
+
+.custom-file-input:active::before {
+  background-color: #d5d5d5;
+}
+
+/* your-component.component.css */
+.table-tooltip {
+  background-color: white;
+  border: 1px solid #ddd;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Normalize card action rows so primary actions align with form fields */
+.mat-mdc-card-actions,
+.mat-card-actions {
+  margin: 0 !important;
+  padding: 0 16px 16px !important;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Keep dialog action rows aligned with dialog form fields/content */
+.cdk-overlay-container .mat-mdc-dialog-container mat-card-actions:not(.dialog-actions-flush),
+.cdk-overlay-container .mat-mdc-dialog-container mat-dialog-actions:not(.dialog-actions-flush) {
+  margin: 0 !important;
+  padding-left: 24px !important;
+  padding-right: 24px !important;
+  display: flex !important;
+  justify-content: flex-start !important;
+  column-gap: 12px;
+  row-gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* Outlined fields float their labels above the control border. Keep the first
+   field clear of the dialog content clipping boundary. */
+.cdk-overlay-container .mat-mdc-dialog-container .mat-mdc-dialog-content,
+.cdk-overlay-container .mat-mdc-dialog-container [mat-dialog-content] {
+  padding-top: 12px !important;
+}
+
+.cdk-overlay-container .mat-mdc-dialog-container .mat-mdc-dialog-content form > mat-form-field:first-of-type,
+.cdk-overlay-container .mat-mdc-dialog-container [mat-dialog-content] form > mat-form-field:first-of-type {
+  margin-top: 4px;
+}
+
+/* #11: Standardise all dialog action rows to end-align (Material 3 pattern)
+   Opt out by adding class="dialog-actions-flush" or override locally as needed */
+.cdk-overlay-container .mat-mdc-dialog-container mat-dialog-actions:not(.dialog-actions-flush) {
+  justify-content: flex-end !important;
+}
+
+/* Keep in-page links visually consistent with routing screens */
+.sidenav-content a {
+  color: #1976d2;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sidenav-content a:visited {
+  color: #1976d2;
+}
+
+.sidenav-content a:hover {
+  text-decoration: underline;
+}
+
+.related-mobile-list {
+  display: none;
+}
+
+.cdk-overlay-container .mat-mdc-snack-bar-container.success-snackbar .mdc-snackbar__surface,
+.cdk-overlay-container .mat-mdc-snack-bar-container.success-snackbar.mat-snack-bar-container .mdc-snackbar__surface {
+  background: #2e7d32 !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 24px rgba(46, 125, 50, 0.35);
+}
+
+.cdk-overlay-container .mat-mdc-snack-bar-container.error-snackbar .mdc-snackbar__surface,
+.cdk-overlay-container .mat-mdc-snack-bar-container.error-snackbar.mat-snack-bar-container .mdc-snackbar__surface {
+  background: #c62828 !important;
+  color: #ffffff !important;
+  box-shadow: 0 10px 24px rgba(198, 40, 40, 0.35);
+}
+
+.cdk-overlay-container .mat-mdc-snack-bar-container.success-snackbar .mdc-snackbar__label,
+.cdk-overlay-container .mat-mdc-snack-bar-container.error-snackbar .mdc-snackbar__label,
+.cdk-overlay-container .mat-mdc-snack-bar-container.success-snackbar .mat-mdc-button,
+.cdk-overlay-container .mat-mdc-snack-bar-container.error-snackbar .mat-mdc-button {
+  color: #ffffff !important;
+}
+
+@media (max-width: 768px) {
+  .related-table-container {
+    display: none;
+  }
+
+  .related-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .related-mobile-card {
+    padding: 14px;
+    border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+    border-radius: 8px;
+    background-color: var(--mat-sys-surface, #fff);
+  }
+
+  .related-mobile-card-header,
+  .related-mobile-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .related-mobile-card-header {
+    padding-bottom: 10px;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 8%, transparent);
+    font-size: 1.05em;
+    font-weight: 600;
+  }
+
+  .related-mobile-card-header a {
+    color: var(--mat-sys-primary, #1976d2);
+    overflow-wrap: anywhere;
+  }
+
+  .related-mobile-card-body {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    padding-top: 12px;
+  }
+
+  .related-mobile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .related-mobile-label {
+    font-size: 0.78em;
+    font-weight: 500;
+    letter-spacing: 0.4px;
+    opacity: 0.65;
+    text-transform: uppercase;
+  }
+
+  .related-mobile-card-footer {
+    padding-top: 10px;
+    margin-top: 12px;
+    border-top: 1px solid color-mix(in srgb, currentColor 8%, transparent);
+  }
+
+  .related-mobile-card-footer strong {
+    color: var(--mat-sys-primary, #1976d2);
+    text-align: right;
+  }
+
+  .asset-mobile-field .label,
+  .move-mobile-field .label,
+  .mobile-data-field .label,
+  .picklist-mobile-field .label,
+  .picklist-bin-mobile-field .label,
+  .mobile-item-field .label,
+  .customer-mobile-field .customer-mobile-label,
+  .supplier-mobile-field .supplier-mobile-label,
+  .product-mobile-label {
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    line-height: 1.35 !important;
+    letter-spacing: 0.01em;
+  }
+
+  .asset-mobile-field > span,
+  .move-mobile-field > span,
+  .mobile-data-field > span,
+  .picklist-mobile-field > span,
+  .picklist-bin-mobile-field > span,
+  .mobile-item-field > span,
+  .customer-mobile-field span,
+  .supplier-mobile-field span,
+  .product-mobile-field span:last-child,
+  .product-mobile-card p {
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+  }
+
+  /* ── Global dialog responsive fix ──────────────────────────────── */
+  /* Prevent dialogs from overflowing the viewport on small screens  */
+  .cdk-overlay-pane {
+    max-width: 96vw !important;
+  }
+
+  .mat-mdc-dialog-container,
+  .mat-mdc-dialog-surface {
+    max-width: 96vw !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Prevent horizontal scrollbar inside dialog content */
+  .mat-mdc-dialog-content,
+  [mat-dialog-content] {
+    overflow-x: hidden !important;
+  }
+
+  /* Allow mat-form-field to shrink below its default minimum width inside dialogs */
+  .mat-mdc-dialog-container .mat-mdc-form-field,
+  .mat-mdc-dialog-surface .mat-mdc-form-field {
+    min-width: 0 !important;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Stack dialog action buttons on very narrow screens */
+  .cdk-overlay-container .mat-mdc-dialog-container mat-dialog-actions:not(.dialog-actions-flush) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cdk-overlay-container .mat-mdc-dialog-container mat-dialog-actions:not(.dialog-actions-flush) button {
+    width: 100%;
+    margin: 0 !important;
+  }
+}
+
+/* ==========================================================================
+   Dark Theme Configuration — Aligning with the Flutter App Theme
+   ========================================================================== */
+
+body.dark-theme {
+  --bg-color: #0f121d;
+  --surface-color: #1e2235;
+  --text-primary: #f1f3f9;
+  --text-secondary: #9eafce;
+  --border-color: #2e354f;
+  --field-bg: #171a2b;
+  --field-border: #2e354f;
+  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+
+  /* Angular Material specific variable overrides for M3 */
+  --mat-sys-primary: #4054b2;
+  --mat-sys-background: #0f121d;
+  --mat-sys-surface: #1e2235;
+  --mat-sys-surface-container: #1e2235;
+  --mat-sys-surface-container-low: #171b2e;
+  --mat-sys-surface-container-high: #262c45;
+  --mat-sys-on-surface: #f1f3f9;
+  --mat-sys-on-surface-variant: #9eafce;
+  --mat-sys-outline: #4a5270;
+  --mat-sys-outline-variant: #2e354f;
+}
+
+/* Page, Scaffold, and Sidenav Content Layout Overrides */
+body.dark-theme .sidenav-content {
+  background-color: var(--bg-color) !important;
+}
+
+/* Sidenav Navigation Styles */
+body.dark-theme .sidenav {
+  background-color: var(--surface-color) !important;
+  border-right: 1px solid var(--border-color) !important;
+}
+
+body.dark-theme .mat-expansion-panel {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body.dark-theme .mat-expansion-panel-header {
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .mat-expansion-panel-header:hover {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+body.dark-theme .mat-panel-title {
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .mat-panel-description {
+  color: var(--text-secondary) !important;
+}
+
+body.dark-theme .mat-nav-list a.mat-mdc-list-item {
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .mat-nav-list a.mat-mdc-list-item:hover {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+body.dark-theme .mat-nav-list a.mat-mdc-list-item.active-link {
+  background-color: rgba(64, 84, 178, 0.15) !important;
+  color: #8fa0f1 !important;
+}
+
+body.dark-theme .mat-nav-list a.mat-mdc-list-item.active-link .mat-icon {
+  color: #8fa0f1 !important;
+}
+
+/* Toolbar Overrides */
+body.dark-theme .barra {
+  background-color: var(--surface-color) !important;
+  color: var(--text-primary) !important;
+  border-bottom: 1px solid var(--border-color);
+}
+
+body.dark-theme .barra .mat-toolbar-row {
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .lang-button,
+body.dark-theme .timezone-button,
+body.dark-theme .user-button,
+body.dark-theme .warehouse-button {
+  color: var(--text-primary) !important;
+  border-color: var(--border-color) !important;
+}
+
+/* Card overrides */
+body.dark-theme mat-card,
+body.dark-theme .mat-mdc-card {
+  background-color: var(--surface-color) !important;
+  border: 1px solid var(--border-color) !important;
+  box-shadow: var(--card-shadow) !important;
+  border-radius: 16px !important;
+}
+
+body.dark-theme .mat-mdc-card-title {
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .mat-mdc-card-subtitle,
+body.dark-theme .mat-mdc-card-content {
+  color: var(--text-secondary) !important;
+}
+
+/* Forms & Inputs */
+body.dark-theme .mat-mdc-form-field {
+  --mdc-filled-text-field-container-color: var(--field-bg);
+  --mdc-outlined-text-field-container-color: var(--field-bg);
+  --mdc-filled-text-field-focus-active-indicator-color: var(--primary-color);
+  --mdc-outlined-text-field-focus-outline-color: var(--primary-color);
+  --mdc-filled-text-field-label-text-color: var(--text-secondary);
+  --mdc-outlined-text-field-label-text-color: var(--text-secondary);
+  --mdc-filled-text-field-focus-label-text-color: var(--primary-color);
+  --mdc-outlined-text-field-focus-label-text-color: var(--primary-color);
+  --mdc-filled-text-field-input-text-color: var(--text-primary);
+  --mdc-outlined-text-field-input-text-color: var(--text-primary);
+  --mdc-select-trigger-text-color: var(--text-primary);
+}
+
+body.dark-theme .mat-mdc-form-field .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,
+body.dark-theme .mat-mdc-form-field .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,
+body.dark-theme .mat-mdc-form-field .mdc-text-field--outlined:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing {
+  border-color: var(--border-color) !important;
+}
+
+body.dark-theme .mat-mdc-form-field .mdc-text-field--outlined.mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-notched-outline__leading,
+body.dark-theme .mat-mdc-form-field .mdc-text-field--outlined.mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-notched-outline__notch,
+body.dark-theme .mat-mdc-form-field .mdc-text-field--outlined.mdc-text-field--focused:not(.mdc-text-field--disabled) .mdc-notched-outline__trailing {
+  border-color: var(--primary-color) !important;
+  border-width: 2px !important;
+}
+
+body.dark-theme .mat-mdc-form-field .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+  border-radius: 8px 8px 0 0;
+}
+
+body.dark-theme .mat-mdc-form-field .mat-mdc-select-arrow {
+  color: var(--text-secondary);
+}
+
+/* Button overrides */
+body.dark-theme .mat-mdc-unelevated-button,
+body.dark-theme .mat-mdc-raised-button,
+body.dark-theme .mat-mdc-flat-button {
+  border-radius: 12px !important;
+}
+
+body.dark-theme .mat-mdc-outlined-button {
+  border-radius: 12px !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .mat-mdc-button {
+  border-radius: 10px !important;
+  color: var(--primary-color) !important;
+}
+
+body.dark-theme .mat-mdc-icon-button {
+  border-radius: 10px !important;
+  color: var(--text-secondary) !important;
+}
+
+/* Overlays (Dialogs, Dropdowns, Menus, Autocomplete) */
+body.dark-theme .mat-mdc-dialog-container .mdc-dialog__surface {
+  background-color: var(--surface-color) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 20px !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+body.dark-theme .mat-mdc-dialog-title {
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .mat-mdc-dialog-content {
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .mat-mdc-menu-panel {
+  background-color: var(--surface-color) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 12px !important;
+}
+
+body.dark-theme .mat-mdc-menu-item {
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .mat-mdc-menu-item .mat-icon {
+  color: var(--text-secondary) !important;
+}
+
+body.dark-theme .mat-mdc-menu-item:hover:not([disabled]) {
+  background-color: var(--field-bg) !important;
+}
+
+body.dark-theme .mat-mdc-select-panel {
+  background-color: var(--surface-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+body.dark-theme .mat-mdc-option {
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .mat-mdc-option:hover:not(.mdc-list-item--disabled),
+body.dark-theme .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+  background-color: var(--field-bg) !important;
+}
+
+body.dark-theme .mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) .mdc-list-item__primary-text {
+  color: #8fa0f1 !important;
+}
+
+body.dark-theme .mat-mdc-autocomplete-panel {
+  background-color: var(--surface-color) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+/* Tables */
+body.dark-theme .mat-mdc-table {
+  background-color: var(--surface-color) !important;
+  background: var(--surface-color) !important;
+}
+
+body.dark-theme .mat-mdc-header-row {
+  background-color: var(--field-bg) !important;
+}
+
+body.dark-theme .mat-mdc-header-cell {
+  color: var(--text-primary) !important;
+  font-weight: 600 !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+body.dark-theme .mat-mdc-row {
+  background-color: transparent !important;
+}
+
+body.dark-theme .mat-mdc-cell {
+  color: var(--text-primary) !important;
+  border-bottom-color: var(--border-color) !important;
+}
+
+body.dark-theme .mat-mdc-row:hover {
+  background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+/* Tabs */
+body.dark-theme .mat-mdc-tab-header {
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+body.dark-theme .mat-mdc-tab .mdc-tab__text-label {
+  color: var(--text-secondary) !important;
+}
+
+body.dark-theme .mat-mdc-tab.mdc-tab--active .mdc-tab__text-label {
+  color: #8fa0f1 !important;
+}
+
+/* Chip / Badge Overrides */
+body.dark-theme .mat-mdc-chip-set {
+  --mdc-chip-background-color: var(--field-bg);
+  --mdc-chip-label-text-color: var(--text-primary);
+}
+
+/* Scrollbars */
+body.dark-theme ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+body.dark-theme ::-webkit-scrollbar-track {
+  background: var(--bg-color);
+}
+
+body.dark-theme ::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+body.dark-theme ::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Hardcoded Layout Card & Section Containers across different pages */
+body.dark-theme .product-mobile-card,
+body.dark-theme .identification-overview-card,
+body.dark-theme .shipping-config-subcard,
+body.dark-theme .related-mobile-card,
+body.dark-theme .facility-section {
+  background: var(--surface-color) !important;
+  background-color: var(--surface-color) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+  box-shadow: var(--card-shadow) !important;
+}
+
+body.dark-theme .product-mobile-id,
+body.dark-theme .product-mobile-subtitle,
+body.dark-theme .product-mobile-label,
+body.dark-theme .shipping-config-label,
+body.dark-theme .identification-overview-item span,
+body.dark-theme .identification-overview-item strong,
+body.dark-theme .related-mobile-label {
+  color: var(--text-primary) !important;
+}
+
+body.dark-theme .product-mobile-subtitle,
+body.dark-theme .product-mobile-label,
+body.dark-theme .shipping-config-label,
+body.dark-theme .identification-overview-item span,
+body.dark-theme .related-mobile-label {
+  color: var(--text-secondary) !important;
+  opacity: 1 !important;
+}
+
+/* Contrast adjustment for countdown banner */
+body.dark-theme .banner-action-btn {
+  background-color: white !important;
+  color: #1e3c72 !important;
+}
+body.dark-theme .banner-warning .banner-action-btn {
+  color: #b45309 !important;
+}
+body.dark-theme .banner-grace .banner-action-btn {
+  color: #dc2626 !important;
+}
+
+/* Link / Anchor visibility overrides in dark theme */
+body.dark-theme a,
+body.dark-theme a:visited {
+  color: #8fa0f1 !important;
+}
+
+body.dark-theme a:hover {
+  color: #a5b4fc !important;
+  text-decoration: underline !important;
+}
+
+/* Custom utility for card headers with action buttons */
+.card-header-with-action {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Floating Action Button (FAB) layout for Create button in search lists */
+.card-header-with-action button {
+  position: fixed !important;
+  top: 88px !important;
+  right: 24px !important;
+  z-index: 999 !important;
+  border-radius: 28px !important;
+  padding: 0 20px !important;
+  height: 52px !important;
+  line-height: 52px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.card-header-with-action button:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Mobile responsive adjustments to make it a circular FAB on smaller screens */
+@media (max-width: 600px) {
+  .card-header-with-action button {
+    width: 56px !important;
+    height: 56px !important;
+    min-width: 56px !important;
+    border-radius: 50% !important;
+    padding: 0 !important;
+    top: 72px !important;
+    right: 16px !important;
+  }
+  
+  /* Hide the text label, showing only the plus icon */
+  .card-header-with-action button .mdc-button__label {
+    display: none !important;
+  }
+  
+  .card-header-with-action button mat-icon {
+    margin: 0 !important;
+  }
+}

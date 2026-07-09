@@ -1,0 +1,96 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.breadcrumb {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+
+.breadcrumb mat-icon {
+  color: color-mix(in srgb, currentColor 54%, transparent);
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+}
+
+.detail-header {
+  align-items: center;
+  gap: 8px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.overview-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.overview-grid > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.wide {
+  grid-column: 1 / -1;
+}
+
+.field-label {
+  color: color-mix(in srgb, currentColor 62%, transparent);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.state-panel {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+}
+
+.table-container {
+  overflow: auto;
+}
+
+.note-cell {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+@media (max-width: 768px) {
+  .detail-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .detail-header button {
+    width: 100%;
+  }
+
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+}

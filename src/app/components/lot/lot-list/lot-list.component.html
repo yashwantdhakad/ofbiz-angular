@@ -1,0 +1,113 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+<ng-template #content>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header class="card-header-with-action">
+      <mat-card-title>
+        <div class="title-row">
+          <span>{{ 'LOT.TITLE' | translate }}</span>
+        </div>
+      </mat-card-title>
+      <button mat-raised-button color="primary" routerLink="/lots/create">
+        <mat-icon>add</mat-icon> {{ 'MENU.CREATE_LOT' | translate }}
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'LOT.TYPE_LOT_ID' | translate }}</mat-label>
+        <input matInput [formControl]="searchControl" />
+      </mat-form-field>
+
+      <div class="lot-table-container">
+        <table mat-table [dataSource]="lots()">
+          <ng-container matColumnDef="lotId">
+            <th mat-header-cell *matHeaderCellDef>{{ 'LOT.LOT_ID' | translate }}</th>
+            <td mat-cell *matCellDef="let item">
+              <a [routerLink]="['/lots', item?.lotId]">{{ item?.lotId || '-' }}</a>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="heatNumber">
+            <th mat-header-cell *matHeaderCellDef>Heat Number</th>
+            <td mat-cell *matCellDef="let item">{{ item?.heatNumber || '-' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="steelGrade">
+            <th mat-header-cell *matHeaderCellDef>Steel Grade</th>
+            <td mat-cell *matCellDef="let item">{{ item?.steelGrade || '-' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="creationDate">
+            <th mat-header-cell *matHeaderCellDef>{{ 'LOT.CREATION_DATE' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item?.creationDate ? (item?.creationDate | userDate : 'MM/dd/yyyy') :
+              '-' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="quantity">
+            <th mat-header-cell class="text-right" *matHeaderCellDef>{{ 'LOT.QUANTITY' | translate }}</th>
+            <td mat-cell class="text-right" *matCellDef="let item">{{ item?.quantity || 0 }}</td>
+          </ng-container>
+          <ng-container matColumnDef="expirationDate">
+            <th mat-header-cell *matHeaderCellDef>{{ 'LOT.EXPIRATION_DATE' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item?.expirationDate ? (item?.expirationDate | userDate : 'MM/dd/yyyy')
+              : '-' }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+
+      <!-- Mobile card list -->
+      <div class="lot-mobile-list">
+        <div class="lot-mobile-card" *ngFor="let item of lots()">
+          <a class="lot-mobile-id" [routerLink]="['/lots', item?.lotId]">
+            {{ item?.lotId || '-' }}
+          </a>
+          <div class="lot-mobile-grid">
+            <div class="lot-mobile-field">
+              <span class="lot-mobile-label">Heat Number</span>
+              <span>{{ item?.heatNumber || '-' }}</span>
+            </div>
+            <div class="lot-mobile-field">
+              <span class="lot-mobile-label">Steel Grade</span>
+              <span>{{ item?.steelGrade || '-' }}</span>
+            </div>
+            <div class="lot-mobile-field">
+              <span class="lot-mobile-label">{{ 'LOT.CREATION_DATE' | translate }}</span>
+              <span>{{ item?.creationDate ? (item?.creationDate | userDate : 'MM/dd/yyyy') : '-' }}</span>
+            </div>
+            <div class="lot-mobile-field">
+              <span class="lot-mobile-label">{{ 'LOT.QUANTITY' | translate }}</span>
+              <span>{{ item?.quantity || 0 }}</span>
+            </div>
+            <div class="lot-mobile-field">
+              <span class="lot-mobile-label">{{ 'LOT.EXPIRATION_DATE' | translate }}</span>
+              <span>{{ item?.expirationDate ? (item?.expirationDate | userDate : 'MM/dd/yyyy') : '-' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <mat-paginator [length]="totalLots()" [pageIndex]="pagination.page - 1" [pageSize]="pagination.rowsPerPage"
+        [pageSizeOptions]="[10, 20, 50, 100]" (page)="onPageChange($event)">
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

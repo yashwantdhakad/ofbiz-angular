@@ -1,0 +1,288 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else detailContent">
+  <div class="loading-container">
+    <mat-spinner diameter="64"></mat-spinner>
+  </div>
+</ng-container>
+
+<ng-template #detailContent>
+  <mat-list>
+    <mat-list-item>
+      <a [routerLink]="['/routings']">{{ 'MENU.ROUTINGS' | translate }}</a>
+      / {{ routing()?.workEffortId || workEffortId() }}
+      <span class="breadcrumb-name">{{ routing()?.workEffortName || '' }}</span>
+    </mat-list-item>
+  </mat-list>
+
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>{{ 'MANUFACTURING.ROUTING_DETAIL' | translate }}</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-expansion-panel [expanded]="true" class="section-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ 'COMMON.OVERVIEW' | translate }}</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="overview-layout">
+          <div class="overview-left">
+            <div class="overview-row"><strong>{{ 'MANUFACTURING.ROUTING' | translate }}:</strong> <span>{{
+                routing()?.workEffortName || '-' }}</span></div>
+            <div class="overview-row"><strong>{{ 'COMMON.DESCRIPTION' | translate }}:</strong> <span>{{
+                routing()?.description || '-' }}</span></div>
+            <div class="overview-row"><strong>{{ 'MANUFACTURING.QTY_TO_PRODUCE' | translate }}:</strong> <span>{{
+                routing()?.quantityToProduce | fixedDecimal }}</span></div>
+          </div>
+          <div class="overview-right">
+            <button mat-icon-button data-testid="routing-detail-edit-routing" (click)="openEditRoutingDialog()" [attr.aria-label]="'MANUFACTURING.EDIT_ROUTING' | translate">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </div>
+        </div>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel [expanded]="true" class="section-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ 'MANUFACTURING.OPERATION' | translate }}</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="section-actions">
+          <button mat-stroked-button color="primary" data-testid="routing-detail-add-operation" (click)="openAddOperationDialog()">{{ 'MANUFACTURING.ADD_OPERATION'
+            | translate }}</button>
+        </div>
+        <div class="routing-detail-table-container">
+          <table mat-table [dataSource]="operations()" class="full-width">
+          <ng-container matColumnDef="sequenceNum">
+            <th mat-header-cell *matHeaderCellDef>{{ 'BOM.SEQ_NUM' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.sequenceNum || '-' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="operation">
+            <th mat-header-cell *matHeaderCellDef>{{ 'MANUFACTURING.OPERATION' | translate }}</th>
+            <td mat-cell *matCellDef="let item">
+              <a [routerLink]="['/operations', item.operationWorkEffortId || item.workEffortId]">
+                {{ item.workEffortName || item.operationWorkEffortId || item.workEffortId }}
+              </a>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="estimatedSetupMillis">
+            <th mat-header-cell *matHeaderCellDef>{{ 'MANUFACTURING.EST_SETUP_TIME' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.estimatedSetupMillis || '-' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="estimatedMilliSeconds">
+            <th mat-header-cell *matHeaderCellDef>{{ 'MANUFACTURING.EST_UNIT_RUN_TIME' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.estimatedMilliSeconds || '-' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="action">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let item">
+              <button mat-icon-button color="warn" [attr.aria-label]="'COMMON.DELETE' | translate" (click)="removeOperation(item); $event.stopPropagation()">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+            <tr mat-header-row
+              *matHeaderRowDef="['sequenceNum', 'operation', 'estimatedSetupMillis', 'estimatedMilliSeconds', 'action']">
+            </tr>
+            <tr mat-row
+              *matRowDef="let row; columns: ['sequenceNum', 'operation', 'estimatedSetupMillis', 'estimatedMilliSeconds', 'action']">
+            </tr>
+          </table>
+        </div>
+        <div class="routing-detail-mobile-list">
+          <div class="routing-detail-mobile-card" *ngFor="let item of operations()">
+            <div class="routing-detail-mobile-header">
+            <a [routerLink]="['/operations', item.operationWorkEffortId || item.workEffortId]">
+              {{ item.workEffortName || item.operationWorkEffortId || item.workEffortId }}
+            </a>
+              <button mat-icon-button color="warn" [attr.aria-label]="'COMMON.DELETE' | translate"
+                (click)="removeOperation(item)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <div class="routing-detail-mobile-grid">
+              <div class="routing-detail-mobile-field">
+                <span class="routing-detail-mobile-label">{{ 'BOM.SEQ_NUM' | translate }}</span>
+                <span>{{ item.sequenceNum || '-' }}</span>
+              </div>
+              <div class="routing-detail-mobile-field">
+                <span class="routing-detail-mobile-label">{{ 'MANUFACTURING.EST_SETUP_TIME' | translate }}</span>
+                <span>{{ item.estimatedSetupMillis || '-' }}</span>
+              </div>
+              <div class="routing-detail-mobile-field">
+                <span class="routing-detail-mobile-label">{{ 'MANUFACTURING.EST_UNIT_RUN_TIME' | translate }}</span>
+                <span>{{ item.estimatedMilliSeconds || '-' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel [expanded]="true" class="section-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ 'MANUFACTURING.DELIVERABLE_ITEM' | translate }}</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="section-actions">
+          <button mat-stroked-button color="primary" (click)="openAddDeliverableDialog()">{{ 'COMMON.ADD_ITEM' |
+            translate }}</button>
+        </div>
+        <div class="routing-detail-table-container">
+          <table mat-table [dataSource]="deliverableItems()" class="full-width">
+          <ng-container matColumnDef="item">
+            <th mat-header-cell *matHeaderCellDef>{{ 'BOM.ITEM' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.productName || item.productId }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="qty">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.QTY' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.estimatedQuantity | fixedDecimal }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="fromDate">
+            <th mat-header-cell *matHeaderCellDef>{{ 'BOM.FROM_DATE' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ formatDate(item.fromDate) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="toDate">
+            <th mat-header-cell *matHeaderCellDef>{{ 'BOM.THRU_DATE' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ formatDate(item.thruDate) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="action">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let item">
+              <button mat-icon-button data-testid="routing-detail-edit-deliverable" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="openEditDeliverableDialog(item); $event.stopPropagation()">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" [attr.aria-label]="'COMMON.DELETE' | translate" (click)="removeDeliverableItem(item); $event.stopPropagation()">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['item', 'qty', 'fromDate', 'toDate', 'action']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['item', 'qty', 'fromDate', 'toDate', 'action']"></tr>
+          </table>
+        </div>
+        <div class="routing-detail-mobile-list">
+          <div class="routing-detail-mobile-card" *ngFor="let item of deliverableItems()">
+            <div class="routing-detail-mobile-header">
+              <strong>{{ item.productName || item.productId }}</strong>
+              <div class="routing-detail-mobile-actions">
+                <button mat-icon-button data-testid="routing-detail-edit-deliverable-mobile"
+                  [attr.aria-label]="'COMMON.EDIT' | translate" (click)="openEditDeliverableDialog(item)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" [attr.aria-label]="'COMMON.DELETE' | translate"
+                  (click)="removeDeliverableItem(item)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+            <div class="routing-detail-mobile-grid">
+              <div class="routing-detail-mobile-field">
+                <span class="routing-detail-mobile-label">{{ 'COMMON.QTY' | translate }}</span>
+                <span>{{ item.estimatedQuantity | fixedDecimal }}</span>
+              </div>
+              <div class="routing-detail-mobile-field">
+                <span class="routing-detail-mobile-label">{{ 'BOM.FROM_DATE' | translate }}</span>
+                <span>{{ formatDate(item.fromDate) }}</span>
+              </div>
+              <div class="routing-detail-mobile-field">
+                <span class="routing-detail-mobile-label">{{ 'BOM.THRU_DATE' | translate }}</span>
+                <span>{{ formatDate(item.thruDate) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel [expanded]="true" class="section-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ 'PARTY.CONTENT_TITLE' | translate }}</mat-panel-title>
+        </mat-expansion-panel-header>
+        <div class="section-actions">
+          <button mat-stroked-button color="primary" (click)="openAddContentDialog('DOCUMENT')">{{
+            'MANUFACTURING.UPLOAD_DOCUMENT' | translate }}</button>
+        </div>
+        <div class="routing-detail-table-container">
+          <table mat-table [dataSource]="contents()" class="full-width">
+          <ng-container matColumnDef="contentName">
+            <th mat-header-cell *matHeaderCellDef>{{ 'MANUFACTURING.DOCUMENT' | translate }}</th>
+            <td mat-cell *matCellDef="let item">
+              <a href="javascript:void(0)" (click)="openContent(item)">
+                {{ item.contentName || item.description || item.contentId }}
+              </a>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.TYPE' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.workEffortContentTypeId || '-' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="fromDate">
+            <th mat-header-cell *matHeaderCellDef>{{ 'BOM.FROM_DATE' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ formatDate(item.fromDate) }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="action">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let item">
+              <button mat-icon-button color="warn" [attr.aria-label]="'COMMON.DELETE' | translate" (click)="removeContent(item); $event.stopPropagation()">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['contentName', 'type', 'fromDate', 'action']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['contentName', 'type', 'fromDate', 'action']"></tr>
+          </table>
+        </div>
+        <div class="routing-detail-mobile-list">
+          <div class="routing-detail-mobile-card" *ngFor="let item of contents()">
+            <div class="routing-detail-mobile-header">
+              <a href="#" (click)="$event.preventDefault(); openContent(item)">
+                {{ item.contentName || item.description || item.contentId || '-' }}
+              </a>
+              <button mat-icon-button color="warn" [attr.aria-label]="'COMMON.DELETE' | translate"
+                (click)="removeContent(item)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <div class="routing-detail-mobile-grid">
+              <div class="routing-detail-mobile-field">
+                <span class="routing-detail-mobile-label">{{ 'COMMON.TYPE' | translate }}</span>
+                <span>{{ item.workEffortContentTypeId || '-' }}</span>
+              </div>
+              <div class="routing-detail-mobile-field">
+                <span class="routing-detail-mobile-label">{{ 'BOM.FROM_DATE' | translate }}</span>
+                <span>{{ formatDate(item.fromDate) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </mat-expansion-panel>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

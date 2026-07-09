@@ -1,0 +1,188 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.status-chip {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 0.8em;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.status-completed {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.run-id {
+  font-family: monospace;
+  font-size: 0.85em;
+  color: var(--mat-sys-primary, #1976d2);
+}
+
+.loading-hint,
+.no-results {
+  text-align: center;
+  opacity: 0.6;
+  padding: 24px 0;
+  margin: 0;
+}
+
+.run-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.control-field {
+  flex: 1 1 240px;
+  max-width: 300px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  padding-bottom: 22px;
+}
+
+.field-action-btn {
+  min-height: 56px;
+  padding: 0 22px;
+}
+
+.field-link-btn {
+  min-height: 56px;
+}
+
+.table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.table-container table {
+  width: 100%;
+}
+
+.mrp-run-mobile-list {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  .run-controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .control-field {
+    min-width: 100%;
+    width: 100%;
+    flex: none;
+  }
+
+  :host ::ng-deep .run-controls .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  :host ::ng-deep .run-controls .mat-mdc-text-field-wrapper {
+    height: 48px;
+  }
+
+  :host ::ng-deep .run-controls .mat-mdc-form-field-infix {
+    min-height: 48px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: auto;
+    gap: 8px;
+    padding-bottom: 0;
+  }
+
+  .actions button {
+    width: 100%;
+    min-height: 48px;
+    line-height: 48px;
+    margin: 0 !important;
+  }
+
+  .mrp-table-container {
+    display: none;
+  }
+
+  .mrp-run-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .mrp-run-mobile-card {
+    display: block;
+    padding: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    background-color: var(--mat-sys-surface, #fff);
+  }
+
+  .mrp-run-mobile-id {
+    display: block;
+    font-size: 1.05em;
+    font-weight: 600;
+    color: var(--mat-sys-primary, #1976d2);
+    margin-bottom: 8px;
+  }
+
+  .mrp-run-mobile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+  }
+
+  .mrp-run-mobile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .mrp-run-mobile-field.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .mrp-run-mobile-label {
+    font-size: 0.75em;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+}
+

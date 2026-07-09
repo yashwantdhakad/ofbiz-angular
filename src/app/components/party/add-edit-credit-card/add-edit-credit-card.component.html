@@ -1,0 +1,196 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-title mat-dialog-title>
+    {{ 'PARTY.CREDIT_CARD_TITLE' | translate }}
+  </mat-card-title>
+  <mat-card-content mat-dialog-content>
+    <form (ngSubmit)="addEditCreditCard()" [formGroup]="addEditCreditCardForm" fxLayout="row wrap"
+      fxLayoutAlign="start">
+      <mat-form-field appearance="outline" fxFlex="100%">
+        <mat-label>{{ 'COMMON.DESCRIPTION' | translate }}</mat-label>
+        <input matInput [placeholder]="'COMMON.DESCRIPTION' | translate" formControlName="description" />
+        <mat-error *ngIf="addEditCreditCardForm.get('description')?.hasError('required')">{{
+          'COMMON.DESCRIPTION_REQUIRED' | translate }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="32%">
+        <mat-label>{{ 'CUSTOMER.FIRST_NAME' | translate }}</mat-label>
+        <input matInput [placeholder]="'CUSTOMER.FIRST_NAME' | translate" formControlName="firstNameOnAccount" />
+        <mat-error *ngIf="addEditCreditCardForm.get('firstNameOnAccount')?.hasError('required')">{{
+          'CUSTOMER.FIRST_NAME' | translate }} {{ 'CUSTOMER.REQUIRED' | translate }}</mat-error>
+      </mat-form-field>
+
+      <span fxFlex="2%"></span>
+
+      <mat-form-field appearance="outline" fxFlex="32%">
+        <mat-label>{{ 'CUSTOMER.LAST_NAME' | translate }}</mat-label>
+        <input matInput [placeholder]="'CUSTOMER.LAST_NAME' | translate" formControlName="lastNameOnAccount" />
+        <mat-error *ngIf="addEditCreditCardForm.get('lastNameOnAccount')?.hasError('required')">{{ 'CUSTOMER.LAST_NAME'
+          | translate }} {{ 'CUSTOMER.REQUIRED' | translate }}</mat-error>
+      </mat-form-field>
+
+      <span fxFlex="2%"></span>
+
+      <mat-form-field appearance="outline" fxFlex="32%">
+        <mat-label>{{ 'PARTY.COMPANY_NAME_ON_ACCOUNT' | translate }}</mat-label>
+        <input matInput [placeholder]="'PARTY.COMPANY_NAME_ON_ACCOUNT' | translate" formControlName="companyNameOnAccount" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="32%">
+        <mat-label>{{ 'PARTY.CREDIT_CARD_TYPE' | translate }}</mat-label>
+        <mat-select formControlName="creditCardTypeEnumId" name="creditCardTypeEnumId">
+          <mat-option *ngFor="let enumType of enumTypes" [value]="enumType.enumId">{{ enumType.description
+            }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="addEditCreditCardForm.get('creditCardTypeEnumId')?.hasError('required')">{{
+          'PARTY.CREDIT_CARD_TYPE_REQUIRED' | translate }}</mat-error>
+      </mat-form-field>
+
+      <span fxFlex="2%"></span>
+
+      <mat-form-field appearance="outline" fxFlex="32%">
+        <mat-label>{{ 'PARTY.CARD_NUMBER' | translate }}</mat-label>
+        <input matInput [placeholder]="'PARTY.CARD_NUMBER' | translate" formControlName="cardNumber" />
+        <mat-error *ngIf="addEditCreditCardForm.get('cardNumber')?.hasError('required')">{{ 'PARTY.CARD_NUMBER_REQUIRED'
+          | translate }}</mat-error>
+      </mat-form-field>
+
+      <span fxFlex="2%"></span>
+
+      <mat-form-field appearance="outline" fxFlex="32%">
+        <mat-label>{{ 'PARTY.CVV' | translate }}</mat-label>
+        <input matInput [placeholder]="'PARTY.CVV' | translate" formControlName="validateSecurityCode" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="49%">
+        <mat-label>{{ 'PARTY.EXPIRE_MONTH' | translate }}</mat-label>
+        <mat-select formControlName="expireMonth" name="expireMonth">
+          <mat-option *ngFor="let month of months" [value]="month">{{ month }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="addEditCreditCardForm.get('expireMonth')?.hasError('required')">{{
+          'PARTY.EXPIRE_MONTH_REQUIRED' | translate }}</mat-error>
+      </mat-form-field>
+
+      <span fxFlex="2%"></span>
+
+      <mat-form-field appearance="outline" fxFlex="49%">
+        <mat-label>{{ 'PARTY.EXPIRE_YEAR' | translate }}</mat-label>
+        <mat-select formControlName="expireYear" name="expireYear">
+          <mat-option *ngFor="let year of years" [value]="year">{{ year }}</mat-option>
+        </mat-select>
+        <mat-error *ngIf="addEditCreditCardForm.get('expireYear')?.hasError('required')">{{ 'PARTY.EXPIRE_YEAR_REQUIRED'
+          | translate }}</mat-error>
+      </mat-form-field>
+
+      <span fxFlex="2%"></span>
+
+      <mat-checkbox fxFlex="100%" formControlName="createNewAddress">
+        {{ 'PARTY.CREATE_NEW_ADDRESS' | translate }}
+      </mat-checkbox>
+
+      <ng-container *ngIf="!addEditCreditCardForm.get('createNewAddress')?.value">
+        <mat-form-field appearance="outline" fxFlex="100%">
+          <mat-label>{{ 'PARTY.SELECT_EXISTING_ADDRESS' | translate }}</mat-label>
+          <mat-select formControlName="existingAddressId" name="existingAddressId">
+            <mat-option *ngFor="let address of existingAddresses" [value]="address.contactMechId">
+              {{ getAddressLabel(address) }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </ng-container>
+
+      <ng-container *ngIf="addEditCreditCardForm.get('createNewAddress')?.value">
+        <mat-form-field appearance="outline" fxFlex="100%">
+          <mat-label>{{ 'PARTY.TO_NAME' | translate }}</mat-label>
+          <input matInput [placeholder]="'PARTY.TO_NAME' | translate" formControlName="toName" />
+          <mat-error *ngIf="addEditCreditCardForm.get('toName')?.hasError('required')">{{ 'PARTY.TO_NAME_REQUIRED' |
+            translate }}</mat-error>
+        </mat-form-field>
+        <mat-form-field *ngIf="existingAddresses.length" appearance="outline" fxFlex="100%">
+          <mat-label>{{ 'PARTY.COPY_FROM_EXISTING_ADDRESS' | translate }}</mat-label>
+          <mat-select formControlName="copyFromAddressId" name="copyFromAddressId">
+            <mat-option *ngFor="let address of existingAddresses" [value]="address.contactMechId">
+              {{ getAddressLabel(address) }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" fxFlex="49%">
+          <mat-label>{{ 'CUSTOMER.ADDRESS1' | translate }}</mat-label>
+          <input matInput [placeholder]="'CUSTOMER.ADDRESS1' | translate" formControlName="address1" />
+          <mat-error *ngIf="addEditCreditCardForm.get('address1')?.hasError('required')">Address 1 is
+            required.</mat-error>
+        </mat-form-field>
+        <span fxFlex="2%"></span>
+
+        <mat-form-field appearance="outline" fxFlex="49%">
+          <mat-label>{{ 'CUSTOMER.ADDRESS2' | translate }}</mat-label>
+          <input matInput [placeholder]="'CUSTOMER.ADDRESS2' | translate" formControlName="address2" />
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" fxFlex="49%">
+          <mat-label>{{ 'CUSTOMER.CITY' | translate }}</mat-label>
+          <input matInput [placeholder]="'CUSTOMER.CITY' | translate" formControlName="city" />
+          <mat-error *ngIf="addEditCreditCardForm.get('city')?.hasError('required')">{{ 'CUSTOMER.CITY' | translate }}
+            {{
+            'CUSTOMER.REQUIRED' | translate }}</mat-error>
+        </mat-form-field>
+        <span fxFlex="2%"></span>
+
+        <mat-form-field appearance="outline" fxFlex="49%">
+          <mat-label>{{ 'CUSTOMER.POSTAL_CODE' | translate }}</mat-label>
+          <input matInput [placeholder]="'CUSTOMER.POSTAL_CODE' | translate" formControlName="postalCode" />
+          <mat-error *ngIf="addEditCreditCardForm.get('postalCode')?.hasError('required')">{{ 'CUSTOMER.POSTAL_CODE' |
+            translate }} {{ 'CUSTOMER.REQUIRED' | translate }}</mat-error>
+        </mat-form-field>
+
+        <!-- Country dropdown -->
+        <mat-form-field appearance="outline" fxFlex="49%">
+          <mat-label>{{ 'CUSTOMER.COUNTRY' | translate }}</mat-label>
+          <mat-select formControlName="countryGeoId" name="countryGeoId">
+            <mat-option *ngFor="let country of countries" [value]="country.geoId">{{ country.geoName }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="addEditCreditCardForm.get('countryGeoId')?.hasError('required')">{{ 'CUSTOMER.COUNTRY' |
+            translate }} {{ 'CUSTOMER.REQUIRED' | translate }}</mat-error>
+        </mat-form-field>
+        <span fxFlex="2%"></span>
+
+        <!-- State dropdown -->
+        <mat-form-field appearance="outline" fxFlex="49%">
+          <mat-label>{{ 'CUSTOMER.STATE' | translate }}</mat-label>
+          <mat-select formControlName="stateProvinceGeoId" name="stateProvinceGeoId">
+            <mat-option *ngFor="let state of states" [value]="state.geoId">{{ state.geoName }}</mat-option>
+          </mat-select>
+          <mat-error *ngIf="addEditCreditCardForm.get('stateProvinceGeoId')?.hasError('required')">
+            {{ 'CUSTOMER.STATE' | translate }} {{ 'CUSTOMER.REQUIRED' | translate }}
+          </mat-error>
+        </mat-form-field>
+      </ng-container>
+
+      <div fxFlex="100%" fxLayoutAlign="start">
+        <button mat-raised-button type="submit" color="primary" class="me-4" [disabled]="isLoading()">
+          <span *ngIf="isLoading()">{{ 'COMMON.LOADING' | translate }}</span>
+          <span *ngIf="!isLoading()">{{ 'COMMON.SAVE' | translate }}</span>
+        </button>
+        <button mat-stroked-button mat-dialog-close>{{ 'COMMON.CANCEL' | translate }}</button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

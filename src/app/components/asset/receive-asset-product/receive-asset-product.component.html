@@ -1,0 +1,226 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-header>
+    <mat-card-title>
+      <h1>{{ 'ASSET.RECEIVE_ASSET' | translate }}</h1>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form
+      class="receive-asset-form"
+      (ngSubmit)="receiveAsset()"
+      [formGroup]="createAssetForm"
+      fxLayout="row wrap"
+      fxLayoutAlign="start"
+    >
+      <mat-form-field fxFlex="70%" appearance="outline">
+        <mat-label>{{ 'COMMON.PRODUCT' | translate }}</mat-label>
+        <input
+          matInput
+          [placeholder]="'COMMON.PRODUCT' | translate"
+          [matAutocomplete]="autoProduct"
+          formControlName="productId"
+        />
+        <mat-autocomplete #autoProduct="matAutocomplete" [displayWith]="displayProduct">
+          <mat-option *ngFor="let product of filteredProducts$ | async" [value]="product">
+            {{ product.productName || product.name || product.productId }}
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error *ngIf="createAssetForm.get('productId')?.hasError('required')">
+          {{ 'COMMON.PRODUCT' | translate }} {{ 'ASSET.REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="34%">
+        <mat-label>Asset Type</mat-label>
+        <mat-select formControlName="inventoryItemTypeId">
+          <mat-option value="NON_SERIAL_INV_ITEM">Non-Serialized (Bulk / Material)</mat-option>
+          <mat-option value="SERIALIZED_INV_ITEM">Serialized (One item per unit)</mat-option>
+        </mat-select>
+        <mat-hint *ngIf="createAssetForm.get('inventoryItemTypeId')?.value === 'SERIALIZED_INV_ITEM'">
+          Auto-detected — one inventory item per unit
+        </mat-hint>
+      </mat-form-field>
+
+      <span fxFlex="2%"></span>
+
+      <mat-form-field appearance="outline" fxFlex="34%">
+        <mat-label>{{ 'COMMON.STATUS' | translate }}</mat-label>
+        <mat-select [placeholder]="'COMMON.STATUS' | translate" formControlName="statusId">
+          <mat-option *ngFor="let status of statusList" [value]="status.statusId">
+            {{ status.description }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="createAssetForm.get('statusId')?.hasError('required')">
+          {{ 'COMMON.STATUS' | translate }} {{ 'ASSET.REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="34%">
+        <mat-label>Serial Number</mat-label>
+        <input matInput placeholder="Serial Number (for serialized assets)" formControlName="serialNumber" />
+        <mat-hint>Required for ship-repair / equipment tracking</mat-hint>
+      </mat-form-field>
+
+      <span fxFlex="2%"></span>
+
+      <mat-form-field appearance="outline" fxFlex="34%">
+        <mat-label>Lot / Heat Number</mat-label>
+        <input
+          matInput
+          placeholder="Type to search lots (e.g. HEAT-DH36)"
+          formControlName="lotId"
+          [matAutocomplete]="autoLot"
+        />
+        <mat-autocomplete #autoLot="matAutocomplete" [displayWith]="displayLot">
+          <mat-option *ngFor="let lot of filteredLots$ | async" [value]="lot">
+            <span>{{ lot.lotId }}</span>
+            <small *ngIf="lot.heatNumber" style="color: #888; margin-left: 8px;">
+              Heat: {{ lot.heatNumber }} | {{ lot.steelGrade }}
+            </small>
+          </mat-option>
+        </mat-autocomplete>
+        <mat-hint>Links this item to a steel heat lot for traceability</mat-hint>
+      </mat-form-field>
+
+      <mat-form-field fxFlex="70%" appearance="outline">
+        <mat-label>Owner Party (Customer / Supplier)</mat-label>
+        <input
+          matInput
+          placeholder="Owner Party (Customer / Supplier)"
+          [matAutocomplete]="autoOwnerParty"
+          formControlName="ownerPartyId"
+        />
+        <mat-autocomplete #autoOwnerParty="matAutocomplete" [displayWith]="displayParty">
+          <mat-option *ngFor="let party of filteredParties$ | async" [value]="party">
+            {{ party.name || party.partyId }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="34%">
+        <mat-label>{{ 'COMMON.FACILITY' | translate }}</mat-label>
+        <mat-select [placeholder]="'COMMON.FACILITY' | translate" formControlName="facilityId">
+          <mat-option *ngFor="let facility of facilities" [value]="facility.facilityId">
+            {{ facility.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="createAssetForm.get('facilityId')?.hasError('required')">
+          {{ 'COMMON.FACILITY' | translate }} {{ 'ASSET.REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+
+      <span fxFlex="2%"></span>
+
+      <mat-form-field appearance="outline" fxFlex="34%">
+        <mat-label>{{ 'COMMON.FACILITY_LOCATION' | translate }}</mat-label>
+        <mat-select [placeholder]="'COMMON.FACILITY_LOCATION' | translate" formControlName="locationSeqId">
+          <mat-option *ngFor="let facilityLocation of facilityLocations" [value]="facilityLocation.locationSeqId">
+            {{ facilityLocation.locationSeqId }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="34%">
+        <mat-label>{{ 'ASSET.QUANTITY' | translate }}</mat-label>
+        <input matInput type="number" min="1" [placeholder]="'ASSET.QUANTITY' | translate" formControlName="quantity" />
+        <mat-hint *ngIf="createAssetForm.get('inventoryItemTypeId')?.value === 'SERIALIZED_INV_ITEM'">
+          Whole number only — each unit becomes its own item
+        </mat-hint>
+        <mat-error *ngIf="createAssetForm.get('quantity')?.hasError('required')">
+          {{ 'ASSET.QUANTITY' | translate }} {{ 'ASSET.REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+
+      <span fxFlex="2%"></span>
+
+      <mat-form-field appearance="outline" fxFlex="34%">
+        <mat-label>{{ 'ASSET.COST' | translate }}</mat-label>
+        <input matInput [placeholder]="'ASSET.COST' | translate" formControlName="acquireCost" />
+        <mat-error *ngIf="createAssetForm.get('acquireCost')?.hasError('required')">
+          {{ 'ASSET.COST' | translate }} {{ 'ASSET.REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+
+      <span fxFlex="30%"></span>
+
+      <mat-form-field appearance="outline" fxFlex="22%">
+        <mat-label>{{ 'ASSET.RECEIVED_DATE' | translate }}</mat-label>
+        <input
+          matInput
+          [matDatepicker]="receivedDate"
+          formControlName="receivedDate"
+          [placeholder]="'ASSET.CHOOSE_DATE' | translate"
+          (click)="receivedDate.open()"
+        />
+        <mat-datepicker-toggle matSuffix [for]="receivedDate"></mat-datepicker-toggle>
+        <mat-datepicker #receivedDate></mat-datepicker>
+      </mat-form-field>
+
+      <span fxFlex="2%"></span>
+
+      <mat-form-field appearance="outline" fxFlex="22%">
+        <mat-label>{{ 'ASSET.MANUFACTURED_DATE' | translate }}</mat-label>
+        <input
+          matInput
+          [matDatepicker]="manufacturedDate"
+          [placeholder]="'ASSET.MANUFACTURED_DATE' | translate"
+          formControlName="manufacturedDate"
+          (click)="manufacturedDate.open()"
+        />
+        <mat-datepicker-toggle matSuffix [for]="manufacturedDate"></mat-datepicker-toggle>
+        <mat-datepicker #manufacturedDate></mat-datepicker>
+      </mat-form-field>
+
+      <span fxFlex="2%"></span>
+
+      <mat-form-field appearance="outline" fxFlex="22%">
+        <mat-label>{{ 'ASSET.EXPIRATION_DATE' | translate }}</mat-label>
+        <input
+          matInput
+          [matDatepicker]="expirationDate"
+          [placeholder]="'ASSET.EXPIRATION_DATE' | translate"
+          formControlName="expirationDate"
+          (click)="expirationDate.open()"
+        />
+        <mat-datepicker-toggle matSuffix [for]="expirationDate"></mat-datepicker-toggle>
+        <mat-datepicker #expirationDate></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="70%">
+        <mat-label>{{ 'ASSET.COMMENT' | translate }}</mat-label>
+        <textarea matInput [placeholder]="'ASSET.ENTER_COMMENT' | translate" formControlName="comments"></textarea>
+      </mat-form-field>
+
+      <div fxFlex="100%" fxLayoutAlign="start">
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="me-4 receive-submit-button"
+          [disabled]="isLoading()"
+        >
+          <span *ngIf="!isLoading()">{{ 'COMMON.SAVE' | translate }}</span>
+          <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

@@ -1,0 +1,138 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<nav class="breadcrumb" aria-label="breadcrumb">
+  <a routerLink="/reports">{{ 'REPORTS.TITLE' | translate }}</a>
+  <mat-icon>chevron_right</mat-icon>
+  <span>{{ 'REPORTS.VENDOR_PERFORMANCE_TITLE' | translate }}</span>
+</nav>
+
+<mat-card class="mat-elevation-z10 report-card">
+  <mat-card-header class="card-header-with-action">
+    <mat-card-title>{{ 'REPORTS.VENDOR_PERFORMANCE_TITLE' | translate }}</mat-card-title>
+    <button mat-stroked-button type="button" (click)="load()">
+      <mat-icon>refresh</mat-icon>
+      {{ 'COMMON.REFRESH' | translate }}
+    </button>
+  </mat-card-header>
+  <mat-card-content>
+    <p class="report-subtitle">{{ 'REPORTS.VENDOR_PERFORMANCE_SUBTITLE' | translate }}</p>
+
+    <div class="filter-row">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'REPORTS.FROM_DATE' | translate }}</mat-label>
+        <input matInput [matDatepicker]="fromPicker" [formControl]="filterForm.controls.fromDate" />
+        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'REPORTS.TO_DATE' | translate }}</mat-label>
+        <input matInput [matDatepicker]="toPicker" [formControl]="filterForm.controls.thruDate" />
+        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+        <mat-datepicker #toPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'REPORTS.TOP_LIMIT' | translate }}</mat-label>
+        <input matInput type="number" min="1" max="100" step="1" [formControl]="filterForm.controls.limit" />
+      </mat-form-field>
+
+      <div class="filter-actions">
+        <button mat-raised-button color="primary" type="button" (click)="load()">
+          <mat-icon>search</mat-icon>
+          {{ 'COMMON.SEARCH' | translate }}
+        </button>
+        <button mat-stroked-button type="button" (click)="reset()">
+          {{ 'COMMON.CLEAR' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <mat-card class="state-card error-card" *ngIf="errorMessage() as errorKey">
+      {{ errorKey | translate }}
+    </mat-card>
+
+    <mat-card class="state-card" *ngIf="loading()">
+      <mat-card-content class="loading-row">
+        <mat-spinner diameter="32"></mat-spinner>
+        <span>{{ 'COMMON.LOADING' | translate }}</span>
+      </mat-card-content>
+    </mat-card>
+
+    <ng-container *ngIf="!loading() && !errorMessage() && report() as vendorReport">
+      <div class="summary-grid">
+        <mat-card class="summary-card" *ngFor="let card of summaryCards()">
+          <div class="summary-label">{{ card.label | translate }}</div>
+          <div class="summary-value">{{ card.value | number:'1.0-1' }}<span class="summary-suffix">{{ card.suffix }}</span></div>
+        </mat-card>
+      </div>
+
+      <mat-card class="table-card">
+        <mat-card-content>
+          <div class="table-container">
+            <table mat-table [dataSource]="vendorReport.items" class="report-table">
+              <ng-container matColumnDef="supplierName">
+                <th mat-header-cell *matHeaderCellDef>{{ 'REPORTS.VENDOR' | translate }}</th>
+                <td mat-cell *matCellDef="let row">
+                  <div class="vendor-cell">
+                    <strong>{{ row.supplierName || row.supplierPartyId }}</strong>
+                    <small>{{ row.supplierPartyId }}</small>
+                  </div>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="purchaseOrderCount">
+                <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'REPORTS.PO_COUNT' | translate }}</th>
+                <td mat-cell *matCellDef="let row" class="text-right">{{ row.purchaseOrderCount | number }}</td>
+              </ng-container>
+              <ng-container matColumnDef="receiptCount">
+                <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'REPORTS.RECEIPTS' | translate }}</th>
+                <td mat-cell *matCellDef="let row" class="text-right">{{ row.receiptCount | number }}</td>
+              </ng-container>
+              <ng-container matColumnDef="onTimeReceiptRate">
+                <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'REPORTS.ON_TIME_RATE' | translate }}</th>
+                <td mat-cell *matCellDef="let row" class="text-right">{{ (row.onTimeReceiptRate * 100) | number:'1.0-1' }}%</td>
+              </ng-container>
+              <ng-container matColumnDef="averageDeliveryDelayDays">
+                <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'REPORTS.AVG_DELAY_DAYS' | translate }}</th>
+                <td mat-cell *matCellDef="let row" class="text-right">{{ row.averageDeliveryDelayDays | number:'1.0-1' }}</td>
+              </ng-container>
+              <ng-container matColumnDef="qualityRejectionRate">
+                <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'REPORTS.REJECTION_RATE' | translate }}</th>
+                <td mat-cell *matCellDef="let row" class="text-right">{{ (row.qualityRejectionRate * 100) | number:'1.0-1' }}%</td>
+              </ng-container>
+              <ng-container matColumnDef="priceVarianceRate">
+                <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'REPORTS.PRICE_VARIANCE' | translate }}</th>
+                <td mat-cell *matCellDef="let row" class="text-right">{{ (row.priceVarianceRate * 100) | number:'1.0-1' }}%</td>
+              </ng-container>
+              <ng-container matColumnDef="score">
+                <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'REPORTS.SCORE' | translate }}</th>
+                <td mat-cell *matCellDef="let row" class="text-right">
+                  <span class="score-chip" [ngClass]="scoreClass(row.score)">{{ row.score | number:'1.0-1' }}</span>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </ng-container>
+  </mat-card-content>
+</mat-card>

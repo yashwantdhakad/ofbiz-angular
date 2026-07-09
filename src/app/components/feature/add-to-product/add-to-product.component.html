@@ -1,0 +1,117 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-title mat-dialog-title>
+    {{ 'FEATURE.ADD_TO_PRODUCT_TITLE' | translate }}
+  </mat-card-title>
+  <mat-card-content mat-dialog-content>
+    <form
+      (ngSubmit)="createProductFeatureAppl()"
+      [formGroup]="createProductFeatureApplForm"
+      fxLayout="row wrap"
+      fxLayoutAlign="start"
+    >
+      <mat-form-field appearance="outline" fxFlex="100%" *ngIf="isNew">
+        <mat-label>{{ 'FEATURE.PRODUCT' | translate }}</mat-label>
+        <input
+          matInput
+          [placeholder]="'FEATURE.PRODUCT' | translate"
+          [matAutocomplete]="auto"
+          formControlName="productId"
+        />
+        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayProduct">
+          <mat-option
+            *ngFor="let product of filteredProducts$ | async"
+            [value]="product"
+          >
+            {{ product.productName || product.name || product.productId }}
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error
+          *ngIf="createProductFeatureApplForm.get('productId')?.hasError('required')"
+          >{{ 'FEATURE.PRODUCT_REQUIRED' | translate }}</mat-error
+        >
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="100%" *ngIf="showFeatureSelector">
+        <mat-label>{{ 'FEATURE.ID' | translate }}</mat-label>
+        <input
+          matInput
+          [placeholder]="'FEATURE.ID' | translate"
+          [matAutocomplete]="featureAuto"
+          formControlName="productFeatureId"
+        />
+        <mat-autocomplete #featureAuto="matAutocomplete" [displayWith]="displayFeature">
+          <mat-option
+            *ngFor="let feature of filteredFeatures$ | async"
+            [value]="feature"
+          >
+            {{ feature.productFeatureId }} - {{ feature.description || feature.abbrev }}
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error
+          *ngIf="createProductFeatureApplForm.get('productFeatureId')?.hasError('required')"
+          >{{ 'FEATURE.FEATURE_REQUIRED' | translate }}</mat-error
+        >
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="100%">
+        <mat-label>{{ 'FEATURE.APPL_TYPE' | translate }}</mat-label>
+        <mat-select formControlName="applTypeEnumId" name="applTypeEnumId">
+          <mat-option
+            *ngFor="let applType of applTypes()"
+            [value]="applType.productFeatureApplTypeId"
+          >{{ applType.description || applType.productFeatureApplTypeId }}</mat-option>
+        </mat-select>
+        <mat-error
+          *ngIf="createProductFeatureApplForm.get('applTypeEnumId')?.hasError('required')"
+          >{{ 'FEATURE.APPL_TYPE_REQUIRED' | translate }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="100%">
+        <mat-label>{{ 'FEATURE.SEQUENCE_NUM' | translate }}</mat-label>
+        <input
+          matInput
+          [placeholder]="'FEATURE.SEQUENCE_NUM' | translate"
+          formControlName="sequenceNum"
+        />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="100%">
+        <mat-label>{{ 'COMMON.AMOUNT' | translate }}</mat-label>
+        <input matInput [placeholder]="'COMMON.AMOUNT' | translate" formControlName="amount" />
+      </mat-form-field>
+
+      <div fxFlex="100%" fxLayoutAlign="start">
+        <button
+          mat-raised-button
+          type="submit"
+          color="primary"
+          class="me-4"
+          data-testid="feature-product-dialog-save"
+          [disabled]="isLoading()"
+        >
+          <span *ngIf="!isLoading()">{{ 'COMMON.SAVE' | translate }}</span>
+          <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+        </button>
+        <button mat-stroked-button mat-dialog-close data-testid="feature-product-dialog-cancel">{{ 'COMMON.CANCEL' | translate }}</button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

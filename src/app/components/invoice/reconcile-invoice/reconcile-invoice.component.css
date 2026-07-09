@@ -1,0 +1,148 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+:host { display: block; padding: 16px; }
+
+.action-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 16px;
+  padding: 10px 16px;
+  background: #f5f5f5;
+  border-radius: 6px;
+}
+.status-chip { font-weight: 600; font-size: 12px; }
+
+.section-card { margin-bottom: 16px; }
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 240px;
+  gap: 24px;
+  padding: 8px 0;
+}
+
+.detail-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 6px;
+  align-items: flex-start;
+}
+.label {
+  font-weight: 600;
+  min-width: 100px;
+  color: #555;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.value { color: #222; font-size: 14px; }
+.vendor-name { font-weight: 500; color: #1565c0; }
+
+.dates-section { border-left: 1px solid #e0e0e0; padding-left: 24px; }
+
+.totals-section {
+  border-left: 1px solid #e0e0e0;
+  padding-left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  justify-content: center;
+}
+.total-row { display: flex; justify-content: space-between; gap: 16px; }
+.total-label { font-size: 13px; color: #555; font-weight: 600; }
+.total-val { font-size: 14px; font-weight: 700; color: #222; }
+.variance-error { color: #c62828 !important; font-weight: 700; }
+.variance-ok { color: #2e7d32; }
+
+.section-panel { margin-bottom: 12px; }
+
+.table-container { overflow-x: auto; }
+
+.reconcile-table {
+  width: 100%;
+  font-size: 13px;
+}
+
+.reconcile-table th { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: #f8f9fa; }
+.reconcile-table td { padding: 6px 12px; }
+.reconcile-table th { padding: 8px 12px; }
+
+.text-right { text-align: right; }
+.link-button {
+  background: none;
+  border: 0;
+  color: #1976d2;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.edit-input {
+  width: 90px;
+  border: 1px solid #1976d2;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 13px;
+  text-align: right;
+}
+
+.editing-row { background: #e3f2fd !important; }
+
+.totals-row td {
+  font-weight: 700;
+  border-top: 2px solid #bdbdbd;
+  background: #f5f5f5;
+  padding: 8px 12px;
+}
+.totals-label { font-weight: 700; color: #333; }
+.totals-val { color: #1565c0; }
+
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  .action-bar {
+    padding: 8px;
+    margin: 4px 0 8px;
+  }
+
+  .overview-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 4px 0;
+  }
+
+  .dates-section,
+  .totals-section {
+    border-left: none;
+    padding-left: 0;
+  }
+
+  .total-row {
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .total-row span:last-child {
+    margin-left: auto;
+  }
+}

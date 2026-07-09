@@ -1,0 +1,159 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.breadcrumb-name {
+  margin-left: 8px;
+  color: #666;
+}
+
+.section-panel {
+  margin-bottom: 12px;
+}
+
+.overview-layout {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.overview-row {
+  margin-bottom: 8px;
+}
+
+.overview-row strong {
+  display: inline-block;
+  min-width: 130px;
+}
+
+.section-actions {
+  margin: 8px 0 12px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.routing-detail-mobile-list {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  mat-list {
+    padding: 0 4px;
+  }
+
+  mat-card-header,
+  mat-card-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .breadcrumb-name {
+    display: block;
+    margin-left: 0;
+  }
+
+  .overview-layout {
+    align-items: flex-start;
+  }
+
+  .overview-row {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .overview-row strong {
+    min-width: 0;
+  }
+
+  .section-actions,
+  .section-actions button {
+    width: 100%;
+  }
+
+  .routing-detail-table-container {
+    display: none;
+  }
+
+  .routing-detail-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .routing-detail-mobile-card {
+    padding: 14px;
+    border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+    border-radius: 8px;
+    background: var(--mat-sys-surface, #fff);
+  }
+
+  .routing-detail-mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 8%, transparent);
+  }
+
+  .routing-detail-mobile-actions {
+    display: flex;
+    flex: 0 0 auto;
+  }
+
+  .routing-detail-mobile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding-top: 12px;
+  }
+
+  .routing-detail-mobile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow-wrap: anywhere;
+  }
+
+  .routing-detail-mobile-label {
+    font-size: 0.78em;
+    font-weight: 500;
+    letter-spacing: 0.4px;
+    opacity: 0.65;
+    text-transform: uppercase;
+  }
+}
+
+@media (max-width: 480px) {
+  .routing-detail-mobile-grid {
+    grid-template-columns: 1fr;
+  }
+}

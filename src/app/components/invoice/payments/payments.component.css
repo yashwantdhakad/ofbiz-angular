@@ -1,0 +1,204 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.payments-page-card,
+.payments-list-card {
+  margin-bottom: 16px;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.filter-field {
+  flex: 1 1 220px;
+  min-width: 220px;
+}
+
+.filter-search {
+  flex: 1.6 1 320px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+  min-height: 56px;
+}
+
+.filter-actions button {
+  min-height: 56px;
+  line-height: 56px;
+  padding: 0 24px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.secondary-text {
+  color: rgba(0, 0, 0, 0.62);
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.loading-state,
+.empty-state {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 180px;
+  color: rgba(0, 0, 0, 0.62);
+}
+
+mat-paginator {
+  margin-top: 8px;
+}
+
+.payments-mobile-list {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .filter-field {
+    min-width: 100%;
+    width: 100%;
+    flex: none;
+  }
+
+  :host ::ng-deep .filter-row .mat-mdc-form-field-subscript-wrapper {
+    display: none;
+  }
+
+  :host ::ng-deep .filter-row .mat-mdc-text-field-wrapper {
+    height: 48px;
+  }
+
+  :host ::ng-deep .filter-row .mat-mdc-form-field-infix {
+    min-height: 48px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+
+  .filter-actions {
+    flex-direction: column;
+    align-items: stretch;
+    min-height: auto;
+    gap: 8px;
+  }
+
+  .filter-actions button {
+    width: 100%;
+    min-height: 48px;
+    line-height: 48px;
+  }
+
+  .payments-table-container {
+    display: none;
+  }
+
+  .payments-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .payments-mobile-card {
+    display: block;
+    padding: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    background-color: var(--mat-sys-surface, #fff);
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.2s ease;
+  }
+
+  .payments-mobile-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .payments-mobile-id {
+    display: block;
+    font-size: 1.05em;
+    font-weight: 600;
+    color: var(--mat-sys-primary, #1976d2);
+    margin-bottom: 8px;
+    text-decoration: none;
+  }
+
+  .payments-mobile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+  }
+
+  .payments-mobile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .wide-mobile-field {
+    grid-column: span 2;
+  }
+
+  .payments-mobile-label {
+    font-size: 0.75em;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+
+  .text-primary {
+    color: var(--mat-sys-primary, #1976d2);
+  }
+}
+

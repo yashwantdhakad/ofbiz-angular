@@ -1,0 +1,331 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+
+<ng-template #content>
+  <mat-list>
+    <mat-list-item>
+      <a [routerLink]="['/boms']">{{ 'BOM.TITLE' | translate }}</a> / {{ productId }}
+    </mat-list-item>
+  </mat-list>
+
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>{{ 'BOM.OVERVIEW' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="overview-grid">
+        <div class="overview-item">
+          <div>
+            <strong>{{ 'BOM.PRODUCT_ID' | translate }}:</strong>
+            <a [routerLink]="['/products', productId]">{{ productId }}</a>
+          </div>
+          <div>
+            <strong>{{ 'BOM.PRODUCT_NAME' | translate }}:</strong>
+            <span>{{ productName || '-' }}</span>
+          </div>
+          <div>
+            <strong>{{ 'BOM.INTERNAL_NAME' | translate }}:</strong>
+            <span>{{ productInternalName || '-' }}</span>
+          </div>
+        </div>
+        <div class="overview-item">
+          <strong>{{ 'BOM.TYPE' | translate }}:</strong>
+          <div>{{ bomTypeLabel || '-' }}</div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <br />
+
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>
+        <div class="card-title-row">
+          <span>{{ 'BOM.REVISION_DOCUMENTS' | translate }}</span>
+          <span class="spacer"></span>
+          <input
+            #bomDocumentInput
+            type="file"
+            hidden
+            (change)="uploadDocument($event)"
+          />
+          <button mat-button color="primary" type="button" (click)="bomDocumentInput.click()">
+            <mat-icon>upload_file</mat-icon>
+            {{ 'BOM.UPLOAD_DOCUMENT' | translate }}
+          </button>
+        </div>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="revision-grid">
+        <div>
+          <span class="detail-label">{{ 'BOM.REVISION' | translate }}</span>
+          <strong>{{ revisionNumber || '-' }}</strong>
+        </div>
+        <div>
+          <span class="detail-label">{{ 'COMMON.STATUS' | translate }}</span>
+          <strong>{{ revisionStatus || '-' }}</strong>
+        </div>
+        <div>
+          <span class="detail-label">{{ 'COMMON.DATE' | translate }}</span>
+          <strong>{{ revisionUpdatedAt ? (revisionUpdatedAt | userDate : 'MM/dd/yyyy hh:mm a') : '-' }}</strong>
+        </div>
+        <div>
+          <span class="detail-label">{{ 'COMMON.NOTE' | translate }}</span>
+          <span>{{ revisionNote || '-' }}</span>
+        </div>
+      </div>
+
+      <div class="document-list" *ngIf="documents.length; else noBomDocuments">
+        <button
+          mat-stroked-button
+          type="button"
+          color="primary"
+          *ngFor="let document of documents"
+          (click)="openDocument(document)"
+        >
+          <mat-icon>description</mat-icon>
+          {{ document.description || document.contentLocation || document.contentId }}
+        </button>
+      </div>
+      <ng-template #noBomDocuments>
+        <div class="muted document-empty">{{ 'BOM.NO_DOCUMENTS' | translate }}</div>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
+
+  <br />
+
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>
+        {{ 'BOM.COMPONENTS' | translate }}
+        <mat-icon
+          matListIcon
+          class="custom-mat-icon custom-icon-align"
+          color="primary"
+          (click)="openAddComponentDialog()"
+        >add</mat-icon>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="components-scroll">
+        <table mat-table [dataSource]="components" class="bom-detail-desktop-table">
+          <ng-container matColumnDef="seq">
+            <th mat-header-cell *matHeaderCellDef>{{ 'BOM.SEQ_NUM' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.seq }}</td>
+          </ng-container>
+          <ng-container matColumnDef="component">
+            <th mat-header-cell *matHeaderCellDef>{{ 'BOM.COMPONENT' | translate }}</th>
+            <td mat-cell *matCellDef="let item">
+              <div>
+                <strong>{{ 'BOM.PRODUCT_ID' | translate }}:</strong>
+                <a *ngIf="item.componentId" [routerLink]="['/products', item.componentId]">
+                  {{ item.componentId }}
+                </a>
+                <span *ngIf="!item.componentId">-</span>
+              </div>
+              <div>
+                <strong>{{ 'BOM.PRODUCT_NAME' | translate }}:</strong>
+                <span>{{ item.componentName || '-' }}</span>
+              </div>
+              <div>
+                <strong>{{ 'BOM.INTERNAL_NAME' | translate }}:</strong>
+                <span>{{ item.componentInternalName || '-' }}</span>
+              </div>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="assocType">
+            <th mat-header-cell *matHeaderCellDef>{{ 'BOM.TYPE' | translate }}</th>
+            <td mat-cell *matCellDef="let item">
+              <div>{{ item.assocTypeLabel || '-' }}</div>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="sequenceNum">
+            <th mat-header-cell *matHeaderCellDef>{{ 'BOM.SEQ_NUM' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.sequenceNum || '-' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="quantity">
+            <th mat-header-cell *matHeaderCellDef>{{ 'BOM.QTY' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.quantity }}</td>
+          </ng-container>
+          <ng-container matColumnDef="fromDate">
+            <th mat-header-cell *matHeaderCellDef>{{ 'BOM.FROM_DATE' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.fromDate | userDate : "MMMM d, y" }}</td>
+          </ng-container>
+          <ng-container matColumnDef="thruDate">
+            <th mat-header-cell *matHeaderCellDef>{{ 'BOM.THRU_DATE' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.thruDate | userDate : "MMMM d, y" }}</td>
+          </ng-container>
+          <ng-container matColumnDef="scrap">
+            <th mat-header-cell *matHeaderCellDef>{{ 'BOM.SCRAP' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.scrap }}</td>
+          </ng-container>
+          <ng-container matColumnDef="inst">
+            <th mat-header-cell *matHeaderCellDef>{{ 'BOM.INST' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.inst }}</td>
+          </ng-container>
+          <ng-container matColumnDef="action">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let item">
+              <mat-icon
+                class="custom-mat-icon custom-icon-align"
+                color="primary"
+                (click)="openEditComponentDialog(item)"
+              >edit</mat-icon>
+              <mat-icon
+                class="custom-mat-icon custom-icon-align"
+                color="warn"
+                (click)="confirmDeleteComponent(item)"
+              >delete</mat-icon>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="componentColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: componentColumns"></tr>
+        </table>
+
+        <div class="bom-detail-mobile-list">
+          <div class="bom-detail-mobile-card" *ngFor="let item of components">
+            <div class="bom-detail-mobile-header">
+              <strong>#{{ item.sequenceNum || item.seq || '-' }}</strong>
+              <div class="bom-detail-mobile-actions">
+                <button mat-icon-button color="primary" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="openEditComponentDialog(item)">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button color="warn" [attr.aria-label]="'COMMON.DELETE' | translate" (click)="confirmDeleteComponent(item)">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+            <div class="bom-detail-mobile-product">
+              <strong>{{ 'BOM.PRODUCT_ID' | translate }}:</strong>
+              <a *ngIf="item.componentId" [routerLink]="['/products', item.componentId]">{{ item.componentId }}</a>
+              <span *ngIf="!item.componentId">-</span>
+            </div>
+            <div class="bom-detail-mobile-product-names">
+              <div><span class="bom-detail-mobile-label">{{ 'BOM.PRODUCT_NAME' | translate }}:</span> {{ item.componentName || '-' }}</div>
+              <div><span class="bom-detail-mobile-label">{{ 'BOM.INTERNAL_NAME' | translate }}:</span> {{ item.componentInternalName || '-' }}</div>
+            </div>
+            <div class="bom-detail-mobile-grid">
+              <div class="bom-detail-mobile-field">
+                <span class="bom-detail-mobile-label">{{ 'BOM.TYPE' | translate }}</span>
+                <span>{{ item.assocTypeLabel || '-' }}</span>
+              </div>
+              <div class="bom-detail-mobile-field">
+                <span class="bom-detail-mobile-label">{{ 'BOM.QTY' | translate }}</span>
+                <span>{{ item.quantity }}</span>
+              </div>
+              <div class="bom-detail-mobile-field">
+                <span class="bom-detail-mobile-label">{{ 'BOM.FROM_DATE' | translate }}</span>
+                <span>{{ item.fromDate | userDate : "MMMM d, y" }}</span>
+              </div>
+              <div class="bom-detail-mobile-field">
+                <span class="bom-detail-mobile-label">{{ 'BOM.THRU_DATE' | translate }}</span>
+                <span>{{ item.thruDate ? (item.thruDate | userDate : "MMMM d, y") : '-' }}</span>
+              </div>
+              <div class="bom-detail-mobile-field">
+                <span class="bom-detail-mobile-label">{{ 'BOM.SCRAP' | translate }}</span>
+                <span>{{ item.scrap }}</span>
+              </div>
+              <div class="bom-detail-mobile-field">
+                <span class="bom-detail-mobile-label">{{ 'BOM.INST' | translate }}</span>
+                <span>{{ item.inst }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <br />
+
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>
+        <div class="card-title-row">
+          <span>{{ 'BOM.SIMULATION_TITLE' | translate }}</span>
+          <span class="spacer"></span>
+          <button mat-stroked-button color="primary" (click)="expandAllSimulation()" [disabled]="!simulationTree.length">
+            {{ 'BOM.EXPAND_ALL' | translate }}
+          </button>
+          <button mat-stroked-button color="basic" (click)="collapseAllSimulation()" [disabled]="!simulationTree.length">
+            {{ 'BOM.COLLAPSE_ALL' | translate }}
+          </button>
+        </div>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div *ngIf="simulationLoading" class="simulation-loading">
+        <mat-progress-spinner [diameter]="36" mode="indeterminate" color="primary"></mat-progress-spinner>
+      </div>
+
+      <div *ngIf="!simulationLoading && simulationError" class="muted">
+        {{ simulationError }}
+      </div>
+
+      <div *ngIf="!simulationLoading && !simulationError && simulationTree.length" class="simulation-tree-wrap">
+        <ng-container
+          *ngTemplateOutlet="simulationNodeTpl; context: { $implicit: simulationTree }">
+        </ng-container>
+      </div>
+
+      <div *ngIf="!simulationLoading && !simulationError && !simulationTree.length" class="muted">
+        {{ 'BOM.NO_SIMULATION_DATA' | translate }}
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <ng-template #simulationNodeTpl let-nodes>
+    <div *ngFor="let node of nodes; trackBy: trackSimulationNode" class="simulation-node" [style.--level]="node.level">
+      <div class="simulation-node-row">
+        <button
+          mat-icon-button
+          class="tree-toggle"
+          [disabled]="!node.children.length"
+          (click)="toggleSimulationNode(node)">
+          <mat-icon *ngIf="node.children.length">{{ isExpanded(node) ? 'expand_more' : 'chevron_right' }}</mat-icon>
+        </button>
+
+        <span class="level-badge">L{{ node.level }}</span>
+
+        <span class="tree-node-label">
+          <a [routerLink]="['/products', node.productId]">{{ node.productId }}</a>
+          <span class="muted"> - {{ node.productName || node.productId }}</span>
+        </span>
+
+        <span class="tree-qty muted">{{ 'BOM.QTY_LABEL' | translate }}: {{ node.quantityFromParent }}</span>
+        <span *ngIf="node.isCycle" class="cycle-badge">{{ 'BOM.CYCLE' | translate }}</span>
+      </div>
+
+      <div class="simulation-children" *ngIf="node.children.length && isExpanded(node)">
+        <ng-container
+          *ngTemplateOutlet="simulationNodeTpl; context: { $implicit: node.children }">
+        </ng-container>
+      </div>
+    </div>
+  </ng-template>
+
+</ng-template>

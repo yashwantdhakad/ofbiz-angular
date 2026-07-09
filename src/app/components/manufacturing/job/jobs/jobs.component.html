@@ -1,0 +1,119 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner
+      [diameter]="60"
+      mode="indeterminate"
+      color="primary"
+    ></mat-progress-spinner>
+  </div>
+</ng-container>
+<ng-template #content>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header class="card-header-with-action">
+      <mat-card-title>{{ 'MANUFACTURING.TITLE' | translate }}</mat-card-title>
+      <button mat-raised-button color="primary" routerLink="/jobs/create">
+        <mat-icon>add</mat-icon> {{ 'MANUFACTURING.CREATE_TITLE' | translate }}
+      </button>
+    </mat-card-header>
+    <mat-card-actions class="jobs-filters">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'COMMON.SEARCH' | translate }}</mat-label>
+        <input
+          matInput
+          [ngModel]="queryString()"
+          (ngModelChange)="queryString.set($event)"
+         
+        />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'COMMON.TYPE' | translate }}</mat-label>
+        <mat-select [ngModel]="selectedPurposeType()" (ngModelChange)="selectedPurposeType.set($event)">
+          <mat-option *ngFor="let purposeType of purposeTypes" [value]="purposeType.value">
+            {{ purposeType.label | translate }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div class="jobs-filter-actions">
+        <button mat-flat-button color="primary" (click)="onSearch()">
+          {{ 'COMMON.SEARCH' | translate }}
+        </button>
+      </div>
+    </mat-card-actions>
+    <mat-card-content>
+      <div class="jobs-table-container">
+        <table mat-table [dataSource]="items()">
+        <ng-container *ngFor="let column of displayedColumns" [matColumnDef]="column.key">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ column.header | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            <ng-container *ngIf="column.key !== 'workEffortId'; else idLink">
+              <ng-container *ngIf="column.key !== 'estimatedStartDate'; else dateField">
+                {{ item[column.key] }}
+              </ng-container>
+              <ng-template #dateField>
+                {{ item.estimatedStartDate | userDate:'MMMM d, y' }}
+              </ng-template>
+            </ng-container>
+            <ng-template #idLink>
+              <a [routerLink]="['/jobs', item.workEffortId]">{{ item.workEffortId }}</a>
+            </ng-template>
+          </td>
+        </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumnKeys()"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumnKeys()"></tr>
+        </table>
+      </div>
+      <div class="jobs-mobile-list">
+        <div class="jobs-mobile-card" *ngFor="let item of items()">
+          <div class="jobs-mobile-header">
+            <span class="jobs-mobile-label">{{ 'MANUFACTURING.JOB_ID' | translate }}</span>
+            <a [routerLink]="['/jobs', item.workEffortId]">{{ item.workEffortId }}</a>
+          </div>
+          <div class="jobs-mobile-name">{{ item.workEffortName || '-' }}</div>
+          <div class="jobs-mobile-grid">
+            <div class="jobs-mobile-field">
+              <span class="jobs-mobile-label">{{ 'COMMON.TYPE' | translate }}</span>
+              <span>{{ item.workEffortPurposeTypeDescription || '-' }}</span>
+            </div>
+            <div class="jobs-mobile-field">
+              <span class="jobs-mobile-label">{{ 'MANUFACTURING.FACILITY_ID' | translate }}</span>
+              <span>{{ item.facilityName || '-' }}</span>
+            </div>
+            <div class="jobs-mobile-field">
+              <span class="jobs-mobile-label">{{ 'MANUFACTURING.STATUS_ID' | translate }}</span>
+              <span>{{ item.statusDescription || '-' }}</span>
+            </div>
+            <div class="jobs-mobile-field">
+              <span class="jobs-mobile-label">{{ 'MANUFACTURING.START_DATE' | translate }}</span>
+              <span>{{ item.estimatedStartDate | userDate:'MMMM d, y' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <mat-paginator
+        [pageIndex]="pagination().page - 1"
+        [pageSize]="pagination().rowsPerPage"
+        [length]="pages()"
+        (page)="onPageChange($event.pageIndex)"
+      ></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

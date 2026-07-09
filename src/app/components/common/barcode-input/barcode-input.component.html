@@ -1,0 +1,108 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<div class="barcode-input">
+  <mat-form-field appearance="outline" class="barcode-input__field">
+    <mat-label>{{ labelKey | translate }}</mat-label>
+    <input
+      matInput
+      [(ngModel)]="manualValue"
+      [placeholder]="placeholderKey | translate"
+      (keyup.enter)="submitManualValue()"
+      autocomplete="off"
+      inputmode="text"
+    />
+  </mat-form-field>
+
+  <button
+    mat-stroked-button
+    color="primary"
+    type="button"
+    class="barcode-input__submit"
+    (click)="submitManualValue()"
+  >
+    <mat-icon>keyboard_return</mat-icon>
+    {{ 'BARCODE.USE_VALUE' | translate }}
+  </button>
+
+  <button
+    mat-raised-button
+    color="primary"
+    type="button"
+    class="barcode-input__scan"
+    (click)="openScanner()"
+  >
+    <mat-icon>qr_code_scanner</mat-icon>
+    {{ 'BARCODE.SCAN' | translate }}
+  </button>
+</div>
+
+<div
+  *ngIf="scannerOpen()"
+  class="barcode-overlay"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="'BARCODE.SCANNER_TITLE' | translate"
+>
+  <div class="barcode-overlay__panel">
+    <div class="barcode-overlay__header">
+      <div>
+        <h2>{{ 'BARCODE.SCANNER_TITLE' | translate }}</h2>
+        <p>{{ 'BARCODE.SCANNER_HELP' | translate }}</p>
+      </div>
+      <button
+        mat-icon-button
+        type="button"
+        [attr.aria-label]="'COMMON.CLOSE' | translate"
+        (click)="closeScanner()"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="barcode-overlay__viewport" *ngIf="cameraAvailable() && !permissionDenied(); else cameraFallback">
+      <zxing-scanner
+        [enable]="scannerOpen()"
+        [device]="selectedDevice()"
+        [formats]="formats"
+        [autostart]="true"
+        [tryHarder]="true"
+        [videoConstraints]="{ facingMode: { ideal: 'environment' } }"
+        (scanSuccess)="onScanSuccess($event)"
+        (scanError)="onScanError()"
+        (camerasFound)="onCamerasFound($event)"
+        (camerasNotFound)="onCamerasNotFound()"
+        (permissionResponse)="onPermissionResponse($event)"
+      ></zxing-scanner>
+      <div class="barcode-overlay__target" aria-hidden="true"></div>
+    </div>
+
+    <ng-template #cameraFallback>
+      <div class="barcode-overlay__fallback">
+        <mat-icon>no_photography</mat-icon>
+        <p>
+          {{ (permissionDenied() ? 'BARCODE.PERMISSION_DENIED' : 'BARCODE.CAMERA_UNAVAILABLE') | translate }}
+        </p>
+      </div>
+    </ng-template>
+
+    <button mat-stroked-button type="button" class="barcode-overlay__close" (click)="closeScanner()">
+      {{ 'COMMON.CLOSE' | translate }}
+    </button>
+  </div>
+</div>

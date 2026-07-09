@@ -1,0 +1,224 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.breadcrumb-list {
+  margin-bottom: 8px;
+}
+
+.header-card,
+.content-card {
+  margin-bottom: 20px;
+}
+
+.header-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.header-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.actions-row {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+/* ─── Desktop table ─────────────────────────────────────────── */
+.table-wrap {
+  overflow: auto;
+}
+
+.full-width-table {
+  width: 100%;
+}
+
+.session-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 28px;
+}
+
+.loader-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+/* Mobile cards hidden on desktop */
+.mobile-review-list {
+  display: none;
+}
+
+/* ─── Tablet ────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .header-top-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* ─── Mobile ────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  .breadcrumb-list {
+    margin-bottom: 4px;
+  }
+
+  .header-top-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .session-meta {
+    gap: 12px;
+    font-size: 0.85rem;
+    color: rgba(0, 0, 0, 0.65);
+  }
+
+  .actions-row {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .actions-row button {
+    width: 100%;
+  }
+
+  /* Hide desktop table */
+  .table-wrap {
+    display: none;
+  }
+
+  /* Mobile review cards */
+  .mobile-review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .mobile-review-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 10px;
+    background: var(--mat-sys-surface, #fff);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .mobile-review-card.selected {
+    border-color: var(--mat-sys-primary, #1976d2);
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
+  }
+
+  .mobile-review-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .mobile-review-header-info {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .mobile-review-ltn {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--mat-sys-primary, #1976d2);
+  }
+
+  .mobile-review-part {
+    font-size: 0.8rem;
+    color: rgba(0, 0, 0, 0.5);
+    margin-top: 2px;
+  }
+
+  .mobile-review-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    font-size: 0.82rem;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .mobile-review-meta span strong {
+    color: rgba(0, 0, 0, 0.75);
+    font-weight: 600;
+  }
+
+  .mobile-review-qty-row {
+    display: flex;
+    gap: 20px;
+    font-size: 0.85rem;
+    padding: 8px 10px;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 6px;
+  }
+
+  .mobile-review-qty-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .mobile-review-qty-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(0, 0, 0, 0.6);
+  }
+
+  .mobile-review-qty-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.8);
+  }
+
+  .mobile-review-qty-value.variance-neg {
+    color: #c62828;
+  }
+
+  .mobile-review-qty-value.variance-pos {
+    color: #2e7d32;
+  }
+}
+

@@ -1,0 +1,215 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.tree-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+  background: #fdfdfd;
+  border-radius: 12px;
+  overflow-x: auto;
+}
+
+.tree-root-section {
+  display: flex;
+  justify-content: center;
+  z-index: 10;
+}
+
+.node-card {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 14px 18px;
+  width: 220px;
+  transition: all 0.3s ease;
+}
+
+.node-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.root-node {
+  border-left: 5px solid #1976d2;
+  background: linear-gradient(135deg, #ffffff 0%, #f0f4c3 100%);
+}
+
+.plate-node {
+  border-left: 5px solid #ff9800;
+  background: linear-gradient(135deg, #ffffff 0%, #fff3e0 100%);
+}
+
+.child-node {
+  border-left: 5px solid #4caf50;
+  background: linear-gradient(135deg, #ffffff 0%, #e8f5e9 100%);
+}
+
+.child-node.scrap-node {
+  border-left: 5px solid #f44336;
+  background: linear-gradient(135deg, #ffffff 0%, #ffebee 100%);
+}
+
+.node-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.node-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #555;
+}
+
+.node-title {
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.node-details {
+  font-size: 0.75rem;
+  color: #666;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dashed #f0f0f0;
+  padding-bottom: 2px;
+}
+
+.detail-row strong {
+  font-weight: 600;
+}
+
+.monospace {
+  font-family: monospace;
+}
+
+.vertical-connector {
+  width: 2px;
+  height: 24px;
+  background-color: #bdbdbd;
+}
+
+.plates-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  width: 100%;
+  align-items: center;
+}
+
+.plate-branch {
+  display: flex;
+  align-items: center;
+  position: relative;
+  gap: 24px;
+  justify-content: center;
+  width: 100%;
+}
+
+.horizontal-connector-bar {
+  height: 2px;
+  background-color: #bdbdbd;
+  flex-grow: 0;
+  width: 40px;
+  min-width: 40px;
+  position: relative;
+}
+
+.horizontal-connector-bar::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: -4px;
+  width: 0;
+  height: 0;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-left: 6px solid #bdbdbd;
+}
+
+.children-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-left: 2px dashed #4caf50;
+  padding-left: 16px;
+}
+
+.children-container:has(.scrap-item) {
+  border-left-color: #ff9800;
+}
+
+.child-node-item {
+  position: relative;
+}
+
+.child-node-item::before {
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  width: 16px;
+  height: 2px;
+  background-color: #4caf50;
+}
+
+.child-node-item.scrap-item::before {
+  background-color: #f44336;
+}
+
+.tree-no-data {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+  background: #f9f9f9;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.no-data-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #bbb;
+  margin-bottom: 12px;
+}
+
+.no-data-text {
+  font-size: 0.9rem;
+  color: #777;
+  max-width: 400px;
+}

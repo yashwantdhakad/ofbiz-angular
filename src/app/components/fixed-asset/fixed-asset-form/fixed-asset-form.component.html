@@ -1,0 +1,217 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<section class="form-page">
+  <header class="page-header">
+    <div>
+      <h1>{{ (isEditMode() ? 'FIXED_ASSET.EDIT_TITLE' : 'FIXED_ASSET.CREATE_TITLE') | translate }}</h1>
+      <p>{{ 'FIXED_ASSET.SUBTITLE' | translate }}</p>
+    </div>
+  </header>
+
+  <div class="state-panel" *ngIf="isLoading()">
+    <mat-spinner diameter="32"></mat-spinner>
+  </div>
+
+  <form class="form-grid" *ngIf="!isLoading()" [formGroup]="assetForm" (ngSubmit)="save()">
+    <section class="form-section full-span">
+      <h2>{{ 'FIXED_ASSET.IDENTITY' | translate }}</h2>
+      <div class="grid">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.ASSET_ID' | translate }}</mat-label>
+          <input matInput formControlName="fixedAssetId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.ASSET_NAME' | translate }}</mat-label>
+          <input matInput formControlName="fixedAssetName" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.TYPE' | translate }}</mat-label>
+          <mat-select formControlName="fixedAssetTypeId">
+            <mat-option *ngFor="let type of fixedAssetTypes(); trackBy: trackByType" [value]="type.fixedAssetTypeId">
+              {{ type.description || type.fixedAssetTypeId }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.STATUS' | translate }}</mat-label>
+          <mat-select formControlName="currentStatusId">
+            <mat-option *ngFor="let status of statusOptions(); trackBy: trackByStatus" [value]="status.statusId">
+              {{ status.description || status.statusId }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.PARENT_ASSET' | translate }}</mat-label>
+          <input matInput formControlName="parentFixedAssetId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.PRODUCT' | translate }}</mat-label>
+          <input matInput formControlName="instanceOfProductId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.CLASS' | translate }}</mat-label>
+          <input matInput formControlName="classEnumId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.SERIAL_NUMBER' | translate }}</mat-label>
+          <input matInput formControlName="serialNumber" autocomplete="off">
+        </mat-form-field>
+      </div>
+    </section>
+
+    <section class="form-section full-span">
+      <h2>{{ 'FIXED_ASSET.LOCATION' | translate }}</h2>
+      <div class="grid">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.FACILITY' | translate }}</mat-label>
+          <input matInput formControlName="locatedAtFacilityId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.LOCATION_SEQ' | translate }}</mat-label>
+          <input matInput formControlName="locatedAtLocationSeqId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.PARTY' | translate }}</mat-label>
+          <input matInput formControlName="partyId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.ROLE' | translate }}</mat-label>
+          <input matInput formControlName="roleTypeId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.RECEIPT_ID' | translate }}</mat-label>
+          <input matInput formControlName="receiptId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.ORDER_ID' | translate }}</mat-label>
+          <input matInput formControlName="acquireOrderId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.ORDER_ITEM_SEQ_ID' | translate }}</mat-label>
+          <input matInput formControlName="acquireOrderItemSeqId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.WORK_EFFORT_ID' | translate }}</mat-label>
+          <input matInput formControlName="workEffortId" autocomplete="off">
+        </mat-form-field>
+      </div>
+    </section>
+
+    <section class="form-section full-span">
+      <h2>{{ 'FIXED_ASSET.COST_AND_LIFE' | translate }}</h2>
+      <div class="grid">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.ACQUIRED_ON' | translate }}</mat-label>
+          <input matInput type="datetime-local" formControlName="dateAcquired">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.LAST_SERVED_ON' | translate }}</mat-label>
+          <input matInput type="datetime-local" formControlName="dateLastServiced">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.NEXT_SERVICE' | translate }}</mat-label>
+          <input matInput type="datetime-local" formControlName="dateNextService">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.END_OF_LIFE' | translate }}</mat-label>
+          <input matInput type="date" formControlName="expectedEndOfLife">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.ACTUAL_END_OF_LIFE' | translate }}</mat-label>
+          <input matInput type="date" formControlName="actualEndOfLife">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.PURCHASE_COST' | translate }}</mat-label>
+          <input matInput type="number" formControlName="purchaseCost">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.PURCHASE_COST_UOM' | translate }}</mat-label>
+          <input matInput formControlName="purchaseCostUomId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.SALVAGE_VALUE' | translate }}</mat-label>
+          <input matInput type="number" formControlName="salvageValue">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.DEPRECIATION' | translate }}</mat-label>
+          <input matInput type="number" formControlName="depreciation">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.QUANTITY' | translate }}</mat-label>
+          <input matInput type="number" formControlName="quantity">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.PRODUCTION_CAPACITY' | translate }}</mat-label>
+          <input matInput type="number" formControlName="productionCapacity">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.UOM' | translate }}</mat-label>
+          <input matInput formControlName="uomId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.CALENDAR' | translate }}</mat-label>
+          <input matInput formControlName="calendarId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.ANNUAL_FLIGHT_HOURS' | translate }}</mat-label>
+          <input matInput type="number" formControlName="annualFlightHours">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.OEM_DISCOUNT' | translate }}</mat-label>
+          <input matInput type="number" formControlName="oemDiscount">
+        </mat-form-field>
+      </div>
+    </section>
+
+    <section class="form-section full-span">
+      <h2>{{ 'FIXED_ASSET.SYSTEM' | translate }}</h2>
+      <div class="grid">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.INVENTORY_ITEM_ID' | translate }}</mat-label>
+          <input matInput formControlName="inventoryItemId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.ACQUIRE_JOB_ID' | translate }}</mat-label>
+          <input matInput formControlName="acquireJobId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.TA_ACQUISITION_SLOT' | translate }}</mat-label>
+          <input matInput formControlName="taAcquisitionSlot" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'FIXED_ASSET.REASON' | translate }}</mat-label>
+          <input matInput formControlName="reasonEnumId" autocomplete="off">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-span">
+          <mat-label>{{ 'FIXED_ASSET.BUILD_COST' | translate }}</mat-label>
+          <input matInput formControlName="buildCost" autocomplete="off">
+        </mat-form-field>
+      </div>
+    </section>
+
+    <div class="actions full-span">
+      <button mat-flat-button color="primary" type="submit" [disabled]="isSaving()">
+        {{ (isEditMode() ? 'COMMON.SAVE' : 'COMMON.CREATE') | translate }}
+      </button>
+      <button mat-stroked-button type="button" (click)="cancel()">
+        {{ 'COMMON.CANCEL' | translate }}
+      </button>
+    </div>
+  </form>
+</section>

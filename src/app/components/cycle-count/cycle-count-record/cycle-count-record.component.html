@@ -1,0 +1,167 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-list class="breadcrumb-list">
+  <mat-list-item>
+    <a [routerLink]="['/cycle-count/find']">{{ 'CYCLE_COUNT.FIND_TITLE' | translate }}</a> / {{ sessionIdValue() }} / {{ 'CYCLE_COUNT.RECORD_TITLE' | translate }}
+  </mat-list-item>
+</mat-list>
+
+<mat-card class="mat-elevation-z10 header-card">
+  <mat-card-content>
+    <div class="header-top-row">
+      <div class="header-copy">
+        <h1 class="page-title">{{ 'CYCLE_COUNT.RECORD_TITLE' | translate }}</h1>
+        <div class="session-meta">
+          <span>{{ 'CYCLE_COUNT.SESSION' | translate }}: {{ detail()?.sessionId }}</span>
+          <span>{{ 'COMMON.FACILITY' | translate }}: {{ detail()?.facilityId }}</span>
+          <span>{{ 'COMMON.STATUS' | translate }}: {{ getStatusLabel(detail()?.statusId) }}</span>
+        </div>
+      </div>
+      <div class="actions-row">
+        <button *ngIf="canOpenReview" mat-stroked-button color="primary" [routerLink]="['/cycle-count/review', sessionIdValue()]">{{ 'CYCLE_COUNT.REVIEW_TITLE' | translate }}</button>
+        <button mat-raised-button color="primary" (click)="saveCounts()" [disabled]="saving() || !canEdit">{{ 'CYCLE_COUNT.SAVE_ALL_COUNTS' | translate }}</button>
+        <button mat-raised-button color="accent" (click)="submit()" [disabled]="submitting() || !canEdit">{{ 'CYCLE_COUNT.SUBMIT_FOR_REVIEW' | translate }}</button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="mat-elevation-z10 content-card">
+  <mat-card-content>
+    <!-- Desktop table -->
+    <div class="table-wrap" *ngIf="!loading(); else loadingTpl">
+      <table mat-table [dataSource]="detail()?.items || []" class="full-width-table">
+        <ng-container matColumnDef="inventoryItemId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.LTN' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.inventoryItemId }}</td>
+        </ng-container>
+        <ng-container matColumnDef="locationSeqId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.LOCATION' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.locationSeqId || '-' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="productIdentifier">
+          <th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.PART_NUMBER' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.productIdentifier || row.productId || '-' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="itemStatusId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ getStatusLabel(row.itemStatusId) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="systemQoh">
+          <th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.SYSTEM_QOH' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.systemQoh ?? 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="variance">
+          <th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.QTY_VARIANCE' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.variance === null || row.variance === undefined ? '-' : row.variance }}</td>
+        </ng-container>
+        <ng-container matColumnDef="countedQuantity">
+          <th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.QTY_COUNTED' | translate }}</th>
+          <td mat-cell *matCellDef="let row" class="count-cell">
+            <mat-form-field appearance="outline" class="count-input">
+              <input
+                matInput
+                type="number"
+                [disabled]="!isRowEditable(row)"
+                [ngModel]="row.countedQuantity"
+                (ngModelChange)="onCountChange(row, $event)"
+              />
+            </mat-form-field>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="rowSave">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.SAVE' | translate }}</th>
+          <td mat-cell *matCellDef="let row" class="row-action-cell">
+            <button
+              mat-icon-button
+              color="primary"
+              [matTooltip]="'CYCLE_COUNT.SAVE_COUNT' | translate"
+              [attr.aria-label]="'CYCLE_COUNT.SAVE_COUNT' | translate"
+              [disabled]="!isRowEditable(row) || savingRowSeqId() === row.inventoryCountItemSeqId"
+              (click)="saveRow(row)"
+            >
+              <mat-icon>save</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <!-- Mobile item cards -->
+    <div class="mobile-items-list" *ngIf="!loading()">
+      <div class="mobile-item-card" *ngFor="let row of (detail()?.items || [])">
+        <div class="mobile-item-header">
+          <div>
+            <div class="mobile-item-ltn">{{ row.inventoryItemId }}</div>
+            <div class="mobile-item-part" *ngIf="row.productIdentifier || row.productId">
+              {{ row.productIdentifier || row.productId }}
+            </div>
+          </div>
+          <app-status-chip [status]="getStatusLabel(row.itemStatusId)" [statusId]="row.itemStatusId"></app-status-chip>
+        </div>
+
+        <div class="mobile-item-meta">
+          <span *ngIf="row.locationSeqId"><strong>{{ 'COMMON.LOCATION' | translate }}:</strong> {{ row.locationSeqId }}</span>
+          <span><strong>{{ 'CYCLE_COUNT.SYSTEM_QOH' | translate }}:</strong> {{ row.systemQoh ?? 0 }}</span>
+        </div>
+
+        <div class="mobile-count-row">
+          <span class="mobile-count-label">{{ 'CYCLE_COUNT.QTY_COUNTED' | translate }}:</span>
+          <mat-form-field appearance="outline" class="mobile-count-field">
+            <input
+              matInput
+              type="number"
+              inputmode="numeric"
+              [disabled]="!isRowEditable(row)"
+              [ngModel]="row.countedQuantity"
+              (ngModelChange)="onCountChange(row, $event)"
+            />
+          </mat-form-field>
+          <button
+            mat-mini-fab
+            color="primary"
+            class="mobile-save-btn"
+            [attr.aria-label]="'CYCLE_COUNT.SAVE_COUNT' | translate"
+            [disabled]="!isRowEditable(row) || savingRowSeqId() === row.inventoryCountItemSeqId"
+            (click)="saveRow(row)"
+          >
+            <mat-icon>save</mat-icon>
+          </button>
+        </div>
+
+        <div
+          class="mobile-variance"
+          *ngIf="row.variance !== null && row.variance !== undefined"
+          [class.negative]="row.variance < 0"
+          [class.positive]="row.variance > 0"
+        >
+          {{ 'CYCLE_COUNT.QTY_VARIANCE' | translate }}: {{ row.variance }}
+        </div>
+      </div>
+    </div>
+
+    <ng-template #loadingTpl>
+      <div class="loader-wrap"><mat-progress-spinner [diameter]="48" mode="indeterminate"></mat-progress-spinner></div>
+    </ng-template>
+  </mat-card-content>
+</mat-card>
+

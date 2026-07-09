@@ -1,0 +1,430 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.align-button {
+  display: flex;
+  align-items: center;
+}
+
+.product-overview-grid {
+  box-sizing: border-box;
+  padding: 0 16px 16px;
+}
+
+.table-scroll {
+  max-height: 360px;
+  overflow: auto;
+}
+
+.product-detail-table-container {
+  display: block;
+}
+
+.product-mobile-list {
+  display: none;
+}
+
+.product-mobile-card {
+  position: relative;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 16px 56px 16px 16px;
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+}
+
+.product-mobile-card + .product-mobile-card {
+  margin-top: 12px;
+}
+
+.product-mobile-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.product-mobile-id {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.8);
+  word-break: break-word;
+}
+
+.product-mobile-subtitle {
+  margin-top: 4px;
+  color: rgba(0, 0, 0, 0.58);
+  font-size: 0.88rem;
+  word-break: break-word;
+}
+
+.product-mobile-actions {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.product-mobile-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+}
+
+.product-mobile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.product-mobile-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.52);
+}
+
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px 20px;
+  align-items: start;
+}
+
+
+.config-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+  line-height: 1.2;
+}
+
+.config-row mat-checkbox {
+  margin-left: 4px;
+}
+
+:host ::ng-deep .config-row .mat-mdc-checkbox {
+  transform: scale(0.85);
+  transform-origin: left center;
+  min-height: 0;
+}
+
+:host ::ng-deep .config-row .mat-mdc-checkbox .mdc-form-field {
+  min-height: 0;
+  height: 24px;
+  align-items: center;
+}
+
+/* Facility Section Styles */
+.facility-section {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 16px;
+  background-color: #fafafa;
+}
+
+.facility-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.facility-details {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.locations-section {
+  margin-top: 16px;
+}
+
+.locations-section h4 {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.custom-mat-icon {
+  cursor: pointer;
+}
+
+.facility-scroll-container {
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.shipping-flags-row {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 12px;
+}
+
+.shipping-config-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.shipping-config-subcard {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+  background-color: var(--mat-sys-surface, #fff);
+  box-shadow: none !important;
+}
+
+.shipping-config-title {
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  color: var(--mat-sys-primary, #1976d2) !important;
+  padding: 8px 12px 0 !important;
+}
+
+.shipping-config-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 12px !important;
+}
+
+.shipping-config-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.shipping-config-label {
+  font-size: 0.75em;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.identification-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.identification-overview-card {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 18px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  background: #fff;
+}
+
+.identification-overview-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.identification-overview-item span {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.identification-overview-item strong {
+  font-size: 1rem;
+  font-weight: 400;
+  word-break: break-word;
+}
+
+.identification-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+button.custom-icon-align {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 2px;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+button.custom-icon-align .custom-mat-icon,
+button.custom-icon-align .mat-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  line-height: 20px;
+}
+
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  mat-list {
+    padding: 0 4px;
+  }
+
+  mat-list-item {
+    overflow-wrap: anywhere;
+  }
+
+  mat-card {
+    min-width: 0;
+  }
+
+  mat-card-header,
+  mat-card-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  mat-card-title {
+    font-size: 18px;
+    line-height: 1.3;
+  }
+
+  .product-overview-grid {
+    width: 100%;
+    gap: 16px;
+    padding: 0 12px 12px;
+  }
+
+  .product-overview-grid > mat-card {
+    width: 100%;
+    margin: 0;
+    flex: 1 1 100% !important;
+    max-width: 100% !important;
+  }
+
+  .custom-list {
+    padding-left: 0;
+  }
+
+  .custom-list-item {
+    overflow-wrap: anywhere;
+  }
+
+  .shipping-flags-row {
+    display: grid;
+    gap: 8px;
+  }
+
+  .product-detail-table-container,
+  .table-scroll,
+  .locations-section {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .product-detail-table-container table,
+  .table-scroll table,
+  .locations-section table {
+    min-width: 680px;
+  }
+
+  .product-mobile-list {
+    display: block;
+  }
+
+  .product-detail-table-container {
+    display: none;
+  }
+
+  .facility-scroll-container {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .facility-section {
+    padding: 12px;
+  }
+
+  .facility-header {
+    align-items: flex-start !important;
+    gap: 8px;
+  }
+
+  .facility-toggle-button {
+    min-width: 0;
+    text-align: left;
+  }
+
+  .facility-toggle-button h3 {
+    overflow-wrap: anywhere;
+  }
+
+  .facility-details {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  .locations-section {
+    padding-left: 0 !important;
+  }
+
+  .identification-overview-card {
+    padding: 14px;
+  }
+
+  button.custom-icon-align {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    padding: 12px;
+  }
+
+  .shipping-config-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .shipping-config-details {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .product-mobile-card {
+    padding: 14px 52px 14px 14px;
+  }
+
+  .product-mobile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-mobile-card-header {
+    flex-direction: column;
+  }
+}

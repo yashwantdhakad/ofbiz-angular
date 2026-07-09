@@ -1,0 +1,136 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-header class="card-header-with-action">
+    <mat-card-title>{{ 'FIXED_ASSET.FIND_TITLE' | translate }}</mat-card-title>
+    <button mat-raised-button color="primary" type="button" (click)="createAsset()">
+      <mat-icon>add</mat-icon> {{ 'FIXED_ASSET.CREATE_BUTTON' | translate }}
+    </button>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="filter-row">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'FIXED_ASSET.ASSET_ID' | translate }}</mat-label>
+        <input matInput [ngModel]="fixedAssetIdFilter()" (ngModelChange)="fixedAssetIdFilter.set($event)" autocomplete="off">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'FIXED_ASSET.ASSET_NAME' | translate }}</mat-label>
+        <input matInput [ngModel]="fixedAssetNameFilter()" (ngModelChange)="fixedAssetNameFilter.set($event)" autocomplete="off">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'FIXED_ASSET.TYPE' | translate }}</mat-label>
+        <input matInput [ngModel]="fixedAssetTypeFilter()" (ngModelChange)="fixedAssetTypeFilter.set($event)" autocomplete="off">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'FIXED_ASSET.STATUS' | translate }}</mat-label>
+        <input matInput [ngModel]="statusFilter()" (ngModelChange)="statusFilter.set($event)" autocomplete="off">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'FIXED_ASSET.FACILITY' | translate }}</mat-label>
+        <input matInput [ngModel]="facilityFilter()" (ngModelChange)="facilityFilter.set($event)" autocomplete="off">
+      </mat-form-field>
+
+      <div class="filter-actions">
+        <button mat-raised-button color="primary" type="button" (click)="searchAssets()">
+          <mat-icon>search</mat-icon>
+          {{ 'COMMON.SEARCH' | translate }}
+        </button>
+        <button mat-stroked-button type="button" (click)="clearFilters()">
+          {{ 'COMMON.CLEAR' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <p *ngIf="!hasSearched()" class="search-hint">{{ 'FIXED_ASSET.SEARCH_TO_LOAD' | translate }}</p>
+
+    <div class="table-container" *ngIf="hasSearched()">
+      <table mat-table [dataSource]="pagedAssets()">
+        <ng-container matColumnDef="fixedAssetId">
+          <th mat-header-cell *matHeaderCellDef class="text-left">{{ 'FIXED_ASSET.ASSET_ID' | translate }}</th>
+          <td mat-cell *matCellDef="let row" class="text-left">
+            <a [routerLink]="['/fixed-assets', row.id]">{{ row.fixedAssetId || row.id }}</a>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="fixedAssetName">
+          <th mat-header-cell *matHeaderCellDef class="text-left">{{ 'FIXED_ASSET.ASSET_NAME' | translate }}</th>
+          <td mat-cell *matCellDef="let row" class="text-left">{{ row.fixedAssetName || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="fixedAssetTypeId">
+          <th mat-header-cell *matHeaderCellDef class="text-left">{{ 'FIXED_ASSET.TYPE' | translate }}</th>
+          <td mat-cell *matCellDef="let row" class="text-left">{{ getTypeLabel(row.fixedAssetTypeId) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="currentStatusId">
+          <th mat-header-cell *matHeaderCellDef class="text-left">{{ 'FIXED_ASSET.STATUS' | translate }}</th>
+          <td mat-cell *matCellDef="let row" class="text-left">{{ getStatusLabel(row.currentStatusId) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="locatedAtFacilityId">
+          <th mat-header-cell *matHeaderCellDef class="text-left">{{ 'FIXED_ASSET.FACILITY' | translate }}</th>
+          <td mat-cell *matCellDef="let row" class="text-left">{{ row.locatedAtFacilityId || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="purchaseCost">
+          <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'FIXED_ASSET.PURCHASE_COST' | translate }}</th>
+          <td mat-cell *matCellDef="let row" class="text-right">{{ row.purchaseCost || 0 }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="serialNumber">
+          <th mat-header-cell *matHeaderCellDef class="text-left">{{ 'FIXED_ASSET.SERIAL_NUMBER' | translate }}</th>
+          <td mat-cell *matCellDef="let row" class="text-left">{{ row.serialNumber || '-' }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" (click)="openAsset(row)"></tr>
+      </table>
+    </div>
+
+    <div class="asset-mobile-list" *ngIf="hasSearched()">
+      <a class="asset-mobile-card" *ngFor="let row of pagedAssets(); trackBy: trackAsset" [routerLink]="['/fixed-assets', row.id]">
+        <strong>{{ row.fixedAssetName || row.fixedAssetId || ('FIXED_ASSET.UNTITLED' | translate) }}</strong>
+        <span>{{ row.fixedAssetId || '-' }}</span>
+        <small>{{ getTypeLabel(row.fixedAssetTypeId) }} · {{ getStatusLabel(row.currentStatusId) }}</small>
+      </a>
+    </div>
+
+    <mat-paginator
+      *ngIf="hasSearched() && !isLoading() && displayedAssets().length > 0"
+      [length]="displayedAssets().length"
+      [pageIndex]="pageIndex()"
+      [pageSize]="pageSize()"
+      [pageSizeOptions]="[10, 20, 50, 100]"
+      (page)="onPageChange($event)">
+    </mat-paginator>
+
+    <div class="state-panel" *ngIf="isLoading()">
+      <mat-spinner diameter="32"></mat-spinner>
+    </div>
+
+    <div class="state-panel" *ngIf="hasSearched() && !isLoading() && displayedAssets().length === 0">
+      {{ 'COMMON.NO_RESULTS' | translate }}
+    </div>
+  </mat-card-content>
+</mat-card>

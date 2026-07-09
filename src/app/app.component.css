@@ -1,0 +1,295 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.contenedor-padre {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%; /* Ensures the container takes full width */
+}
+
+.barra {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+}
+
+.nav-toggle-button {
+  flex: 0 0 auto;
+}
+
+.toolbar-spacer {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.toolbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.lang-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 18px;
+  padding: 2px 12px;
+  font-weight: 600;
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.timezone-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 18px;
+  padding: 2px 12px;
+  margin-left: 6px;
+  font-weight: 600;
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.user-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 18px;
+  padding: 2px 12px;
+  margin-left: 10px;
+  margin-right: 4px;
+  font-weight: 600;
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.warehouse-button {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 18px;
+  padding: 2px 10px;
+  margin-left: 10px;
+  font-weight: 600;
+  max-width: 180px;
+  font-size: 13px;
+  color: white !important;
+  border-color: rgba(255, 255, 255, 0.55) !important;
+}
+
+.warehouse-label {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 1.1;
+}
+
+.company-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  line-height: 1;
+  padding: 0 12px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  text-transform: none;
+}
+
+.company-button-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.company-logo {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: #fff;
+}
+
+.company-button .mat-icon,
+.company-button .company-logo {
+  flex: 0 0 auto;
+}
+
+.company-name {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.contenido {
+  display: flex;
+  flex-grow: 1;
+  width: 100%; /* Ensures the container takes full width */
+}
+
+.sidenav {
+  min-width: 300px;
+  width: 300px;
+  flex: 0 0 300px;
+  height: 100%;
+  overflow: auto; /* Ensures the sidenav is scrollable */
+}
+
+.sidenav-content {
+  flex-grow: 1;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 20px;
+  overflow-y: auto; /* Makes the main content scrollable */
+  height: calc(100vh - 64px); /* Adjusts the height to account for the toolbar height */
+}
+
+.sidenav-content.auth-content {
+  height: 100dvh;
+  padding: 0;
+}
+
+.custom-expansion-panel {
+  padding-left: 18px;
+}
+
+.custom-expansion-panel-body {
+  padding-left: 25px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+.custom-icon {
+  margin-right: 8px;
+}
+
+.single-nav-item {
+  text-decoration: none;
+  padding-left: 18px;
+  padding-right: 16px;
+}
+
+.single-nav-item .mat-icon[matListItemIcon] {
+  margin-right: 8px;
+  width: 24px;
+  min-width: 24px;
+}
+
+.single-nav-item.active-link {
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 8px;
+}
+
+.mat-card-content {
+  overflow: auto;
+}
+
+@media (max-width: 959px) {
+  .mobile-hidden {
+    display: none !important;
+  }
+
+  .barra .mat-toolbar-row {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .sidenav-content {
+    padding: 12px;
+    height: calc(100vh - 56px);
+  }
+
+  .sidenav-content.auth-content {
+    height: 100dvh;
+    padding: 0;
+  }
+}
+
+/* Trial Countdown Banner */
+.trial-countdown-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  z-index: 1001;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.banner-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.banner-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.banner-message {
+  line-height: 1.4;
+}
+
+.banner-action-btn {
+  height: 32px;
+  line-height: 32px;
+  padding: 0 16px !important;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.banner-info {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+}
+
+.banner-warning {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+}
+
+.banner-grace {
+  background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%);
+}
+
+@media (max-width: 600px) {
+  .trial-countdown-banner {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    padding: 12px;
+    gap: 8px;
+  }
+  .banner-content {
+    justify-content: center;
+  }
+}

@@ -1,0 +1,132 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+/* ── Overview panel ──────────────────────────────────────────────── */
+.overview-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.overview-card {
+  flex: 1 1 320px;
+  min-width: 260px;
+}
+
+/* ── Desktop tables ──────────────────────────────────────────────── */
+.feature-table-container {
+  overflow-x: auto;
+}
+
+.feature-table-container table {
+  width: 100%;
+}
+
+/* ── Mobile card lists (hidden on desktop) ───────────────────────── */
+.feature-mobile-list {
+  display: none;
+}
+
+/* ── Section title row ───────────────────────────────────────────── */
+.section-title-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+/* ── Mobile breakpoint ───────────────────────────────────────────── */
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  mat-card {
+    margin-bottom: 12px;
+  }
+
+  mat-card-header,
+  mat-card-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .overview-card {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  /* Hide desktop tables, show cards */
+  .feature-table-container {
+    display: none;
+  }
+
+  .feature-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .feature-mobile-card {
+    padding: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 8px;
+    background-color: var(--mat-sys-surface, #fff);
+  }
+
+  .feature-mobile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    font-weight: 600;
+    font-size: 1em;
+  }
+
+  .feature-mobile-card-actions {
+    display: flex;
+    gap: 4px;
+  }
+
+  .feature-mobile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+  }
+
+  .feature-mobile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .feature-mobile-label {
+    font-size: 0.75em;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+}

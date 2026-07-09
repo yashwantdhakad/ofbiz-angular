@@ -1,0 +1,117 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+
+<ng-template #content>
+  <div class="bom-toolbar">
+    <div class="filters">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'BOM.TYPE' | translate }}</mat-label>
+        <mat-select [ngModel]="selectedBomType()" (ngModelChange)="selectedBomType.set($event)" (selectionChange)="applyFilters()">
+          <mat-option value="">{{ 'COMMON.ALL' | translate }}</mat-option>
+          <mat-option *ngFor="let type of bomTypes(); trackBy: trackByBomType" [value]="type.productAssocTypeId">
+            {{ type.description || type.productAssocTypeId }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'BOM.PRODUCT' | translate }}</mat-label>
+        <input
+          matInput
+          [ngModel]="productFilter()"
+          (ngModelChange)="productFilter.set($event)"
+          (keyup.enter)="applyFilters()"
+          placeholder="{{ 'COMMON.SEARCH' | translate }}"
+        />
+      </mat-form-field>
+
+      <div class="filter-actions">
+        <button mat-flat-button color="primary" (click)="applyFilters()">
+          {{ 'COMMON.SEARCH' | translate }}
+        </button>
+
+        <button mat-stroked-button type="button" (click)="clearFilters()">
+          {{ 'COMMON.CLEAR' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header class="card-header-with-action">
+      <mat-card-title>{{ 'BOM.TITLE' | translate }}</mat-card-title>
+      <button mat-raised-button color="primary" routerLink="/boms/create">
+        <mat-icon>add</mat-icon> {{ 'MENU.CREATE_BOM' | translate }}
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <table mat-table [dataSource]="boms()" class="bom-desktop-table">
+        <ng-container matColumnDef="bomId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'BOM.ID' | translate }}</th>
+          <td mat-cell *matCellDef="let item">
+            <a [routerLink]="['/boms', item.bomId]">{{ item.bomId }}</a>
+            <div class="muted">{{ item.bomTypeLabel || item.bomType || ('MENU.MANUFACTURING' | translate) }}</div>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="product">
+          <th mat-header-cell *matHeaderCellDef>{{ 'BOM.PRODUCT' | translate }}</th>
+          <td mat-cell *matCellDef="let item">
+            <a [routerLink]="['/products', item.productId]">{{ item.productId }}</a>
+            <div class="muted">{{ item.productName || item.productId }}</div>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="['bomId', 'product']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['bomId', 'product']"></tr>
+      </table>
+
+      <div class="bom-mobile-list">
+        <div class="bom-mobile-card" *ngFor="let item of boms()">
+          <div class="bom-mobile-header">
+            <span class="bom-mobile-label">{{ 'BOM.ID' | translate }}</span>
+            <a [routerLink]="['/boms', item.bomId]">{{ item.bomId }}</a>
+          </div>
+          <div class="bom-mobile-grid">
+            <div class="bom-mobile-field">
+              <span class="bom-mobile-label">{{ 'BOM.TYPE' | translate }}</span>
+              <span>{{ item.bomTypeLabel || item.bomType || ('MENU.MANUFACTURING' | translate) }}</span>
+            </div>
+            <div class="bom-mobile-field">
+              <span class="bom-mobile-label">{{ 'BOM.PRODUCT' | translate }}</span>
+              <div class="bom-product-info">
+                <a [routerLink]="['/products', item.productId]">{{ item.productId }}</a>
+                <div class="muted">{{ item.productName || item.productId }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <mat-paginator
+        [pageIndex]="pagination().page - 1"
+        [pageSize]="pagination().rowsPerPage"
+        [length]="pages()"
+        (page)="onPageChange($event.pageIndex)"
+      ></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

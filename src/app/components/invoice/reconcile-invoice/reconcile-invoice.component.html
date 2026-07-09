@@ -1,0 +1,254 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+
+<ng-template #content>
+  <ng-container *ngIf="invoice() as inv">
+    <!-- Breadcrumb -->
+    <mat-list>
+      <mat-list-item>
+        <a routerLink="/invoices/purchase">{{ 'INVOICE.PURCHASE_TITLE' | translate }}</a>
+        / <button type="button" class="link-button" (click)="goBack()">{{ inv.invoiceId }}</button>
+        / {{ 'INVOICE.RECONCILE' | translate }}
+      </mat-list-item>
+    </mat-list>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+      <mat-chip class="status-chip">{{ getStatusLabel(inv.statusId) }}</mat-chip>
+      <app-status-history-icon [entries]="statusHistoryEntries()"></app-status-history-icon>
+    </div>
+
+    <!-- Overview Card -->
+    <mat-card class="section-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'INVOICE.OVERVIEW' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="overview-grid">
+          <div class="party-section">
+            <div class="detail-row">
+              <span class="label">{{ 'INVOICE.ID' | translate }}</span>
+              <button type="button" class="link-button" (click)="goBack()">{{ inv.invoiceId }}</button>
+            </div>
+            <div class="detail-row">
+              <span class="label">{{ 'RECONCILE.PO' | translate }}</span>
+              <span class="value">{{ getPOReference(inv) }}</span>
+            </div>
+            <div class="detail-row" *ngIf="inv.references?.length">
+              <span class="label">{{ 'INVOICE.REFERENCES' | translate }}</span>
+              <span class="value">{{ inv.references?.length }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">{{ 'RECONCILE.VENDOR' | translate }}</span>
+              <span class="value vendor-name">{{ inv.fromPartyName || inv.partyIdFrom }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">{{ 'PARTY.ADDRESS' | translate }}</span>
+              <span class="value">
+                <ng-container *ngIf="inv.fromAddress">
+                  {{ inv.fromAddress.address1 }}<br/>
+                  {{ inv.fromAddress.city }} {{ inv.fromAddress.stateProvinceGeoId }} {{ inv.fromAddress.postalCode }}
+                </ng-container>
+              </span>
+            </div>
+            <div class="detail-row">
+              <span class="label">{{ 'RECONCILE.FACILITY' | translate }}</span>
+              <span class="value">{{ inv.facilityId || '-' }}</span>
+            </div>
+          </div>
+
+          <div class="dates-section">
+            <div class="detail-row">
+              <span class="label">{{ 'INVOICE.INVOICE_DATE' | translate }}</span>
+              <span class="value">{{ inv.invoiceDate | userDate:'MM/dd/yyyy' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">{{ 'INVOICE.DUE_DATE' | translate }}</span>
+              <span class="value">{{ inv.dueDate ? (inv.dueDate | userDate:'MM/dd/yyyy') : '-' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="label">{{ 'RECONCILE.PO_DATE' | translate }}</span>
+              <span class="value">{{ getPOReference(inv) ? (inv.invoiceDate | userDate:'MM/dd/yyyy') : '-' }}</span>
+            </div>
+          </div>
+
+          <div class="totals-section">
+            <div class="total-row">
+              <span class="total-label">{{ 'RECONCILE.RECEIPT_TOTAL' | translate }}</span>
+              <span class="total-val">{{ receiptTotal | amountWithCurrency : (inv.currencyUomId || inv.currencyUom || 'USD') }}</span>
+            </div>
+            <div class="total-row">
+              <span class="total-label">{{ 'RECONCILE.INVOICE_TOTAL' | translate }}</span>
+              <span class="total-val">{{ invoiceTotal | amountWithCurrency : (inv.currencyUomId || inv.currencyUom || 'USD') }}</span>
+            </div>
+            <div class="total-row">
+              <span class="total-label">{{ 'RECONCILE.AMT_DUE_VAR' | translate }}</span>
+              <span class="total-val" [ngClass]="amtDueVar !== 0 ? 'variance-error' : 'variance-ok'">
+                {{ amtDueVar | amountWithCurrency : (inv.currencyUomId || inv.currencyUom || 'USD') }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Items Reconciliation Table -->
+    <mat-expansion-panel [expanded]="true" class="section-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ 'COMMON.ITEMS' | translate }}</mat-panel-title>
+      </mat-expansion-panel-header>
+
+      <div class="table-container">
+        <table mat-table [dataSource]="reconcileItems()" class="reconcile-table">
+          <!-- Item Description -->
+          <ng-container matColumnDef="itemDesc">
+            <th mat-header-cell *matHeaderCellDef>{{ 'RECONCILE.ITEM_DESC' | translate }}</th>
+            <td mat-cell *matCellDef="let row">{{ row.description }}</td>
+          </ng-container>
+          <!-- PO ORD -->
+          <ng-container matColumnDef="poOrd">
+            <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'RECONCILE.PO_ORD' | translate }}</th>
+            <td mat-cell *matCellDef="let row" class="text-right">{{ row.poOrd | fixedDecimal }}</td>
+          </ng-container>
+          <!-- PO RECV -->
+          <ng-container matColumnDef="poRecv">
+            <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'RECONCILE.PO_RECV' | translate }}</th>
+            <td mat-cell *matCellDef="let row" class="text-right">{{ row.poRecv | fixedDecimal }}</td>
+          </ng-container>
+          <!-- PO COST -->
+          <ng-container matColumnDef="poCost">
+            <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'RECONCILE.PO_COST' | translate }}</th>
+            <td mat-cell *matCellDef="let row" class="text-right">{{ row.poCost | amountWithCurrency : (inv.currencyUomId || inv.currencyUom || 'USD') }}</td>
+          </ng-container>
+          <!-- PO OFF-INV -->
+          <ng-container matColumnDef="poOffInv">
+            <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'RECONCILE.PO_OFF_INV' | translate }}</th>
+            <td mat-cell *matCellDef="let row" class="text-right">{{ row.poOffInv | amountWithCurrency : (inv.currencyUomId || inv.currencyUom || 'USD') }}</td>
+          </ng-container>
+          <!-- PO EXT-NET -->
+          <ng-container matColumnDef="poExtNet">
+            <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'RECONCILE.PO_EXT_NET' | translate }}</th>
+            <td mat-cell *matCellDef="let row" class="text-right">{{ row.poExtNet | amountWithCurrency : (inv.currencyUomId || inv.currencyUom || 'USD') }}</td>
+          </ng-container>
+          <!-- INV QTY (editable) -->
+          <ng-container matColumnDef="invQty">
+            <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'RECONCILE.INV_QTY' | translate }}</th>
+            <td mat-cell *matCellDef="let row" class="text-right">
+              <ng-container *ngIf="row.editing; else qtyDisplay">
+                <input class="edit-input" type="number" [(ngModel)]="row.invQty" min="0" />
+              </ng-container>
+              <ng-template #qtyDisplay>{{ row.invQty | fixedDecimal }}</ng-template>
+            </td>
+          </ng-container>
+          <!-- INV COST (editable) -->
+          <ng-container matColumnDef="invCost">
+            <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'RECONCILE.INV_COST' | translate }}</th>
+            <td mat-cell *matCellDef="let row" class="text-right">
+              <ng-container *ngIf="row.editing; else costDisplay">
+                <input class="edit-input" type="number" [(ngModel)]="row.invCost" min="0" step="0.01" />
+              </ng-container>
+              <ng-template #costDisplay>{{ row.invCost | amountWithCurrency : (inv.currencyUomId || inv.currencyUom || 'USD') }}</ng-template>
+            </td>
+          </ng-container>
+          <!-- INV OFF-INV -->
+          <ng-container matColumnDef="invOffInv">
+            <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'RECONCILE.INV_OFF_INV' | translate }}</th>
+            <td mat-cell *matCellDef="let row" class="text-right">{{ row.invOffInv | amountWithCurrency : (inv.currencyUomId || inv.currencyUom || 'USD') }}</td>
+          </ng-container>
+          <!-- INV EXT-NET -->
+          <ng-container matColumnDef="invExtNet">
+            <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'RECONCILE.INV_EXT_NET' | translate }}</th>
+            <td mat-cell *matCellDef="let row" class="text-right">{{ row.invExtNet | amountWithCurrency : (inv.currencyUomId || inv.currencyUom || 'USD') }}</td>
+          </ng-container>
+          <!-- EXT NET VAR -->
+          <ng-container matColumnDef="extNetVar">
+            <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'RECONCILE.EXT_NET_VAR' | translate }}</th>
+            <td mat-cell *matCellDef="let row" class="text-right"
+                [ngClass]="row.extNetVar !== 0 ? 'variance-error' : ''">
+              {{ row.extNetVar | amountWithCurrency : (inv.currencyUomId || inv.currencyUom || 'USD') }}
+            </td>
+          </ng-container>
+          <!-- QTY VAR -->
+          <ng-container matColumnDef="qtyVar">
+            <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'RECONCILE.QTY_VAR' | translate }}</th>
+            <td mat-cell *matCellDef="let row" class="text-right"
+                [ngClass]="row.qtyVar !== 0 ? 'variance-error' : ''">
+              {{ row.qtyVar | fixedDecimal }}
+            </td>
+          </ng-container>
+          <!-- Actions -->
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let row">
+              <ng-container *ngIf="!row.editing; else editActions">
+                <button mat-icon-button color="primary" (click)="startEdit(row)" [attr.aria-label]="'COMMON.EDIT' | translate">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </ng-container>
+              <ng-template #editActions>
+                <button
+                  mat-icon-button
+                  color="primary"
+                  (click)="saveRow(row)"
+                  [attr.aria-label]="'COMMON.SAVE' | translate"
+                >
+                  <mat-icon>check</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  (click)="cancelEdit(row)"
+                  [attr.aria-label]="'COMMON.CANCEL' | translate"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+              </ng-template>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"
+              [ngClass]="row.editing ? 'editing-row' : ''"></tr>
+
+          <!-- Totals row -->
+          <tr class="totals-row">
+            <td class="totals-label">{{ 'COMMON.TOTAL' | translate }}</td>
+            <td class="text-right totals-val">{{ totals.poOrd | fixedDecimal }}</td>
+            <td class="text-right totals-val">{{ totals.poRecv | fixedDecimal }}</td>
+            <td></td><td></td>
+            <td class="text-right totals-val">{{ totals.poExtNet | amountWithCurrency : (inv.currencyUomId || inv.currencyUom || 'USD') }}</td>
+            <td></td><td></td><td></td>
+            <td class="text-right totals-val">{{ totals.invExtNet | amountWithCurrency : (inv.currencyUomId || inv.currencyUom || 'USD') }}</td>
+            <td class="text-right totals-val" [ngClass]="totals.extNetVar !== 0 ? 'variance-error' : ''">
+              {{ totals.extNetVar | amountWithCurrency : (inv.currencyUomId || inv.currencyUom || 'USD') }}
+            </td>
+            <td class="text-right totals-val" [ngClass]="totals.qtyVar !== 0 ? 'variance-error' : ''">
+              {{ totals.qtyVar | fixedDecimal }}
+            </td>
+            <td></td>
+          </tr>
+        </table>
+      </div>
+    </mat-expansion-panel>
+  </ng-container>
+</ng-template>

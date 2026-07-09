@@ -1,0 +1,90 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-accordion>
+  <mat-expansion-panel class="mat-elevation-z10" [(expanded)]="poApprovalExpanded">
+    <mat-expansion-panel-header>
+      <mat-panel-title>{{ 'COMPANY.PO_APPROVAL_POLICY_TITLE' | translate }}</mat-panel-title>
+    </mat-expansion-panel-header>
+
+    <form class="id-pref-form" [formGroup]="poApprovalForm" (ngSubmit)="savePurchaseOrderApprovalPolicy()">
+      <mat-checkbox formControlName="enabled">
+        {{ 'COMPANY.PO_APPROVAL_POLICY_ENABLED' | translate }}
+      </mat-checkbox>
+
+      <div class="id-pref-action">
+        <button mat-stroked-button color="primary" type="button" (click)="addPoApprovalBand()">
+          {{ 'COMPANY.PO_APPROVAL_ADD_BAND' | translate }}
+        </button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="poApprovalForm.invalid">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+      </div>
+    </form>
+
+    <div class="table-scroll-wrapper">
+      <table mat-table [dataSource]="poApprovalBandsControls" [trackBy]="trackByPoApprovalBand">
+        <ng-container matColumnDef="label">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.NAME' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let bandGroup">
+            <mat-form-field appearance="outline" [formGroup]="bandGroup">
+              <mat-label>{{ 'COMMON.NAME' | translate }}</mat-label>
+              <input matInput formControlName="label" />
+            </mat-form-field>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="maxAmount">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.AMOUNT' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let bandGroup; let index = index">
+            <div class="po-approval-amount-cell" [formGroup]="bandGroup">
+              <mat-checkbox
+                class="po-approval-unlimited"
+                formControlName="unlimited"
+                (change)="onPoApprovalUnlimitedChange(index)">
+                {{ 'USER.PO_APPROVAL_UNLIMITED' | translate }}
+              </mat-checkbox>
+              <mat-form-field appearance="outline" class="po-approval-amount-field" *ngIf="!bandGroup.controls.unlimited.value">
+                <mat-label>{{ 'COMMON.AMOUNT' | translate }}</mat-label>
+                <input matInput type="number" min="0" formControlName="maxAmount" />
+              </mat-form-field>
+            </div>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="action">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.ACTION' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let bandGroup; let index = index">
+            <button
+              mat-icon-button
+              color="warn"
+              type="button"
+              [attr.aria-label]="'COMMON.DELETE' | translate"
+              (click)="removePoApprovalBand(index)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="poApprovalColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: poApprovalColumns"></tr>
+      </table>
+    </div>
+  </mat-expansion-panel>
+</mat-accordion>

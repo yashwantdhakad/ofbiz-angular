@@ -1,0 +1,143 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-header>
+    <mat-card-title>{{ 'CYCLE_COUNT.CREATE_TITLE' | translate }}</mat-card-title>
+  </mat-card-header>
+
+  <mat-card-content>
+    <form [formGroup]="filterForm" (ngSubmit)="pendingPageIndex = 0; searchPending()">
+    <div class="filters-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'COMMON.FACILITY' | translate }}</mat-label>
+        <mat-select formControlName="facilityId" (selectionChange)="onFacilityChange($event.value)">
+          <mat-option *ngFor="let facility of facilities()" [value]="facility.facilityId">
+            {{ facility.facilityName || facility.facilityId }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>{{ 'COMMON.LOCATION' | translate }}</mat-label><input matInput formControlName="locationSeqId" /></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>{{ 'CYCLE_COUNT.AREA' | translate }}</mat-label><input matInput formControlName="areaId" /></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>{{ 'CYCLE_COUNT.AISLE' | translate }}</mat-label><input matInput formControlName="aisleId" /></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>{{ 'CYCLE_COUNT.SECTION' | translate }}</mat-label><input matInput formControlName="sectionId" /></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>{{ 'CYCLE_COUNT.LEVEL' | translate }}</mat-label><input matInput formControlName="levelId" /></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>{{ 'CYCLE_COUNT.POSITION' | translate }}</mat-label><input matInput formControlName="positionId" /></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>{{ 'CYCLE_COUNT.NOT_SCANNED_DAYS' | translate }}</mat-label><input matInput type="number" min="0" formControlName="notScannedInLastDays" /></mat-form-field>
+      <mat-form-field appearance="outline"><mat-label>{{ 'CYCLE_COUNT.SCHEDULED_NEXT_DAYS' | translate }}</mat-label><input matInput type="number" min="0" formControlName="scheduledInNextDays" /></mat-form-field>
+    </div>
+
+    <div class="actions-row">
+      <button mat-raised-button color="primary" type="submit" [disabled]="loadingPending()">{{ 'CYCLE_COUNT.FIND_ACTION' | translate }}</button>
+      <button mat-flat-button color="primary" type="button" (click)="createSession()" [disabled]="creatingSession() || selectedLocations.size === 0">{{ 'CYCLE_COUNT.CREATE_TITLE' | translate }}</button>
+    </div>
+    </form>
+
+    <!-- Desktop table -->
+    <div class="table-wrap" *ngIf="!loadingPending(); else loadingTpl">
+      <table mat-table [dataSource]="pendingItems()" class="full-width-table">
+        <ng-container matColumnDef="select">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-checkbox [checked]="pendingItems().length > 0 && selectedLocations.size === pendingItems().length" [indeterminate]="selectedLocations.size > 0 && selectedLocations.size < pendingItems().length" (change)="toggleAllLocations($event.checked)"></mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let row">
+            <mat-checkbox [checked]="isLocationSelected(row.locationSeqId)" (change)="toggleLocation(row.locationSeqId, $event.checked)"></mat-checkbox>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="facilityId"><th mat-header-cell *matHeaderCellDef>{{ 'COMMON.FACILITY' | translate }}</th><td mat-cell *matCellDef="let row">{{ row.facilityName || row.facilityId || '-' }}</td></ng-container>
+        <ng-container matColumnDef="locationSeqId"><th mat-header-cell *matHeaderCellDef>{{ 'COMMON.LOCATION' | translate }}</th><td mat-cell *matCellDef="let row">{{ row.locationSeqId }}</td></ng-container>
+        <ng-container matColumnDef="areaId"><th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.AREA' | translate }}</th><td mat-cell *matCellDef="let row">{{ row.areaId || '-' }}</td></ng-container>
+        <ng-container matColumnDef="aisleId"><th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.AISLE' | translate }}</th><td mat-cell *matCellDef="let row">{{ row.aisleId || '-' }}</td></ng-container>
+        <ng-container matColumnDef="sectionId"><th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.SECTION' | translate }}</th><td mat-cell *matCellDef="let row">{{ row.sectionId || '-' }}</td></ng-container>
+        <ng-container matColumnDef="levelId"><th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.LEVEL' | translate }}</th><td mat-cell *matCellDef="let row">{{ row.levelId || '-' }}</td></ng-container>
+        <ng-container matColumnDef="positionId"><th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.POSITION' | translate }}</th><td mat-cell *matCellDef="let row">{{ row.positionId || '-' }}</td></ng-container>
+        <ng-container matColumnDef="lastCountDate"><th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.LAST_COUNT' | translate }}</th><td mat-cell *matCellDef="let row">{{ row.lastCountDate || '-' }}</td></ng-container>
+        <ng-container matColumnDef="nextCountDate"><th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.NEXT_COUNT' | translate }}</th><td mat-cell *matCellDef="let row">{{ row.nextCountDate || '-' }}</td></ng-container>
+        <ng-container matColumnDef="totalItems"><th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.TOTAL_LTNS' | translate }}</th><td mat-cell *matCellDef="let row">{{ row.totalItems || 0 }}</td></ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="pendingColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: pendingColumns"></tr>
+      </table>
+
+      <mat-paginator [length]="pendingTotal()" [pageIndex]="pendingPageIndex" [pageSize]="pendingPageSize" [pageSizeOptions]="pendingPageSizeOptions" (page)="onPendingPage($event)"></mat-paginator>
+    </div>
+
+    <!-- Mobile location cards -->
+    <div class="mobile-location-list" *ngIf="!loadingPending()">
+      <ng-container *ngIf="pendingItems().length > 0; else mobileEmptyTpl">
+        <!-- Select all row -->
+        <div class="mobile-select-all-row">
+          <mat-checkbox
+            [checked]="pendingItems().length > 0 && selectedLocations.size === pendingItems().length"
+            [indeterminate]="selectedLocations.size > 0 && selectedLocations.size < pendingItems().length"
+            (change)="toggleAllLocations($event.checked)"
+          ></mat-checkbox>
+          <span>{{ 'COMMON.SELECT_ALL' | translate }} ({{ selectedLocations.size }}/{{ pendingItems().length }})</span>
+        </div>
+
+        <!-- One card per location -->
+        <div
+          class="mobile-location-card"
+          *ngFor="let row of pendingItems()"
+          [class.selected]="isLocationSelected(row.locationSeqId)"
+          (click)="toggleLocation(row.locationSeqId, !isLocationSelected(row.locationSeqId))"
+          role="checkbox"
+          [attr.aria-checked]="isLocationSelected(row.locationSeqId)"
+          tabindex="0"
+          (keydown.space)="$event.preventDefault(); toggleLocation(row.locationSeqId, !isLocationSelected(row.locationSeqId))"
+        >
+          <mat-checkbox
+            [checked]="isLocationSelected(row.locationSeqId)"
+            (click)="$event.stopPropagation()"
+            (change)="toggleLocation(row.locationSeqId, $event.checked)"
+          ></mat-checkbox>
+          <div class="mobile-location-card-body">
+            <div class="mobile-location-id">{{ row.locationSeqId }}</div>
+            <div class="mobile-location-facility" *ngIf="row.facilityName || row.facilityId">
+              {{ row.facilityName || row.facilityId }}
+            </div>
+            <div class="mobile-location-details">
+              <span *ngIf="row.areaId"><strong>{{ 'CYCLE_COUNT.AREA' | translate }}:</strong> {{ row.areaId }}</span>
+              <span *ngIf="row.aisleId"><strong>{{ 'CYCLE_COUNT.AISLE' | translate }}:</strong> {{ row.aisleId }}</span>
+              <span *ngIf="row.sectionId"><strong>{{ 'CYCLE_COUNT.SECTION' | translate }}:</strong> {{ row.sectionId }}</span>
+              <span *ngIf="row.levelId"><strong>{{ 'CYCLE_COUNT.LEVEL' | translate }}:</strong> {{ row.levelId }}</span>
+              <span *ngIf="row.positionId"><strong>{{ 'CYCLE_COUNT.POSITION' | translate }}:</strong> {{ row.positionId }}</span>
+            </div>
+            <div class="mobile-location-dates">
+              <span *ngIf="row.lastCountDate"><strong>{{ 'CYCLE_COUNT.LAST_COUNT' | translate }}:</strong> {{ row.lastCountDate }}</span>
+              <span *ngIf="row.nextCountDate"><strong>{{ 'CYCLE_COUNT.NEXT_COUNT' | translate }}:</strong> {{ row.nextCountDate }}</span>
+            </div>
+            <span class="mobile-location-badge" *ngIf="row.totalItems">
+              <mat-icon style="font-size:13px;width:13px;height:13px;">inventory_2</mat-icon>
+              {{ row.totalItems }} {{ 'CYCLE_COUNT.TOTAL_LTNS' | translate }}
+            </span>
+          </div>
+        </div>
+      </ng-container>
+      <ng-template #mobileEmptyTpl>
+        <div class="mobile-empty">{{ 'COMMON.NO_RESULTS' | translate }}</div>
+      </ng-template>
+    </div>
+
+    <ng-template #loadingTpl>
+      <div class="loader-wrap"><mat-progress-spinner [diameter]="48" mode="indeterminate"></mat-progress-spinner></div>
+    </ng-template>
+  </mat-card-content>
+</mat-card>
+

@@ -1,0 +1,57 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="dialog-card">
+  <mat-card-title mat-dialog-title>{{ 'PO.ADD_SUPPLIER_TITLE' | translate }}</mat-card-title>
+
+  <mat-card-content mat-dialog-content>
+    <form [formGroup]="supplierForm" class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'SUPPLIER.SUPPLIER_NAME' | translate }}</mat-label>
+        <input matInput formControlName="groupName" />
+        <mat-error *ngIf="supplierForm.get('groupName')?.hasError('required')">
+          {{ 'PO.SUPPLIER_NAME_REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+
+      <mat-checkbox formControlName="gstRcmApplicable">{{ 'PO.GST_RCM_APPLICABLE' | translate }}</mat-checkbox>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'PO.TDS_195_PERCENT' | translate }}</mat-label>
+        <input matInput type="number" min="0" max="100" step="0.01" formControlName="tdsSection195Percent" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'COMMON.PHONE' | translate }}</mat-label>
+        <input matInput formControlName="contactNumber" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'COMMON.EMAIL' | translate }}</mat-label>
+        <input matInput formControlName="emailAddress" />
+        <mat-error *ngIf="supplierForm.get('emailAddress')?.hasError('email')">
+          {{ 'COMMON.EMAIL_INVALID' | translate }}
+        </mat-error>
+      </mat-form-field>
+    </form>
+    <div class="action-row">
+      <button mat-raised-button color="primary" (click)="save()" [disabled]="isSaving()">{{ 'COMMON.SAVE' | translate }}</button>
+      <button mat-stroked-button (click)="close()" [disabled]="isSaving()">{{ 'COMMON.CANCEL' | translate }}</button>
+    </div>
+  </mat-card-content>
+</mat-card>

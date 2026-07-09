@@ -1,0 +1,117 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+
+<ng-template #content>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>{{ 'COMPANY.TITLE' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="company-overview">
+        <div class="logo-block">
+          <img *ngIf="context().companyLogoUrl; else fallbackLogo" [src]="context().companyLogoUrl"
+            [attr.alt]="'COMPANY.LOGO_ALT' | translate" class="company-logo" />
+          <ng-template #fallbackLogo>
+            <div class="logo-fallback">
+              <mat-icon>apartment</mat-icon>
+            </div>
+          </ng-template>
+
+          <div class="logo-actions">
+            <input #logoInput type="file" accept="image/*" (change)="onLogoFileSelected($event)" style="display:none" />
+            <button mat-stroked-button type="button" (click)="logoInput.click()">
+              {{ selectedLogoFile() ? selectedLogoFile()!.name : ('COMPANY.SELECT_LOGO' | translate) }}
+            </button>
+            <button mat-raised-button color="primary" (click)="uploadLogo()"
+              [disabled]="!selectedLogoFile() || isUploadingLogo()">
+              <mat-spinner *ngIf="isUploadingLogo()" diameter="18" style="display:inline-block;margin-right:6px"></mat-spinner>
+              {{ 'COMPANY.UPLOAD_LOGO' | translate }}
+            </button>
+          </div>
+        </div>
+
+        <div class="details-block">
+          <div class="name-field">
+            <strong>{{ 'COMMON.NAME' | translate }}:</strong>
+            <span>{{ context().companyName || ('APP.TITLE' | translate) }}</span>
+            <button mat-icon-button type="button" color="primary" (click)="startEditName()"
+              [attr.aria-label]="'COMMON.EDIT' | translate">
+              <mat-icon>edit</mat-icon>
+            </button>
+          </div>
+          <div><strong>{{ 'COMPANY.PARTY_ID' | translate }}:</strong> {{ context().companyPartyId || 'COMPANY' }}</div>
+          <div><strong>{{ 'COMPANY.PREFERRED_CURRENCY' | translate }}:</strong> {{
+            context().companyProfile?.preferredCurrencyUomId || 'USD' }}</div>
+          <div class="address-section">
+            <div class="address-header">
+              <strong>{{ 'COMMON.ADDRESS' | translate }}:</strong>
+                <button mat-icon-button color="primary" type="button"
+                [title]="(hasCompanyAddress() ? 'COMMON.EDIT' : 'COMMON.ADD') | translate"
+                [attr.aria-label]="(hasCompanyAddress() ? 'COMMON.EDIT' : 'COMMON.ADD') | translate"
+                (click)="openCompanyAddressDialog()">
+                <mat-icon>{{ hasCompanyAddress() ? 'edit' : 'add' }}</mat-icon>
+              </button>
+            </div>
+
+            <div class="address-display">
+              {{ companyAddressLine() }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <br />
+
+  @defer (on viewport) {
+    <app-company-store-facility-overview />
+  } @placeholder {
+    <div>
+      <mat-accordion>
+        <mat-expansion-panel class="mat-elevation-z10">
+          <mat-expansion-panel-header>
+            <mat-panel-title>{{ 'COMPANY.PRODUCT_STORES' | translate }}</mat-panel-title>
+          </mat-expansion-panel-header>
+        </mat-expansion-panel>
+      </mat-accordion>
+
+      <br />
+
+      <mat-accordion>
+        <mat-expansion-panel class="mat-elevation-z10">
+          <mat-expansion-panel-header>
+            <mat-panel-title>{{ 'COMPANY.FACILITIES' | translate }}</mat-panel-title>
+          </mat-expansion-panel-header>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+  }
+
+  <br />
+
+  <!-- ID preference flow is temporarily hidden; it will be added back later. -->
+  <!-- Purchase approval flow is temporarily hidden; it will be added back later. -->
+
+</ng-template>

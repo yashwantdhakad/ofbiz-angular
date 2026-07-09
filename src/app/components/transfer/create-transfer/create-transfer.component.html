@@ -1,0 +1,228 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-list>
+  <mat-list-item>
+    <a routerLink="/transfers">{{ 'TRANSFER.LIST_TITLE' | translate }}</a>
+    / {{ 'TRANSFER.CREATE_TITLE' | translate }}
+  </mat-list-item>
+</mat-list>
+
+<mat-card class="mat-elevation-z10">
+  <mat-card-header>
+    <mat-card-title>
+      <h1>{{ 'TRANSFER.CREATE_TITLE' | translate }}</h1>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form
+      id="transferCreateForm"
+      [formGroup]="transferForm"
+      (ngSubmit)="createTransfer()"
+      autocomplete="off"
+    >
+      <div fxLayout="row wrap" fxLayout.xs="column" fxLayoutGap="16px">
+
+        <!-- From Facility -->
+        <div fxFlex.gt-xs="48%">
+          <mat-form-field appearance="outline" style="width:100%">
+            <mat-label>{{ 'TRANSFER.FROM_FACILITY' | translate }}</mat-label>
+            <mat-select formControlName="fromFacilityId">
+              <mat-option
+                *ngFor="let facility of facilities(); trackBy: trackByFacility"
+                [value]="facility.facilityId"
+              >
+                {{ facility.facilityName || facility.facilityId }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="transferForm.get('fromFacilityId')?.hasError('required')">
+              {{ 'TRANSFER.FROM_FACILITY_REQUIRED' | translate }}
+            </mat-error>
+          </mat-form-field>
+          <div class="facility-address-preview" *ngIf="fromFacilityAddresses().length">
+            <ng-container *ngFor="let addr of fromFacilityAddresses(); let first = first">
+              <div *ngIf="first" class="facility-address-block">
+                <div *ngIf="addr.toName"><strong>{{ addr.toName }}</strong></div>
+                <div *ngIf="addr.address1">{{ addr.address1 }}</div>
+                <div *ngIf="addr.address2">{{ addr.address2 }}</div>
+                <div>
+                  <span *ngIf="addr.city">{{ addr.city }}</span>
+                  <span *ngIf="addr.stateProvinceGeoId">, {{ addr.stateProvinceGeoId }}</span>
+                  <span *ngIf="addr.postalCode"> {{ addr.postalCode }}</span>
+                  <span *ngIf="addr.countryGeoId"> {{ addr.countryGeoId }}</span>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- To Facility -->
+        <div fxFlex.gt-xs="48%">
+          <mat-form-field appearance="outline" style="width:100%">
+            <mat-label>{{ 'TRANSFER.TO_FACILITY' | translate }}</mat-label>
+            <mat-select formControlName="toFacilityId">
+              <mat-option
+                *ngFor="let facility of availableToFacilities(); trackBy: trackByFacility"
+                [value]="facility.facilityId"
+              >
+                {{ facility.facilityName || facility.facilityId }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="transferForm.get('toFacilityId')?.hasError('required')">
+              {{ 'TRANSFER.TO_FACILITY_REQUIRED' | translate }}
+            </mat-error>
+            <mat-error *ngIf="transferForm.get('toFacilityId')?.hasError('sameFacility')">
+              {{ 'TRANSFER.TO_FACILITY_DIFFERENT_REQUIRED' | translate }}
+            </mat-error>
+          </mat-form-field>
+          <div class="facility-address-preview" *ngIf="toFacilityAddresses().length">
+            <ng-container *ngFor="let addr of toFacilityAddresses(); let first = first">
+              <div *ngIf="first" class="facility-address-block">
+                <div *ngIf="addr.toName"><strong>{{ addr.toName }}</strong></div>
+                <div *ngIf="addr.address1">{{ addr.address1 }}</div>
+                <div *ngIf="addr.address2">{{ addr.address2 }}</div>
+                <div>
+                  <span *ngIf="addr.city">{{ addr.city }}</span>
+                  <span *ngIf="addr.stateProvinceGeoId">, {{ addr.stateProvinceGeoId }}</span>
+                  <span *ngIf="addr.postalCode"> {{ addr.postalCode }}</span>
+                  <span *ngIf="addr.countryGeoId"> {{ addr.countryGeoId }}</span>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+      </div>
+
+      <div fxLayout="row wrap" fxLayout.xs="column" fxLayoutGap="16px">
+        <div fxFlex.gt-xs="48%">
+          <mat-form-field appearance="outline" style="width:100%">
+            <mat-label>{{ 'COMMON.SHIPPING_METHOD' | translate }}</mat-label>
+            <mat-select formControlName="shipByMethod">
+              <mat-option
+                *ngFor="let option of shipByOptions; trackBy: trackByOptionId"
+                [value]="option.id"
+              >
+                {{ option.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="transferForm.get('shipByMethod')?.hasError('required')">
+              {{ 'COMMON.SHIPPING_METHOD' | translate }} {{ 'COMMON.REQUIRED' | translate }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div fxFlex.gt-xs="48%">
+          <mat-form-field appearance="outline" style="width:100%">
+            <mat-label>{{ 'COMMON.SHIPPING_INSTRUCTIONS' | translate }}</mat-label>
+            <textarea matInput rows="3" formControlName="shippingInstructions"></textarea>
+          </mat-form-field>
+        </div>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="mat-elevation-z10" style="margin-top: 16px;">
+  <mat-card-header>
+    <mat-card-title>
+      {{ 'COMMON.ITEMS' | translate }}
+      <button mat-stroked-button type="button" color="primary" (click)="addItemRow()">
+        {{ 'COMMON.ADD_ITEM' | translate }}
+      </button>
+    </mat-card-title>
+  </mat-card-header>
+  <br />
+  <mat-card-content>
+    <div [formGroup]="transferForm">
+      <div formArrayName="items">
+        <div
+          class="item-row"
+          *ngFor="let item of items.controls; let i = index; trackBy: trackByFormIndex"
+          [formGroupName]="i"
+        >
+          <mat-form-field appearance="outline" class="form-field-product">
+            <mat-label>{{ 'COMMON.PRODUCT' | translate }}</mat-label>
+            <input
+              matInput
+              formControlName="productId"
+              [matAutocomplete]="productAuto"
+            />
+            <mat-autocomplete
+              #productAuto="matAutocomplete"
+              [displayWith]="displayProduct"
+              (optionSelected)="onProductSelected($event, i)"
+            >
+              <mat-option
+                *ngFor="let product of filteredProducts[i] | async; trackBy: trackByProduct"
+                [value]="product"
+              >
+                {{ product.productId }} - {{ product.productName }}
+              </mat-option>
+            </mat-autocomplete>
+            <mat-error *ngIf="item.get('productId')?.hasError('required')">
+              {{ 'COMMON.PRODUCT_REQUIRED' | translate }}
+            </mat-error>
+          </mat-form-field>
+
+          <div class="item-detail-row">
+            <mat-form-field appearance="outline" class="form-field-qty">
+              <mat-label>{{ 'COMMON.QTY' | translate }}</mat-label>
+              <input matInput type="number" formControlName="quantity" min="1" />
+              <mat-error *ngIf="item.get('quantity')?.hasError('required')">
+                {{ 'COMMON.QUANTITY_REQUIRED' | translate }}
+              </mat-error>
+              <mat-error *ngIf="item.get('quantity')?.hasError('min')">
+                {{ 'COMMON.QUANTITY_MIN' | translate }}
+              </mat-error>
+            </mat-form-field>
+
+            <button
+              mat-icon-button
+              class="item-remove"
+              color="warn"
+              type="button"
+              [attr.aria-label]="'COMMON.REMOVE_ITEM' | translate"
+              (click)="removeItemRow(i)"
+              [disabled]="items.length === 1"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+  <mat-card-actions>
+    <div class="form-actions">
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        form="transferCreateForm"
+        [disabled]="isLoading()"
+      >
+        <span *ngIf="!isLoading()">{{ 'TRANSFER.CREATE_ACTION' | translate }}</span>
+        <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+      </button>
+      <button mat-stroked-button type="button" (click)="cancel()">
+        {{ 'COMMON.CANCEL' | translate }}
+      </button>
+    </div>
+  </mat-card-actions>
+</mat-card>

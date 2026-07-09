@@ -1,0 +1,232 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+<ng-template #content>
+  <mat-list>
+    <mat-list-item>
+      <a [routerLink]="['/features']">{{ 'FEATURE.TITLE' | translate }}</a>
+      / {{ featureDetail()?.productFeatureId }}
+    </mat-list-item>
+  </mat-list>
+
+  <!-- Overview Card -->
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title> {{ 'FEATURE.OVERVIEW_TITLE' | translate }} </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="overview-grid">
+        <mat-card class="overview-card mat-elevation-z10">
+          <mat-card-content>
+            <ul class="custom-list">
+              <li class="custom-list-item">
+                <strong>{{ 'FEATURE.ABBREV' | translate }}:</strong>
+                {{ featureDetail()?.abbrev }}
+                <button mat-icon-button type="button" color="primary" class="custom-icon-align icon-right"
+                  data-testid="feature-detail-edit-overview"
+                  [attr.aria-label]="'COMMON.EDIT' | translate" (click)="editFeatureDialog()">
+                  <mat-icon class="custom-mat-icon">edit</mat-icon>
+                </button>
+              </li>
+              <li class="custom-list-item">
+                <strong>{{ 'COMMON.DESCRIPTION' | translate }}:</strong>
+                {{ featureDetail()?.description }}
+              </li>
+            </ul>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <br />
+
+  <!-- Products Card -->
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>
+        <div class="section-title-row">
+          {{ 'FEATURE.PRODUCTS_TITLE' | translate }}
+          <button mat-icon-button type="button" color="primary" class="custom-icon-align"
+            data-testid="feature-detail-add-product"
+            [attr.aria-label]="'COMMON.ADD' | translate" (click)="addFeatureToProductDialog({isNew: true})">
+            <mat-icon class="custom-mat-icon">add</mat-icon>
+          </button>
+        </div>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <!-- Desktop table -->
+      <div class="feature-table-container">
+        <table mat-table [dataSource]="products()">
+          <ng-container matColumnDef="productId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FEATURE.ID' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item.productId }}</td>
+          </ng-container>
+          <ng-container matColumnDef="productFeatureApplTypeId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FEATURE.APPL_TYPE' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item.productFeatureApplTypeId || item.applTypeEnumId }}</td>
+          </ng-container>
+          <ng-container matColumnDef="sequenceNum">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FEATURE.SEQUENCE_NUM' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item.sequenceNum }}</td>
+          </ng-container>
+          <ng-container matColumnDef="fromDate">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FEATURE.FROM_DATE' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item.fromDate | userDate : "MMMM d, y" }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.ACTION' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">
+              <button mat-icon-button type="button" color="primary" class="custom-icon-align"
+                data-testid="feature-detail-edit-product"
+                [attr.aria-label]="'COMMON.EDIT' | translate" (click)="addFeatureToProductDialog(item)">
+                <mat-icon class="custom-mat-icon">edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" color="warn" class="custom-icon-align"
+                data-testid="feature-detail-delete-product"
+                [attr.aria-label]="'COMMON.DELETE' | translate" (click)="deleteProductFeatureAppl(item)">
+                <mat-icon class="custom-mat-icon">delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="productsColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: productsColumns"></tr>
+        </table>
+      </div>
+
+      <!-- Mobile cards for Products -->
+      <div class="feature-mobile-list">
+        <div class="feature-mobile-card" *ngFor="let item of products()">
+          <div class="feature-mobile-card-header">
+            <span>{{ item.productId || '-' }}</span>
+            <div class="feature-mobile-card-actions">
+              <button mat-icon-button type="button" color="primary"
+                [attr.aria-label]="'COMMON.EDIT' | translate" (click)="addFeatureToProductDialog(item)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" color="warn"
+                [attr.aria-label]="'COMMON.DELETE' | translate" (click)="deleteProductFeatureAppl(item)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+          <div class="feature-mobile-grid">
+            <div class="feature-mobile-field">
+              <span class="feature-mobile-label">{{ 'FEATURE.APPL_TYPE' | translate }}</span>
+              <span>{{ item.productFeatureApplTypeId || item.applTypeEnumId || '-' }}</span>
+            </div>
+            <div class="feature-mobile-field">
+              <span class="feature-mobile-label">{{ 'FEATURE.SEQUENCE_NUM' | translate }}</span>
+              <span>{{ item.sequenceNum || '-' }}</span>
+            </div>
+            <div class="feature-mobile-field">
+              <span class="feature-mobile-label">{{ 'FEATURE.FROM_DATE' | translate }}</span>
+              <span>{{ item.fromDate | userDate : "MMMM d, y" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <br />
+
+  <!-- Groups Card -->
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>
+        <div class="section-title-row">
+          {{ 'FEATURE.GROUPS_TITLE' | translate }}
+          <button mat-icon-button type="button" color="primary" class="custom-icon-align"
+            data-testid="feature-detail-add-group"
+            [attr.aria-label]="'COMMON.ADD' | translate" (click)="addFeatureToGroupDialog({isNew: true})">
+            <mat-icon class="custom-mat-icon">add</mat-icon>
+          </button>
+        </div>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <!-- Desktop table -->
+      <div class="feature-table-container">
+        <table mat-table [dataSource]="groups()">
+          <ng-container matColumnDef="productFeatureGroupId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FEATUREGROUP.ID' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item?.productFeatureGroupId }}</td>
+          </ng-container>
+          <ng-container matColumnDef="group">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.DESCRIPTION' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item?.group?.description }}</td>
+          </ng-container>
+          <ng-container matColumnDef="sequenceNum">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FEATURE.SEQUENCE_NUM' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item?.sequenceNum }}</td>
+          </ng-container>
+          <ng-container matColumnDef="fromDate">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FEATURE.FROM_DATE' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item?.fromDate | userDate : "MMMM d, y" }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.ACTION' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">
+              <button mat-icon-button type="button" color="primary" class="custom-icon-align"
+                data-testid="feature-detail-edit-group"
+                [attr.aria-label]="'COMMON.EDIT' | translate" (click)="addFeatureToGroupDialog(item)">
+                <mat-icon class="custom-mat-icon">edit</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="groupsColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: groupsColumns"></tr>
+        </table>
+      </div>
+
+      <!-- Mobile cards for Groups -->
+      <div class="feature-mobile-list">
+        <div class="feature-mobile-card" *ngFor="let item of groups()">
+          <div class="feature-mobile-card-header">
+            <span>{{ item?.productFeatureGroupId || '-' }}</span>
+            <div class="feature-mobile-card-actions">
+              <button mat-icon-button type="button" color="primary"
+                [attr.aria-label]="'COMMON.EDIT' | translate" (click)="addFeatureToGroupDialog(item)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </div>
+          </div>
+          <div class="feature-mobile-grid">
+            <div class="feature-mobile-field">
+              <span class="feature-mobile-label">{{ 'COMMON.DESCRIPTION' | translate }}</span>
+              <span>{{ item?.group?.description || '-' }}</span>
+            </div>
+            <div class="feature-mobile-field">
+              <span class="feature-mobile-label">{{ 'FEATURE.SEQUENCE_NUM' | translate }}</span>
+              <span>{{ item?.sequenceNum || '-' }}</span>
+            </div>
+            <div class="feature-mobile-field">
+              <span class="feature-mobile-label">{{ 'FEATURE.FROM_DATE' | translate }}</span>
+              <span>{{ item?.fromDate | userDate : "MMMM d, y" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

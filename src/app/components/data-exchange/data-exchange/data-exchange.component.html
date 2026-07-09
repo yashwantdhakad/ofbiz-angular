@@ -1,0 +1,162 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="exchange-card">
+  <h2>{{ 'DATA_EXCHANGE.TITLE' | translate }}</h2>
+  <div class="exchange-grid">
+    <mat-card class="panel">
+      <h3>{{ 'DATA_EXCHANGE.EXPORT_CSV' | translate }}</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'DATA_EXCHANGE.ENTITY' | translate }}</mat-label>
+        <mat-select [(ngModel)]="exportEntityType">
+          <mat-option *ngFor="let entity of exportEntityTypes" [value]="entity">{{ getEntityLabel(entity) }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button mat-raised-button color="primary" (click)="runExport()" [disabled]="runningExport()">
+        {{ runningExport() ? ('DATA_EXCHANGE.EXPORTING' | translate) : ('DATA_EXCHANGE.EXPORT' | translate) }}
+      </button>
+    </mat-card>
+
+    <mat-card class="panel">
+      <h3>{{ 'DATA_EXCHANGE.IMPORT_CSV' | translate }}</h3>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'DATA_EXCHANGE.ENTITY' | translate }}</mat-label>
+        <mat-select [(ngModel)]="importEntityType">
+          <mat-option *ngFor="let entity of importEntityTypes" [value]="entity">{{ getEntityLabel(entity) }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="import-controls">
+        <button mat-stroked-button type="button" (click)="downloadTemplate()">{{ 'DATA_EXCHANGE.DOWNLOAD_TEMPLATE' | translate }}</button>
+      </div>
+
+      <div class="file-picker-row">
+        <input #fileInput type="file" accept=".csv,text/csv" (change)="onImportFileSelected($event)" />
+        <button mat-button type="button" *ngIf="importFile()" (click)="clearImportFile(fileInput)">
+          {{ 'COMMON.CLEAR' | translate }}
+        </button>
+      </div>
+
+      <div class="selected-file" *ngIf="selectedFileName()">
+        {{ 'DATA_EXCHANGE.SELECTED_FILE' | translate }}: {{ selectedFileName() }}
+      </div>
+
+      <mat-checkbox [ngModel]="importDryRun()" (ngModelChange)="importDryRun.set($event)">
+        {{ 'DATA_EXCHANGE.DRY_RUN' | translate }}
+      </mat-checkbox>
+
+      <div class="upsert-hint">
+        <div class="upsert-title">{{ 'DATA_EXCHANGE.UPSERT_KEYS_TITLE' | translate }}</div>
+        <div>{{ 'DATA_EXCHANGE.UPSERT_KEY_PRODUCT' | translate }}</div>
+        <div>{{ 'DATA_EXCHANGE.UPSERT_KEY_CATEGORY' | translate }}</div>
+        <div>{{ 'DATA_EXCHANGE.UPSERT_KEY_CUSTOMER' | translate }}</div>
+        <div>{{ 'DATA_EXCHANGE.UPSERT_KEY_SUPPLIER' | translate }}</div>
+        <div>{{ 'DATA_EXCHANGE.UPSERT_KEY_FACILITY' | translate }}</div>
+        <div>{{ 'DATA_EXCHANGE.UPSERT_KEY_FACILITY_LOCATION' | translate }}</div>
+      </div>
+
+      <div class="active-import-warning" *ngIf="hasActiveImportForEntity(importEntityType)">
+        {{ 'DATA_EXCHANGE.ACTIVE_IMPORT_WARNING' | translate }}
+      </div>
+
+      <button mat-raised-button color="primary" (click)="runImport()" [disabled]="runningImport() || !importFile() || hasActiveImportForEntity(importEntityType)">
+        {{ runningImport() ? ('DATA_EXCHANGE.IMPORTING' | translate) : ('DATA_EXCHANGE.IMPORT' | translate) }}
+      </button>
+    </mat-card>
+  </div>
+</mat-card>
+
+<mat-card class="exchange-card">
+  <div class="history-header">
+    <h3>{{ 'DATA_EXCHANGE.JOB_HISTORY' | translate }}</h3>
+    <button mat-button type="button" (click)="loadJobs()">{{ 'DATA_EXCHANGE.REFRESH' | translate }}</button>
+  </div>
+
+  <div *ngIf="loadingJobs()" class="loading-row">{{ 'DATA_EXCHANGE.LOADING' | translate }}</div>
+
+  <table mat-table [dataSource]="jobs()" *ngIf="!loadingJobs()" class="full-width">
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ID' | translate }}</th>
+      <td mat-cell *matCellDef="let item">{{ item.id }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="jobType">
+      <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.TYPE' | translate }}</th>
+      <td mat-cell *matCellDef="let item">{{ item.jobType }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="entityType">
+      <th mat-header-cell *matHeaderCellDef>{{ 'DATA_EXCHANGE.ENTITY' | translate }}</th>
+      <td mat-cell *matCellDef="let item">{{ getEntityLabel(item.entityType) }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="status">
+      <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+      <td mat-cell *matCellDef="let item">
+        <div class="status-cell">
+          <span>{{ item.status }}</span>
+          <button
+            mat-icon-button
+            color="warn"
+            type="button"
+            *ngIf="isPending(item)"
+            (click)="cancelJob(item)"
+            [title]="'COMMON.CANCEL' | translate"
+            [attr.aria-label]="'COMMON.CANCEL' | translate"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="rows">
+      <th mat-header-cell *matHeaderCellDef>{{ 'DATA_EXCHANGE.ROWS' | translate }}</th>
+      <td mat-cell *matCellDef="let item">
+        {{ 'DATA_EXCHANGE.TOTAL' | translate }}: {{ item.totalRows || 0 }}, {{ 'DATA_EXCHANGE.SUCCESS' | translate }}: {{ item.successRows || 0 }}, {{ 'DATA_EXCHANGE.FAILED' | translate }}: {{ item.failedRows || 0 }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="errorMessage">
+      <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ERROR' | translate }}</th>
+      <td mat-cell *matCellDef="let item" class="error-cell">
+        {{ item.errorMessage || '-' }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="createdAt">
+      <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.CREATED' | translate }}</th>
+      <td mat-cell *matCellDef="let item">{{ item.createdAt | userDate: 'short' }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ACTION' | translate }}</th>
+      <td mat-cell *matCellDef="let item" class="actions-cell">
+        <button mat-stroked-button type="button" *ngIf="item.hasResultFile" (click)="downloadResult(item)">
+          {{ 'DATA_EXCHANGE.DOWNLOAD_CSV' | translate }}
+        </button>
+        <button mat-stroked-button type="button" *ngIf="item.hasErrorFile" (click)="downloadErrors(item)">
+          {{ 'DATA_EXCHANGE.DOWNLOAD_ERRORS' | translate }}
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+</mat-card>

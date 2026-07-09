@@ -1,0 +1,139 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.chart-card {
+  padding: 16px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #101828;
+  margin-bottom: 12px;
+}
+
+.chart-empty {
+  min-height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #667085;
+}
+
+.trend-table {
+  display: grid;
+  gap: 8px;
+}
+
+.trend-table-header,
+.trend-row {
+  display: grid;
+  grid-template-columns: minmax(96px, 1fr) minmax(120px, 1fr) 96px;
+  gap: 12px;
+  align-items: center;
+}
+
+.trend-table-header {
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eaecf0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #475467;
+}
+
+.trend-row {
+  padding: 10px 0;
+  border-bottom: 1px solid #f2f4f7;
+  color: #101828;
+}
+
+.rank-list {
+  display: grid;
+  gap: 14px;
+}
+
+.rank-row {
+  display: grid;
+  gap: 8px;
+}
+
+.rank-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.rank-label {
+  font-weight: 600;
+  color: #101828;
+}
+
+.rank-value {
+  color: #344054;
+  font-variant-numeric: tabular-nums;
+}
+
+.rank-bar-shell {
+  height: 10px;
+  border-radius: 999px;
+  background: #f2f4f7;
+  overflow: hidden;
+}
+
+.rank-bar {
+  height: 100%;
+  border-radius: inherit;
+}
+
+.rank-bar-amber {
+  background: linear-gradient(90deg, #f79009 0%, #dc6803 100%);
+}
+
+.rank-bar-red {
+  background: linear-gradient(90deg, #f97066 0%, #d92d20 100%);
+}
+
+.rank-bar-risk {
+  background: linear-gradient(90deg, #f04438 0%, #912018 100%);
+}
+
+.risk-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 12px;
+  color: #475467;
+}
+
+@media (max-width: 768px) {
+  .trend-table-header,
+  .trend-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}

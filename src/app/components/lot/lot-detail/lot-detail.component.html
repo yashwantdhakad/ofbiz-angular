@@ -1,0 +1,210 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+<ng-template #content>
+  <mat-list>
+    <mat-list-item>
+      <a [routerLink]="['/lots']">{{ 'LOT.TITLE' | translate }}</a>
+      / {{ lot?.lotId || lotId }}
+    </mat-list-item>
+  </mat-list>
+
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>{{ 'LOT.DETAIL_TITLE' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="header-grid">
+        <div><strong>{{ 'LOT.LOT_ID' | translate }}:</strong> {{ lot?.lotId || '-' }}</div>
+        <div><strong>{{ 'LOT.CREATION_DATE' | translate }}:</strong> {{ lot?.creationDate ? (lot?.creationDate | userDate : 'MM/dd/yyyy') : '-' }}</div>
+        <div><strong>{{ 'LOT.QUANTITY' | translate }}:</strong> {{ lot?.quantity || 0 }}</div>
+        <div>
+          <strong>{{ 'LOT.EXPIRATION_DATE' | translate }}:</strong>
+          {{ lot?.expirationDate ? (lot?.expirationDate | userDate : 'MM/dd/yyyy') : '-' }}
+          <mat-icon matListIcon class="custom-mat-icon custom-icon-align" color="primary"
+            (click)="openExpirationDateDialog()">edit</mat-icon>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <br />
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>Metallurgical Traceability</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="header-grid">
+        <div>
+          <strong>Heat Number:</strong>
+          {{ lot?.heatNumber || '-' }}
+          <mat-icon class="custom-mat-icon custom-icon-align" color="primary"
+            (click)="openEditPropertyDialog('heatNumber', 'Edit Heat Number', 'Heat Number', lot?.heatNumber)">edit</mat-icon>
+        </div>
+        <div>
+          <strong>Steel Grade:</strong>
+          {{ lot?.steelGrade || '-' }}
+          <mat-icon class="custom-mat-icon custom-icon-align" color="primary"
+            (click)="openEditPropertyDialog('steelGrade', 'Edit Steel Grade', 'Steel Grade', lot?.steelGrade)">edit</mat-icon>
+        </div>
+        <div>
+          <strong>Mill Certificate No:</strong>
+          {{ lot?.millCertNumber || '-' }}
+          <mat-icon class="custom-mat-icon custom-icon-align" color="primary"
+            (click)="openEditPropertyDialog('millCertNumber', 'Edit Mill Certificate No', 'Mill Certificate No', lot?.millCertNumber)">edit</mat-icon>
+        </div>
+        <div>
+          <strong>Manufacturer:</strong>
+          {{ lot?.manufacturer || '-' }}
+          <mat-icon class="custom-mat-icon custom-icon-align" color="primary"
+            (click)="openEditPropertyDialog('manufacturer', 'Edit Manufacturer', 'Manufacturer', lot?.manufacturer)">edit</mat-icon>
+        </div>
+        <div>
+          <strong>Yield Strength (MPa):</strong>
+          {{ lot?.yieldStrength || '-' }}
+          <mat-icon class="custom-mat-icon custom-icon-align" color="primary"
+            (click)="openEditPropertyDialog('yieldStrength', 'Edit Yield Strength', 'Yield Strength', lot?.yieldStrength, 'number')">edit</mat-icon>
+        </div>
+        <div>
+          <strong>Mill Certificate Report:</strong>
+          <span *ngIf="!millCertUrl()">-</span>
+          <a *ngIf="millCertUrl()" [href]="millCertUrl()" target="_blank" mat-flat-button color="primary" class="cert-btn">
+            <mat-icon>picture_as_pdf</mat-icon> View Mill Report
+          </a>
+          <mat-icon class="custom-mat-icon custom-icon-align" color="primary"
+            (click)="openEditAttributeDialog('MILL_CERT_URL', 'Edit Mill Certificate URL', 'Mill Certificate URL', millCertUrl())">edit</mat-icon>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <br />
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>{{ 'LOT.INVENTORY_ITEMS' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="inventory-table-container">
+        <table mat-table [dataSource]="inventoryItems">
+          <ng-container matColumnDef="inventoryItemId">
+            <th mat-header-cell *matHeaderCellDef>{{ 'ASSET.ASSET_ID' | translate }}</th>
+            <td mat-cell *matCellDef="let item">
+              <a [routerLink]="['/assets', item?.inventoryItemId]">{{ item?.inventoryItemId || '-' }}</a>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="productId">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.PRODUCT_ID' | translate }}</th>
+            <td mat-cell *matCellDef="let item">
+              <a [routerLink]="['/products', item?.productId]">{{ item?.productId || '-' }}</a>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="facilityId">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.FACILITY' | translate }}</th>
+            <td mat-cell *matCellDef="let item">
+              <a [routerLink]="['/facilities', item?.facilityId]">{{ item?.facilityId || '-' }}</a>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="locationSeqId">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.LOCATION' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item?.locationSeqId || '-' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="statusId">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item?.statusId || '-' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="containerId">
+            <th mat-header-cell *matHeaderCellDef>{{ 'LOT.CONTAINER_ID' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item?.containerId || '-' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="atpQoh">
+            <th mat-header-cell *matHeaderCellDef>{{ 'MANUFACTURING.ATP_QOH' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item?.availableToPromiseTotal || 0 }}/{{ item?.quantityOnHandTotal || 0 }}</td>
+          </ng-container>
+          <ng-container matColumnDef="receivedDate">
+            <th mat-header-cell *matHeaderCellDef>{{ 'ASSET.RECEIVED_DATE' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item?.datetimeReceived ? (item?.datetimeReceived | userDate : 'MM/dd/yyyy hh:mm a') : '-' }}</td>
+          </ng-container>
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef></th>
+            <td mat-cell *matCellDef="let item">
+              <button mat-icon-button color="primary" title="Create Cut Sections from this plate"
+                *ngIf="(item?.availableToPromiseTotal || 0) > 0"
+                (click)="openCutSectionsDialog(item.inventoryItemId)">
+                <mat-icon>content_cut</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="inventoryColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: inventoryColumns"></tr>
+        </table>
+      </div>
+
+      <!-- Mobile card list -->
+      <div class="inventory-mobile-list">
+        <div class="inventory-mobile-card" *ngFor="let item of inventoryItems">
+          <a class="inventory-mobile-id" [routerLink]="['/assets', item?.inventoryItemId]">
+            {{ item?.inventoryItemId || '-' }}
+          </a>
+          <div class="inventory-mobile-grid">
+            <div class="inventory-mobile-field">
+              <span class="inventory-mobile-label">{{ 'COMMON.PRODUCT_ID' | translate }}</span>
+              <a [routerLink]="['/products', item?.productId]">{{ item?.productId || '-' }}</a>
+            </div>
+            <div class="inventory-mobile-field">
+              <span class="inventory-mobile-label">{{ 'COMMON.FACILITY' | translate }}</span>
+              <a [routerLink]="['/facilities', item?.facilityId]">{{ item?.facilityId || '-' }}</a>
+            </div>
+            <div class="inventory-mobile-field">
+              <span class="inventory-mobile-label">{{ 'COMMON.LOCATION' | translate }}</span>
+              <span>{{ item?.locationSeqId || '-' }}</span>
+            </div>
+            <div class="inventory-mobile-field">
+              <span class="inventory-mobile-label">{{ 'COMMON.STATUS' | translate }}</span>
+              <span>{{ item?.statusId || '-' }}</span>
+            </div>
+            <div class="inventory-mobile-field">
+              <span class="inventory-mobile-label">{{ 'LOT.CONTAINER_ID' | translate }}</span>
+              <span>{{ item?.containerId || '-' }}</span>
+            </div>
+            <div class="inventory-mobile-field">
+              <span class="inventory-mobile-label">{{ 'MANUFACTURING.ATP_QOH' | translate }}</span>
+              <span>{{ item?.availableToPromiseTotal || 0 }}/{{ item?.quantityOnHandTotal || 0 }}</span>
+            </div>
+            <div class="inventory-mobile-field full-width">
+              <span class="inventory-mobile-label">{{ 'ASSET.RECEIVED_DATE' | translate }}</span>
+              <span>{{ item?.datetimeReceived ? (item?.datetimeReceived | userDate : 'MM/dd/yyyy hh:mm a') : '-' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <br />
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>Material Genealogy &amp; Traceability</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <app-lot-traceability-tree [treeData]="traceabilityTree()"></app-lot-traceability-tree>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

@@ -1,0 +1,80 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<div class="form-container">
+  <mat-card>
+    <mat-card-content style="padding: 24px;">
+      <h2 class="form-title">Submit Support Request</h2>
+      
+      <form [formGroup]="ticketForm" (ngSubmit)="onSubmit()">
+        <!-- Subject -->
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Subject</mat-label>
+          <input matInput formControlName="subject" placeholder="Summarize the issue or request">
+          <mat-error *ngIf="ticketForm.get('subject')?.hasError('required')">
+            Subject is required.
+          </mat-error>
+          <mat-error *ngIf="ticketForm.get('subject')?.hasError('maxlength')">
+            Subject cannot exceed 255 characters.
+          </mat-error>
+        </mat-form-field>
+
+        <div class="row">
+          <!-- Type -->
+          <mat-form-field class="col" appearance="outline">
+            <mat-label>Request Type</mat-label>
+            <mat-select formControlName="custRequestTypeId">
+              <mat-option *ngFor="let type of ticketTypes" [value]="type.value">
+                {{ type.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Priority -->
+          <mat-form-field class="col" appearance="outline">
+            <mat-label>Priority</mat-label>
+            <mat-select formControlName="priority">
+              <mat-option *ngFor="let p of priorities" [value]="p.value">
+                {{ p.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Description -->
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Detailed Description</mat-label>
+          <textarea matInput formControlName="description" rows="6" placeholder="Please provide steps to reproduce, or details of the feedback..."></textarea>
+          <mat-error *ngIf="ticketForm.get('description')?.hasError('required')">
+            Description is required.
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Actions -->
+        <div class="actions">
+          <button mat-button type="button" routerLink="/support/tickets" [disabled]="submitting">
+            Cancel
+          </button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="ticketForm.invalid || submitting">
+            Submit Request
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

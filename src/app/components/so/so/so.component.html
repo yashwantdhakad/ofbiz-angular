@@ -1,0 +1,194 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner
+      [diameter]="60"
+      mode="indeterminate"
+      color="primary"
+    ></mat-progress-spinner>
+  </div>
+</ng-container>
+<ng-template #content>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header class="card-header-with-action">
+      <mat-card-title>{{ pageTitle | translate }}</mat-card-title>
+      <button mat-raised-button color="primary" [routerLink]="[detailBasePath + '/create']">
+        <mat-icon>add</mat-icon> {{ (orderTypeId === 'SALES_QUOTE' ? 'QUOTE.CREATE_ACTION' : 'MENU.CREATE_ORDER') | translate }}
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="filter-row">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'COMMON.SEARCH' | translate }}</mat-label>
+          <input
+            matInput
+            [(ngModel)]="queryString"
+           
+          />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'COMMON.STATUS' | translate }}</mat-label>
+          <mat-select [(ngModel)]="selectedStatusId">
+            <mat-option value="">{{ 'COMMON.ALL' | translate }}</mat-option>
+            <mat-option *ngFor="let status of statusOptions()" [value]="status.statusId">
+              {{ status.description || status.statusId }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'SO.STORE' | translate }}</mat-label>
+          <mat-select [(ngModel)]="selectedProductStoreId">
+            <mat-option value="">{{ 'COMMON.ALL' | translate }}</mat-option>
+            <mat-option *ngFor="let store of productStoreOptions()" [value]="store.productStoreId">
+              {{ store.storeName || store.productStoreId }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'COMMON.ORDER_DATE_RANGE' | translate }}</mat-label>
+          <mat-select [(ngModel)]="selectedOrderDatePreset">
+            <mat-option *ngFor="let preset of orderDatePresets" [value]="preset.value">
+              {{ preset.label | translate }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <div class="filter-actions">
+          <button mat-raised-button color="primary" (click)="onSearch()">
+            {{ 'COMMON.SEARCH' | translate }}
+          </button>
+          <button mat-stroked-button type="button" (click)="clearFilters()">
+            {{ 'COMMON.CLEAR' | translate }}
+          </button>
+        </div>
+      </div>
+      <div class="so-table-container">
+        <table mat-table [dataSource]="items()" [trackBy]="trackBySoRow" matSort [matSortDisableClear]="true" (matSortChange)="onSortChange($event)">
+          <ng-container matColumnDef="id">
+            <th mat-header-cell class="text-left" *matHeaderCellDef mat-sort-header="id">
+              {{ 'COMMON.ID' | translate }}
+            </th>
+            <td mat-cell class="text-left" *matCellDef="let item">
+              <a [routerLink]="[detailBasePath, item.id]">{{ item.id }}</a>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="orderId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef mat-sort-header="orderId">
+              {{ 'COMMON.ORDER_ID' | translate }}
+            </th>
+            <td mat-cell class="text-left" *matCellDef="let item">
+              {{ item.orderId }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="customerName">
+            <th mat-header-cell class="text-left" *matHeaderCellDef mat-sort-header="customerName">
+              {{ 'SO.BILL_TO' | translate }}
+            </th>
+            <td mat-cell class="text-left" *matCellDef="let item">
+              {{ item.customerName }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="organizationName">
+            <th mat-header-cell class="text-left" *matHeaderCellDef mat-sort-header="organizationName">
+              {{ 'SO.BILL_FROM' | translate }}
+            </th>
+            <td mat-cell class="text-left" *matCellDef="let item">
+                {{ item.organizationName }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="entryDate">
+            <th mat-header-cell class="text-left" *matHeaderCellDef mat-sort-header="entryDate">
+              {{ 'SO.ORDER_DATE' | translate }}
+            </th>
+            <td mat-cell class="text-left" *matCellDef="let item">
+              {{ item.entryDate | userDate : 'MMMM d, y' }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="statusDescription">
+            <th mat-header-cell class="text-left" *matHeaderCellDef mat-sort-header="statusDescription">
+              {{ 'COMMON.STATUS' | translate }}
+            </th>
+            <td mat-cell class="text-left" *matCellDef="let item">
+              <app-status-chip [status]="item.statusDescription" [statusId]="item.statusId"></app-status-chip>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="storeName">
+            <th mat-header-cell class="text-left" *matHeaderCellDef mat-sort-header="storeName">
+              {{ 'SO.STORE' | translate }}
+            </th>
+            <td mat-cell class="text-left" *matCellDef="let item">
+              {{ item.storeName }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="grandTotal">
+            <th mat-header-cell class="text-left" *matHeaderCellDef mat-sort-header="grandTotal">
+              {{ 'SO.TOTAL' | translate }}
+            </th>
+            <td mat-cell class="text-right" *matCellDef="let item">
+              {{ item.grandTotal | amountWithCurrency : (item.currencyUomId || item.currencyUom || 'USD') }}
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+
+      <div class="so-mobile-list">
+        <a
+          class="so-mobile-card"
+          *ngFor="let item of items(); trackBy: trackBySoRow"
+          [routerLink]="[detailBasePath, item.id]"
+        >
+          <div class="so-mobile-heading">
+            <strong>{{ item.id }}</strong>
+            <app-status-chip [status]="item.statusDescription" [statusId]="item.statusId"></app-status-chip>
+          </div>
+          
+          <div class="so-mobile-field" *ngIf="item.customerName">
+            <mat-icon>person</mat-icon>
+            <span class="so-mobile-value">{{ item.customerName }}</span>
+          </div>
+
+          <div class="so-mobile-field" *ngIf="item.storeName">
+            <mat-icon>store</mat-icon>
+            <span class="so-mobile-value">{{ item.storeName }}</span>
+          </div>
+
+          <div class="so-mobile-field" *ngIf="item.entryDate">
+            <mat-icon>event</mat-icon>
+            <span class="so-mobile-value">{{ item.entryDate | userDate : 'MMMM d, y' }}</span>
+          </div>
+
+          <div class="so-mobile-total">
+            <strong>{{ item.grandTotal | amountWithCurrency : (item.currencyUomId || item.currencyUom || 'USD') }}</strong>
+          </div>
+        </a>
+      </div>
+      <mat-paginator
+        [pageIndex]="pagination.page - 1"
+        [pageSize]="pagination.rowsPerPage"
+        [length]="pages()"
+        [pageSizeOptions]="[10, 20, 30, 100]"
+        (page)="onPageChange($event.pageIndex, $event.pageSize)"
+      ></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

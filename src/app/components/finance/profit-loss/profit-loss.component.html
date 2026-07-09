@@ -1,0 +1,124 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<div class="report-shell">
+  <div class="header-actions">
+    <h2>{{ 'FINANCE.PROFIT_LOSS_TITLE' | translate }}</h2>
+    <button mat-raised-button color="primary" (click)="printReport()">
+      {{ 'FINANCE.EXPORT_PDF' | translate }}
+    </button>
+  </div>
+
+  <mat-card class="filter-card">
+    <mat-card-content class="filter-row">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'FINANCE.PERIOD' | translate }}</mat-label>
+        <mat-select [formControl]="filterForm.controls.datePreset" (selectionChange)="applyFilters()">
+          <mat-option value="THIS_MONTH">{{ 'FINANCE.THIS_MONTH' | translate }}</mat-option>
+          <mat-option value="LAST_MONTH">{{ 'FINANCE.LAST_MONTH' | translate }}</mat-option>
+          <mat-option value="YTD">{{ 'FINANCE.YTD' | translate }}</mat-option>
+          <mat-option value="CUSTOM">{{ 'FINANCE.CUSTOM_RANGE' | translate }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" *ngIf="showCustomDateRange()">
+        <mat-label>{{ 'FINANCE.FROM_DATE' | translate }}</mat-label>
+        <input matInput [matDatepicker]="fromPicker" [formControl]="filterForm.controls.fromDate" />
+        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" *ngIf="showCustomDateRange()">
+        <mat-label>{{ 'FINANCE.TO_DATE' | translate }}</mat-label>
+        <input matInput [matDatepicker]="toPicker" [formControl]="filterForm.controls.toDate" />
+        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+        <mat-datepicker #toPicker></mat-datepicker>
+      </mat-form-field>
+
+      <button mat-stroked-button *ngIf="showCustomDateRange()" (click)="applyFilters()">
+        {{ 'FINANCE.APPLY' | translate }}
+      </button>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="loading-state" *ngIf="loading()">
+    <mat-spinner diameter="40"></mat-spinner>
+    <span>{{ 'FINANCE.LOADING_REPORT' | translate }}</span>
+  </div>
+
+  <div class="error-state" *ngIf="errorMessage()">
+    {{ 'FINANCE.ERROR_LOAD_PL' | translate }}
+  </div>
+
+  <mat-card class="pl-card" *ngIf="!loading() && !errorMessage() && reportData() as report">
+    <mat-card-content>
+      
+      <!-- REVENUE SECTION -->
+      <div class="pl-section">
+        <div class="pl-section-title">{{ 'FINANCE.REVENUE' | translate }}</div>
+        <div class="pl-row" *ngFor="let item of report.revenueItems">
+          <div class="pl-account">{{ item.accountName }} ({{ item.accountCode }})</div>
+          <div class="pl-amount">{{ item.amount | currency }}</div>
+        </div>
+        <div class="pl-total-row">
+          <div class="pl-account">{{ 'FINANCE.TOTAL_REVENUE' | translate }}</div>
+          <div class="pl-amount">{{ report.totalRevenue | currency }}</div>
+        </div>
+      </div>
+
+      <!-- COGS SECTION -->
+      <div class="pl-section">
+        <div class="pl-section-title">{{ 'FINANCE.COST_OF_GOODS_SOLD' | translate }}</div>
+        <div class="pl-row" *ngFor="let item of report.cogsItems">
+          <div class="pl-account">{{ item.accountName }} ({{ item.accountCode }})</div>
+          <div class="pl-amount">{{ item.amount | currency }}</div>
+        </div>
+        <div class="pl-total-row">
+          <div class="pl-account">{{ 'FINANCE.TOTAL_COGS' | translate }}</div>
+          <div class="pl-amount">{{ report.totalCogs | currency }}</div>
+        </div>
+      </div>
+
+      <!-- GROSS PROFIT -->
+      <div class="pl-summary-row highlight">
+        <div class="pl-account">{{ 'FINANCE.GROSS_PROFIT' | translate }}</div>
+        <div class="pl-amount">{{ report.grossProfit | currency }}</div>
+      </div>
+
+      <!-- OPERATING EXPENSES SECTION -->
+      <div class="pl-section">
+        <div class="pl-section-title">{{ 'FINANCE.OPERATING_EXPENSES' | translate }}</div>
+        <div class="pl-row" *ngFor="let item of report.expenseItems">
+          <div class="pl-account">{{ item.accountName }} ({{ item.accountCode }})</div>
+          <div class="pl-amount">{{ item.amount | currency }}</div>
+        </div>
+        <div class="pl-total-row">
+          <div class="pl-account">{{ 'FINANCE.TOTAL_EXPENSES' | translate }}</div>
+          <div class="pl-amount">{{ report.totalExpenses | currency }}</div>
+        </div>
+      </div>
+
+      <!-- NET PROFIT -->
+      <div class="pl-summary-row super-highlight">
+        <div class="pl-account">{{ 'FINANCE.NET_PROFIT' | translate }}</div>
+        <div class="pl-amount">{{ report.netProfit | currency }}</div>
+      </div>
+
+    </mat-card-content>
+  </mat-card>
+</div>

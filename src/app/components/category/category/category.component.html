@@ -1,0 +1,84 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+<ng-template #content>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header class="card-header-with-action">
+      <mat-card-title> {{ 'CATEGORY.TITLE' | translate }} </mat-card-title>
+      <button mat-raised-button color="primary" routerLink="/category/create">
+        <mat-icon>add</mat-icon> {{ 'CATEGORY.CREATE_TITLE' | translate }}
+      </button>
+    </mat-card-header>
+    <mat-card-actions>
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>{{ 'COMMON.SEARCH' | translate }}</mat-label>
+        <input matInput [formControl]="searchControl" />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+    </mat-card-actions>
+    <mat-card-content>
+      <!-- Desktop table -->
+      <div class="category-table-container">
+        <table mat-table [dataSource]="items()" [trackBy]="trackByCategoryRow" matSort [matSortDisableClear]="true"
+          (matSortChange)="onSortChange($event)">
+          <ng-container *ngFor="let column of displayedColumns; trackBy: trackByCategoryColumn"
+            [matColumnDef]="column.key">
+            <th mat-header-cell *matHeaderCellDef [mat-sort-header]="column.key">
+              {{ column.header | translate }}
+            </th>
+            <td mat-cell *matCellDef="let item">
+              <ng-container *ngIf="column.key === 'productCategoryId'; else defaultCell">
+                <a [routerLink]="['/category', item[column.key]]">{{ item[column.key] }}</a>
+              </ng-container>
+              <ng-template #defaultCell>{{ getValue(item, column.key) }}</ng-template>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="getColumnKeys()"></tr>
+          <tr mat-row *matRowDef="let row; columns: getColumnKeys()"></tr>
+        </table>
+      </div>
+
+      <!-- Mobile card list -->
+      <div class="category-mobile-list">
+        <div class="category-mobile-card" *ngFor="let item of items(); trackBy: trackByCategoryRow">
+          <a class="category-mobile-id" [routerLink]="['/category', item.productCategoryId]">
+            {{ item.productCategoryId }}
+          </a>
+          <div class="category-mobile-grid">
+            <div class="category-mobile-field">
+              <span class="category-mobile-label">{{ 'CATEGORY.NAME' | translate }}</span>
+              <span>{{ item.categoryName || '-' }}</span>
+            </div>
+            <div class="category-mobile-field">
+              <span class="category-mobile-label">{{ 'CATEGORY.TYPE' | translate }}</span>
+              <span>{{ getValue(item, 'productCategoryTypeId') || '-' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <mat-paginator [pageIndex]="pagination.page - 1" [pageSize]="pagination.rowsPerPage" [length]="pages()"
+        (page)="onPageChange($event.pageIndex)"></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

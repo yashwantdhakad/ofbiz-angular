@@ -1,0 +1,747 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+<ng-template #content>
+  <mat-list class="breadcrumb-list">
+    <mat-list-item>
+      <a [routerLink]="['/assets']">{{ 'ASSET.BREADCRUMB' | translate }}</a>
+      / {{ assetDetail()?.inventoryItemId }}
+    </mat-list-item>
+  </mat-list>
+  <mat-card class="mat-elevation-z10 header-card">
+    <mat-card-content>
+      <div class="header-top-row">
+        <div class="header-copy">
+          <h1 class="page-title">{{ assetDetail()?.inventoryItemId }}</h1>
+        </div>
+        <div class="actions-row" *ngIf="canSendToInspection()">
+          <button mat-raised-button color="accent" [disabled]="isInspectionUpdating()" (click)="sendToInspection()">
+            <mat-icon>assignment</mat-icon>
+            Send to Inspection
+          </button>
+        </div>
+        <div class="actions-row" *ngIf="canRunInspectionDecision()">
+          <span class="inspection-label" style="font-size:12px;color:#666;margin-right:8px">Inspection Result:</span>
+          <button mat-stroked-button color="warn" [disabled]="isInspectionUpdating()" (click)="rejectInspection()">
+            <mat-icon>cancel</mat-icon>
+            {{ 'COMMON.REJECT' | translate }} (Defective)
+          </button>
+          <button mat-raised-button color="primary" [disabled]="isInspectionUpdating()" (click)="acceptInspection()">
+            <mat-icon>check_circle</mat-icon>
+            {{ 'COMMON.ACCEPT' | translate }} (OK)
+          </button>
+        </div>
+        <div class="actions-row" *ngIf="canStartRepair()">
+          <button mat-raised-button color="warn" (click)="startRepair()">
+            <mat-icon>build</mat-icon>
+            Begin Repair / Disassembly
+          </button>
+        </div>
+        <div class="actions-row" *ngIf="canDisassemble()">
+          <button mat-raised-button color="warn" (click)="openDisassemblyDialog()">
+            <mat-icon>call_split</mat-icon>
+            {{ 'ASSET.START_REPAIR_WORKFLOW' | translate }}
+          </button>
+        </div>
+        <div class="actions-row" *ngIf="canMarkInstalled()">
+          <button mat-raised-button color="primary" [disabled]="isInspectionUpdating()" (click)="markInstalled()">
+            <mat-icon>directions_boat</mat-icon>
+            {{ 'ASSET.MARK_INSTALLED' | translate }}
+          </button>
+        </div>
+      </div>
+
+      <div class="overview-grid">
+        <div class="overview-card">
+          <div class="overview-card-title">{{ 'COMMON.DETAILS' | translate }}</div>
+          <div class="overview-item">
+            <span>{{ 'COMMON.FACILITY' | translate }}</span>
+            <strong>
+              <ng-container *ngIf="assetDetail()?.facilityId; else noFacility">
+                <a [routerLink]="['/facilities', assetDetail()?.facilityId]">
+                  {{ facilityName() || assetDetail()?.facilityId }}
+                </a>
+              </ng-container>
+              <ng-template #noFacility>--</ng-template>
+            </strong>
+          </div>
+          <div class="overview-item">
+            <span>{{ 'COMMON.LOCATION' | translate }}</span>
+            <strong class="value-with-action">
+              <span>{{ assetDetail()?.locationSeqId || '--' }}</span>
+              <button mat-icon-button type="button" color="primary" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="openLocationDialog()">
+                <mat-icon class="custom-mat-icon custom-icon-align">edit</mat-icon>
+              </button>
+            </strong>
+          </div>
+          <div class="overview-item">
+            <span>Owner Party</span>
+            <strong class="value-with-action">
+              <span>{{ assetDetail()?.ownerPartyId || '--' }}</span>
+              <button mat-icon-button type="button" color="primary" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="openOwnerDialog()">
+                <mat-icon class="custom-mat-icon custom-icon-align">edit</mat-icon>
+              </button>
+            </strong>
+          </div>
+          <div class="overview-item">
+            <span>{{ 'ASSET.ORDER_ID' | translate }}</span>
+            <strong>
+              <ng-container *ngIf="receipts().length && receipts()[0]?.orderId; else noPoOrderId">
+                <a [routerLink]="['/pos', receipts()[0].orderId]">{{ receipts()[0].orderId }}</a>
+              </ng-container>
+              <ng-template #noPoOrderId>--</ng-template>
+            </strong>
+          </div>
+          <div class="overview-item">
+            <span>{{ 'COMMON.PRODUCT_ID' | translate }}</span>
+            <strong>
+              <ng-container *ngIf="assetDetail()?.productId; else noProductId">
+                <a [routerLink]="['/products', assetDetail()?.productId]">
+                  {{ assetDetail()?.productId }}
+                </a>
+              </ng-container>
+              <ng-template #noProductId>--</ng-template>
+            </strong>
+          </div>
+          <div class="overview-item">
+            <span>{{ 'LOT.LOT_ID' | translate }}</span>
+            <strong>
+              <ng-container *ngIf="assetDetail()?.lotId; else noLotId">
+                <a [routerLink]="['/lots', assetDetail()?.lotId]">{{ assetDetail()?.lotId }}</a>
+              </ng-container>
+              <ng-template #noLotId>--</ng-template>
+            </strong>
+          </div>
+          <div class="overview-item">
+            <span>{{ 'MANUFACTURING.CONTAINER_ID' | translate }}</span>
+            <strong>{{ assetDetail()?.containerId || '--' }}</strong>
+          </div>
+          <div class="overview-item" *ngIf="assetDetail()?.serialNumber">
+            <span>{{ 'ASSET.SERIAL_NUMBER' | translate }}</span>
+            <strong>{{ assetDetail()?.serialNumber }}</strong>
+          </div>
+          <div class="overview-item" *ngIf="assetDetail()?.parentInventoryItemId">
+            <span>Parent Item (Cut From)</span>
+            <strong>
+              <a [routerLink]="['/assets', assetDetail()?.parentInventoryItemId]">
+                {{ assetDetail()?.parentInventoryItemId }}
+              </a>
+            </strong>
+          </div>
+        </div>
+
+        <div class="overview-card">
+          <div class="overview-card-title">{{ 'ASSET.OTHER_DETAILS' | translate }}</div>
+          <div class="overview-item">
+            <span>{{ 'COMMON.TYPE' | translate }}</span>
+            <strong>{{ getInventoryItemTypeLabel(assetDetail()?.inventoryItemTypeId || assetDetail()?.inventoryItemTypeEnumId) }}</strong>
+          </div>
+          <div class="overview-item">
+            <span>{{ 'COMMON.STATUS' | translate }}</span>
+            <strong class="value-with-action">
+              <span>{{ getStatusLabel(assetDetail()?.statusId) }}</span>
+              <button mat-icon-button type="button" color="primary" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="openStatusDialog()">
+                <mat-icon class="custom-mat-icon custom-icon-align">edit</mat-icon>
+              </button>
+              <app-status-history-icon [entries]="statusHistoryEntries()"></app-status-history-icon>
+            </strong>
+          </div>
+          <div class="overview-item">
+            <span>{{ 'ASSET.RECEIVED_DATE' | translate }}</span>
+            <strong>{{ assetDetail()?.datetimeReceived ? (assetDetail()?.datetimeReceived | userDate : "MMMM d, y") : '--' }}</strong>
+          </div>
+          <div class="overview-item">
+            <span>{{ 'ASSET.MANUFACTURED_DATE' | translate }}</span>
+            <strong>{{ assetDetail()?.datetimeManufactured ? (assetDetail()?.datetimeManufactured | userDate : "MMMM d, y") : '--' }}</strong>
+          </div>
+          <div class="overview-item">
+            <span>{{ 'ASSET.EXPIRATION_DATE' | translate }}</span>
+            <strong class="value-with-action">
+              <span>{{ assetDetail()?.expireDate ? (assetDetail()?.expireDate | userDate : "MMMM d, y") : '--' }}</span>
+              <button mat-icon-button type="button" color="primary" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="openExpireDateDialog()">
+                <mat-icon class="custom-mat-icon custom-icon-align">edit</mat-icon>
+              </button>
+            </strong>
+          </div>
+        </div>
+
+        <div class="overview-card amount-card">
+          <div class="overview-card-title">{{ 'COMMON.QUANTITY' | translate }}</div>
+          <div class="overview-item">
+            <span>{{ 'ASSET.TOTAL_QOH' | translate }}</span>
+            <strong>{{ assetDetail()?.quantityOnHandTotal || '0' }}</strong>
+          </div>
+          <div class="overview-item">
+            <span>{{ 'ASSET.TOTAL_ATP' | translate }}</span>
+            <strong>{{ assetDetail()?.availableToPromiseTotal || '0' }}</strong>
+          </div>
+          <div class="overview-item">
+            <span>{{ 'COMMON.UNIT_COST' | translate }}</span>
+            <strong class="value-with-action">
+              <span>{{ assetDetail()?.unitCost !== null && assetDetail()?.unitCost !== undefined ? (assetDetail()?.unitCost | amountWithCurrency : (assetDetail()?.currencyUomId || 'USD')) : '--' }}</span>
+              <button mat-icon-button type="button" color="primary" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="openUnitCostDialog()">
+                <mat-icon class="custom-mat-icon custom-icon-align">edit</mat-icon>
+              </button>
+            </strong>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <br />
+  <mat-card class="mat-elevation-z10 content-card">
+    <mat-card-content>
+      <div class="mobile-section-list">
+        <mat-card *ngFor="let item of details()" class="mobile-data-card">
+          <mat-card-content>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.DETAIL_ID' | translate }}</span>
+              <span>{{ item.inventoryItemDetailSeqId || '--' }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.WORK_EFFORT_ID' | translate }}</span>
+              <span>
+                <ng-container *ngIf="item.workEffortId; else noMobileWorkEffortId">
+                  <a [routerLink]="['/jobs', item.workEffortId]">{{ item.workEffortId }}</a>
+                </ng-container>
+                <ng-template #noMobileWorkEffortId>--</ng-template>
+              </span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.ORDER_ID' | translate }}</span>
+              <span>
+                <ng-container *ngIf="item.orderId; else noMobileOrderId">
+                  <a [routerLink]="getDetailOrderRoute(item)">{{ item.orderId }}</a>
+                </ng-container>
+                <ng-template #noMobileOrderId>--</ng-template>
+              </span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'RETURN.RETURN_ID' | translate }}</span>
+              <span>
+                <ng-container *ngIf="item.returnId; else noMobileReturnId">
+                  <a [routerLink]="['/returns', item.returnId]">{{ item.returnId }}</a>
+                </ng-container>
+                <ng-template #noMobileReturnId>--</ng-template>
+              </span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.RECEIPT_ID' | translate }}</span>
+              <span>{{ item.receiptId || '--' }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.PHYSICAL_ID' | translate }}</span>
+              <span>{{ item.physicalInventoryId || '--' }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'COMMON.DESCRIPTION' | translate }}</span>
+              <span>{{ item.description || '--' }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.QOH_DIFF' | translate }}</span>
+              <span>{{ item.quantityOnHandDiff || 0 }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.QTP_DIFF' | translate }}</span>
+              <span>{{ item.availableToPromiseDiff || 0 }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.EFFECTIVE_DATE' | translate }}</span>
+              <span>{{ item.effectiveDate | userDate : "MMMM d, y" }}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="details()" class="asset-desktop-table">
+        <ng-container matColumnDef="inventoryItemDetailSeqId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'ASSET.DETAIL_ID' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.inventoryItemDetailSeqId }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="workEffortId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'ASSET.WORK_EFFORT_ID' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            <ng-container *ngIf="item.workEffortId; else noWorkEffortId">
+              <a [routerLink]="['/jobs', item.workEffortId]">{{ item.workEffortId }}</a>
+            </ng-container>
+            <ng-template #noWorkEffortId>--</ng-template>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="orderId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'ASSET.ORDER_ID' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            <ng-container *ngIf="item.orderId; else noOrderId">
+              <a [routerLink]="getDetailOrderRoute(item)">{{ item.orderId }}</a>
+            </ng-container>
+            <ng-template #noOrderId>--</ng-template>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="returnId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'RETURN.RETURN_ID' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            <ng-container *ngIf="item.returnId; else noReturnId">
+              <a [routerLink]="['/returns', item.returnId]">{{ item.returnId }}</a>
+            </ng-container>
+            <ng-template #noReturnId>--</ng-template>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="receiptId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'ASSET.RECEIPT_ID' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.receiptId }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="physicalInventoryId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'ASSET.PHYSICAL_ID' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.physicalInventoryId }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="description">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'COMMON.DESCRIPTION' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.description }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="quantityOnHandDiff">
+          <th mat-header-cell class="text-right" *matHeaderCellDef>
+            {{ 'ASSET.QOH_DIFF' | translate }}
+          </th>
+          <td mat-cell class="text-right" *matCellDef="let item">
+            {{ item?.quantityOnHandDiff || 0 }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="availableToPromiseDiff">
+          <th mat-header-cell class="text-right" *matHeaderCellDef>
+            {{ 'ASSET.QTP_DIFF' | translate }}
+          </th>
+          <td mat-cell class="text-right" *matCellDef="let item">
+            {{ item?.availableToPromiseDiff }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="effectiveDate">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'ASSET.EFFECTIVE_DATE' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.effectiveDate | userDate : "MMMM d, y" }}
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="detailColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: detailColumns"></tr>
+        </table>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <br />
+      <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>{{ 'ASSET.RESERVATIONS' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <h3>{{ 'ASSET.ORDER_RESERVATIONS' | translate }}</h3>
+      <div class="mobile-section-list">
+        <mat-card *ngFor="let item of orderReservations()" class="mobile-data-card">
+          <mat-card-content>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.ORDER_ID' | translate }}</span>
+              <span>
+                <ng-container *ngIf="item.orderId; else noMobileReservationOrder">
+                  <a [routerLink]="['/orders', item.orderId]">{{ item.orderId }}</a>
+                </ng-container>
+                <ng-template #noMobileReservationOrder>--</ng-template>
+              </span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.ORDER_ITEM_SEQ_ID' | translate }}</span>
+              <span>{{ item.orderItemSeqId || '--' }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.SHIP_GROUP_SEQ_ID' | translate }}</span>
+              <span>{{ item.shipGroupSeqId || '--' }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.RESERVED_QTY' | translate }}</span>
+              <span>{{ item.quantity || 0 }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.NOT_AVAILABLE_QTY' | translate }}</span>
+              <span>{{ item.quantityNotAvailable || 0 }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.RESERVED_DATETIME' | translate }}</span>
+              <span>{{ item.reservedDatetime | userDate : "MMMM d, y" }}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <table mat-table [dataSource]="orderReservations()" class="asset-desktop-table">
+        <ng-container matColumnDef="orderId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'ASSET.ORDER_ID' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            <ng-container *ngIf="item.orderId; else noOrderId">
+              <a [routerLink]="['/orders', item.orderId]">{{ item.orderId }}</a>
+            </ng-container>
+            <ng-template #noOrderId>--</ng-template>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="orderItemSeqId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'ASSET.ORDER_ITEM_SEQ_ID' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.orderItemSeqId }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="shipGroupSeqId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'ASSET.SHIP_GROUP_SEQ_ID' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.shipGroupSeqId }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell class="text-right" *matHeaderCellDef>
+            {{ 'ASSET.RESERVED_QTY' | translate }}
+          </th>
+          <td mat-cell class="text-right" *matCellDef="let item">
+            {{ item.quantity }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="quantityNotAvailable">
+          <th mat-header-cell class="text-right" *matHeaderCellDef>
+            {{ 'ASSET.NOT_AVAILABLE_QTY' | translate }}
+          </th>
+          <td mat-cell class="text-right" *matCellDef="let item">
+            {{ item.quantityNotAvailable }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="reservedDatetime">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'ASSET.RESERVED_DATETIME' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.reservedDatetime | userDate : "MMMM d, y" }}
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="orderReservationColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: orderReservationColumns"></tr>
+      </table>
+      <br />
+      <h3>{{ 'ASSET.JOB_RESERVATIONS' | translate }}</h3>
+      <div class="mobile-section-list">
+        <mat-card *ngFor="let item of workEffortReservations()" class="mobile-data-card">
+          <mat-card-content>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.WORK_EFFORT_ID' | translate }}</span>
+              <span>
+                <ng-container *ngIf="item.workEffortId; else noMobileWorkEffortReservation">
+                  <a [routerLink]="['/jobs', item.workEffortId]">{{ item.workEffortId }}</a>
+                </ng-container>
+                <ng-template #noMobileWorkEffortReservation>--</ng-template>
+              </span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.RESERVED_QTY' | translate }}</span>
+              <span>{{ item.quantity || 0 }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.NOT_AVAILABLE_QTY' | translate }}</span>
+              <span>{{ item.quantityNotAvailable || 0 }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.RESERVED_DATETIME' | translate }}</span>
+              <span>{{ item.reservedDatetime | userDate : "MMMM d, y" }}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <table mat-table [dataSource]="workEffortReservations()" class="asset-desktop-table">
+        <ng-container matColumnDef="workEffortId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'ASSET.WORK_EFFORT_ID' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            <ng-container *ngIf="item.workEffortId; else noWorkEffortId">
+              <a [routerLink]="['/jobs', item.workEffortId]">{{ item.workEffortId }}</a>
+            </ng-container>
+            <ng-template #noWorkEffortId>--</ng-template>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell class="text-right" *matHeaderCellDef>
+            {{ 'ASSET.RESERVED_QTY' | translate }}
+          </th>
+          <td mat-cell class="text-right" *matCellDef="let item">
+            {{ item.quantity }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="quantityNotAvailable">
+          <th mat-header-cell class="text-right" *matHeaderCellDef>
+            {{ 'ASSET.NOT_AVAILABLE_QTY' | translate }}
+          </th>
+          <td mat-cell class="text-right" *matCellDef="let item">
+            {{ item.quantityNotAvailable }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="reservedDatetime">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'ASSET.RESERVED_DATETIME' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.reservedDatetime | userDate : "MMMM d, y" }}
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="workEffortReservationColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: workEffortReservationColumns"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+  <br />
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>{{ 'ASSET.RECEIPTS' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="mobile-section-list">
+        <mat-card *ngFor="let item of receipts()" class="mobile-data-card">
+          <mat-card-content>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.RECEIPT_ID' | translate }}</span>
+              <span>{{ item.receiptId || '--' }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'SHIPMENT.ID_LABEL' | translate }}</span>
+              <span>
+                <ng-container *ngIf="item.shipmentId; else noMobileShipment">
+                  <a [routerLink]="['/shipments', item.shipmentId]">{{ item.shipmentId }}</a>
+                </ng-container>
+                <ng-template #noMobileShipment>--</ng-template>
+              </span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'COMMON.PRODUCT_ID' | translate }}</span>
+              <span>{{ item.productId || '--' }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.ACCEPTED_QTY' | translate }}</span>
+              <span>{{ item.quantityAccepted || 0 }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.RECEIVED_BY' | translate }}</span>
+              <span>{{ item.receivedByUserLoginId || '--' }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.RECEIVED_DATE' | translate }}</span>
+              <span>{{ item.datetimeReceived | userDate : "MMMM d, y" }}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <table mat-table [dataSource]="receipts()" class="asset-desktop-table">
+        <ng-container matColumnDef="receiptId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'ASSET.RECEIPT_ID' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.receiptId }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="shipmentId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'SHIPMENT.ID_LABEL' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            <ng-container *ngIf="item.shipmentId; else noShipment">
+              <a [routerLink]="['/shipments', item.shipmentId]">{{ item.shipmentId }}</a>
+            </ng-container>
+            <ng-template #noShipment>--</ng-template>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="productId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'COMMON.PRODUCT_ID' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.productId }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="quantityAccepted">
+          <th mat-header-cell class="text-right" *matHeaderCellDef>
+            {{ 'ASSET.ACCEPTED_QTY' | translate }}
+          </th>
+          <td mat-cell class="text-right" *matCellDef="let item">
+            {{ item?.quantityAccepted }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="receivedByUserLoginId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'ASSET.RECEIVED_BY' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.receivedByUserLoginId }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="datetimeReceived">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>
+            {{ 'ASSET.RECEIVED_DATE' | translate }}
+          </th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.datetimeReceived | userDate : "MMMM d, y" }}
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="receiptColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: receiptColumns"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+  <br />
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>
+        <div class="card-title-row">
+          <span>{{ 'ASSET.VARIANCE.TITLE' | translate }}</span>
+          <span class="spacer"></span>
+          <button mat-button color="primary" (click)="openVarianceDialog()">
+            <mat-icon>add</mat-icon>
+            {{ 'ASSET.VARIANCE.ADD_VARIANCE' | translate }}
+          </button>
+        </div>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="mobile-section-list">
+        <mat-card *ngFor="let item of variances()" class="mobile-data-card">
+          <mat-card-content>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'COMMON.REASON' | translate }}</span>
+              <span>{{ getVarianceReasonLabel(item.varianceReasonId) }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.VARIANCE.QOH_VAR' | translate }}</span>
+              <span>{{ item.quantityOnHandVar || 0 }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'ASSET.VARIANCE.ATP_VAR' | translate }}</span>
+              <span>{{ item.availableToPromiseVar || 0 }}</span>
+            </div>
+            <div class="mobile-data-field">
+              <span class="label">{{ 'COMMON.COMMENTS' | translate }}</span>
+              <span>{{ item.comments || '--' }}</span>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+      <table mat-table [dataSource]="variances()" class="asset-desktop-table">
+        <ng-container matColumnDef="varianceReasonId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.REASON' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">{{ getVarianceReasonLabel(item.varianceReasonId) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="quantityOnHandVar">
+          <th mat-header-cell class="text-right" *matHeaderCellDef>{{ 'ASSET.VARIANCE.QOH_VAR' | translate }}</th>
+          <td mat-cell class="text-right" *matCellDef="let item">{{ item.quantityOnHandVar }}</td>
+        </ng-container>
+        <ng-container matColumnDef="availableToPromiseVar">
+          <th mat-header-cell class="text-right" *matHeaderCellDef>{{ 'ASSET.VARIANCE.ATP_VAR' | translate }}</th>
+          <td mat-cell class="text-right" *matCellDef="let item">{{ item.availableToPromiseVar }}</td>
+        </ng-container>
+        <ng-container matColumnDef="comments">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.COMMENTS' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">{{ item.comments }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="varianceColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: varianceColumns"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Ship-Repair Disassembly: Component Items Card -->
+  <br />
+  <mat-card class="mat-elevation-z10" *ngIf="childItems().length">
+    <mat-card-header>
+      <mat-card-title>
+        <div class="card-title-row">
+          <mat-icon style="color:#1976d2;margin-right:8px;vertical-align:middle">call_split</mat-icon>
+          Component Items — Post-Disassembly
+          <span class="component-badge">{{ childItems().length }}</span>
+        </div>
+      </mat-card-title>
+      <mat-card-subtitle>Items created from this asset via BOM-driven disassembly, inheriting ownerPartyId.</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <table mat-table [dataSource]="childItems()" class="child-items-table">
+        <ng-container matColumnDef="inventoryItemId">
+          <th mat-header-cell *matHeaderCellDef>Item ID</th>
+          <td mat-cell *matCellDef="let item">
+            <a [routerLink]="['/assets', item.inventoryItemId]">{{ item.inventoryItemId }}</a>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="productId">
+          <th mat-header-cell *matHeaderCellDef>Product ID</th>
+          <td mat-cell *matCellDef="let item">
+            <a [routerLink]="['/products', item.productId]">{{ item.productId }}</a>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="productName">
+          <th mat-header-cell *matHeaderCellDef>Product Name</th>
+          <td mat-cell *matCellDef="let item">{{ item.productName || '-' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="serialNumber">
+          <th mat-header-cell *matHeaderCellDef>Serial No.</th>
+          <td mat-cell *matCellDef="let item"><code>{{ item.serialNumber || '-' }}</code></td>
+        </ng-container>
+        <ng-container matColumnDef="statusId">
+          <th mat-header-cell *matHeaderCellDef>Status</th>
+          <td mat-cell *matCellDef="let item">
+            <span class="status-pill">{{ item.statusDescription || item.statusId || '-' }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="unitCost">
+          <th mat-header-cell class="text-right" *matHeaderCellDef>Unit Cost</th>
+          <td mat-cell class="text-right" *matCellDef="let item">{{ item.unitCost ? (item.unitCost | number:'1.2-2') : '-' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="ownerPartyId">
+          <th mat-header-cell *matHeaderCellDef>Owner Party</th>
+          <td mat-cell *matCellDef="let item">{{ item.ownerPartyId || '-' }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="childItemColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: childItemColumns"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

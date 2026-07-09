@@ -1,0 +1,128 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+
+<ng-template #content>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>{{ 'INVOICE.PURCHASE_TITLE' | translate }}</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-actions class="invoice-search-actions">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>{{ 'COMMON.SEARCH' | translate }}</mat-label>
+        <input matInput [(ngModel)]="queryString" (input)="onSearch()" />
+        <mat-icon matSuffix>search</mat-icon>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="status-field">
+        <mat-label>{{ 'COMMON.STATUS' | translate }}</mat-label>
+        <mat-select [(ngModel)]="statusId" (selectionChange)="onSearch()">
+          <mat-option value="">{{ 'COMMON.ALL' | translate }}</mat-option>
+          <mat-option *ngFor="let status of statusOptions()" [value]="status.statusId">
+            {{ status.description || status.statusId }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <button mat-stroked-button type="button" (click)="onClear()">
+        {{ 'COMMON.CLEAR' | translate }}
+      </button>
+    </mat-card-actions>
+
+    <mat-card-content>
+      <!-- Desktop table container -->
+      <div class="invoice-table-container">
+        <table mat-table [dataSource]="items()">
+          <ng-container matColumnDef="invoiceId">
+            <th mat-header-cell *matHeaderCellDef class="text-left">{{ 'INVOICE.ID' | translate }}</th>
+            <td mat-cell *matCellDef="let item" class="text-left">
+              <a [routerLink]="[detailBasePath, item.id]">{{ item.invoiceId }}</a>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="partyIdFrom">
+            <th mat-header-cell *matHeaderCellDef class="text-left">{{ 'INVOICE.FROM' | translate }}</th>
+            <td mat-cell *matCellDef="let item" class="text-left">{{ item.fromPartyName || item.partyIdFrom || '-' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="invoiceDate">
+            <th mat-header-cell *matHeaderCellDef class="text-left">{{ 'INVOICE.INVOICE_DATE' | translate }}</th>
+            <td mat-cell *matCellDef="let item" class="text-left">{{ item.invoiceDate | userDate: 'MM/dd/yyyy' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="dueDate">
+            <th mat-header-cell *matHeaderCellDef class="text-left">{{ 'INVOICE.DUE_DATE' | translate }}</th>
+            <td mat-cell *matCellDef="let item" class="text-left">{{ item.dueDate ? (item.dueDate | userDate:
+              'MM/dd/yyyy') : '-' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="statusDescription">
+            <th mat-header-cell *matHeaderCellDef class="text-left">{{ 'COMMON.STATUS' | translate }}</th>
+            <td mat-cell *matCellDef="let item" class="text-left">{{ item.statusDescription || item.statusId }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="total">
+            <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'INVOICE.TOTAL' | translate }}</th>
+            <td mat-cell *matCellDef="let item" class="text-right">{{ (item.grandTotal ?? item.total) | amountWithCurrency : (item.currencyUomId || item.currencyUom || 'USD') }}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+
+      <!-- Mobile card list -->
+      <div class="invoice-mobile-list">
+        <div class="invoice-mobile-card" *ngFor="let item of items()">
+          <a class="invoice-mobile-id" [routerLink]="[detailBasePath, item.id]">
+            {{ item.invoiceId }}
+          </a>
+          <div class="invoice-mobile-grid">
+            <div class="invoice-mobile-field">
+              <span class="invoice-mobile-label">{{ 'INVOICE.FROM' | translate }}</span>
+              <span>{{ item.fromPartyName || item.partyIdFrom || '-' }}</span>
+            </div>
+            <div class="invoice-mobile-field">
+              <span class="invoice-mobile-label">{{ 'INVOICE.INVOICE_DATE' | translate }}</span>
+              <span>{{ item.invoiceDate | userDate: 'MM/dd/yyyy' }}</span>
+            </div>
+            <div class="invoice-mobile-field">
+              <span class="invoice-mobile-label">{{ 'INVOICE.DUE_DATE' | translate }}</span>
+              <span>{{ item.dueDate ? (item.dueDate | userDate: 'MM/dd/yyyy') : '-' }}</span>
+            </div>
+            <div class="invoice-mobile-field">
+              <span class="invoice-mobile-label">{{ 'COMMON.STATUS' | translate }}</span>
+              <span>{{ item.statusDescription || item.statusId || '-' }}</span>
+            </div>
+            <div class="invoice-mobile-field wide-mobile-field">
+              <span class="invoice-mobile-label">{{ 'INVOICE.TOTAL' | translate }}</span>
+              <strong class="text-primary">{{ (item.grandTotal ?? item.total) | amountWithCurrency : (item.currencyUomId || item.currencyUom || 'USD') }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <mat-paginator [pageIndex]="pagination.page - 1" [pageSize]="pagination.rowsPerPage" [length]="pages()" [pageSizeOptions]="[10, 20, 50, 100]"
+        (page)="onPageChange($event)"></mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

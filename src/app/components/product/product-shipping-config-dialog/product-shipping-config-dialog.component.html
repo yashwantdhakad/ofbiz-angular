@@ -1,0 +1,69 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<h2 mat-dialog-title>{{ 'PRODUCT.SHIPPING_CONFIGURATION' | translate }}</h2>
+
+<mat-dialog-content [formGroup]="form">
+  <div class="config-grid">
+    <mat-checkbox formControlName="shippable">{{ 'PRODUCT.SHIPPABLE' | translate }}</mat-checkbox>
+    <mat-checkbox formControlName="inShipBox">{{ 'PRODUCT.IN_SHIP_BOX' | translate }}</mat-checkbox>
+
+    <h3 class="section-title">{{ 'PRODUCT.PRODUCT_DIMENSION' | translate }}</h3>
+    <div></div>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PRODUCT.HEIGHT' | translate }}</mat-label>
+      <input matInput type="number" formControlName="productHeight" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PRODUCT.WIDTH' | translate }}</mat-label>
+      <input matInput type="number" formControlName="productWidth" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PRODUCT.DEPTH' | translate }}</mat-label>
+      <input matInput type="number" formControlName="productDepth" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PRODUCT.WEIGHT' | translate }}</mat-label>
+      <input matInput type="number" formControlName="productWeight" />
+    </mat-form-field>
+
+    <h3 class="section-title">{{ 'PRODUCT.SHIPPING_DIMENSION' | translate }}</h3>
+    <div></div>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PRODUCT.HEIGHT' | translate }}</mat-label>
+      <input matInput type="number" formControlName="shippingHeight" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PRODUCT.WIDTH' | translate }}</mat-label>
+      <input matInput type="number" formControlName="shippingWidth" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PRODUCT.DEPTH' | translate }}</mat-label>
+      <input matInput type="number" formControlName="shippingDepth" />
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>{{ 'PRODUCT.WEIGHT' | translate }}</mat-label>
+      <input matInput type="number" formControlName="shippingWeight" />
+    </mat-form-field>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-raised-button color="primary" type="button" (click)="save()">{{ 'COMMON.SAVE' | translate }}</button>
+  <button mat-stroked-button type="button" (click)="close()">{{ 'COMMON.CANCEL' | translate }}</button>
+</mat-dialog-actions>

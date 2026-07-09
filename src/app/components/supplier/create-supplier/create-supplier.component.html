@@ -1,0 +1,60 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-header>
+    <mat-card-title>
+      <h1>{{ 'SUPPLIER.CREATE_TITLE' | translate }}</h1>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form class="supplier-form" (ngSubmit)="createSupplier()" [formGroup]="supplierForm" fxLayout="row wrap" fxLayoutAlign="start">
+      <mat-form-field appearance="outline" fxFlex="70%">
+        <mat-label>{{ 'SUPPLIER.SUPPLIER_NAME' | translate }}</mat-label>
+        <input matInput [placeholder]="'SUPPLIER.SUPPLIER_NAME' | translate" formControlName="groupName" />
+        <mat-error *ngIf="supplierForm.get('groupName')?.hasError('required')">{{ 'SUPPLIER.SUPPLIER_REQUIRED' |
+          translate }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="70%">
+        <mat-label>{{ 'SUPPLIER.CONTACT_NUMBER' | translate }}</mat-label>
+        <input matInput [placeholder]="'SUPPLIER.CONTACT_NUMBER' | translate" formControlName="contactNumber" />
+        <mat-error *ngIf="supplierForm.get('contactNumber')?.hasError('required')">{{ 'SUPPLIER.CONTACT_REQUIRED' |
+          translate }}</mat-error>
+        <mat-error *ngIf="supplierForm.get('contactNumber')?.hasError('minlength')">{{ 'COMMON.CONTACT_NUMBER_LENGTH' |
+          translate }}</mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" fxFlex="70%">
+        <mat-label>{{ 'COMMON.EMAIL' | translate }}</mat-label>
+        <input matInput [placeholder]="'COMMON.EMAIL' | translate" formControlName="emailAddress" />
+        <mat-error *ngIf="supplierForm.get('emailAddress')?.hasError('required')">{{ 'SUPPLIER.EMAIL_REQUIRED' |
+          translate }}</mat-error>
+        <mat-error *ngIf="supplierForm.get('emailAddress')?.hasError('email')">{{ 'COMMON.EMAIL_INVALID' | translate
+          }}</mat-error>
+      </mat-form-field>
+
+      <div fxFlex="100%" fxLayoutAlign="start" class="supplier-form-actions">
+        <button mat-raised-button type="submit" color="primary" class="me-4" data-testid="supplier-create-save" [disabled]="isLoading()">
+          <span *ngIf="!isLoading()">{{ 'COMMON.SAVE' | translate }}</span>
+          <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

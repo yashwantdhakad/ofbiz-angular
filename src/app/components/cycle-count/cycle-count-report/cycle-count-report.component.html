@@ -1,0 +1,129 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-list class="breadcrumb-list">
+  <mat-list-item>
+    <a [routerLink]="['/cycle-count/find']">{{ 'CYCLE_COUNT.SESSIONS_TITLE' | translate }}</a> / {{ sessionId }} / {{ 'CYCLE_COUNT.REPORT_TITLE' | translate }}
+  </mat-list-item>
+</mat-list>
+
+<mat-card class="mat-elevation-z10 header-card">
+  <mat-card-content>
+    <div class="header-top-row">
+      <div class="header-copy">
+        <h1 class="page-title">{{ 'CYCLE_COUNT.REPORT_TITLE' | translate }}</h1>
+        <div class="session-meta">
+          <span>{{ 'CYCLE_COUNT.SESSION' | translate }}: {{ detail()?.sessionId || sessionId }}</span>
+          <span>{{ 'COMMON.FACILITY' | translate }}: {{ detail()?.facilityId || '-' }}</span>
+          <span>{{ 'COMMON.STATUS' | translate }}: {{ detail()?.statusId || '-' }}</span>
+        </div>
+      </div>
+      <div class="actions-row" *ngIf="canOpenReview || canReturnToRecord">
+        <button *ngIf="canOpenReview" mat-stroked-button color="primary" [routerLink]="['/cycle-count/review', sessionId]">{{ 'CYCLE_COUNT.REVIEW_TITLE' | translate }}</button>
+        <button *ngIf="canReturnToRecord" mat-stroked-button color="primary" [routerLink]="['/cycle-count/record', sessionId]">{{ 'CYCLE_COUNT.RECORD_TITLE' | translate }}</button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="mat-elevation-z10 content-card">
+  <mat-card-content>
+    <!-- Desktop table -->
+    <div class="table-wrap" *ngIf="!loading(); else loadingTpl">
+      <table mat-table [dataSource]="rows" class="full-width-table">
+        <ng-container matColumnDef="inventoryCountItemSeqId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.SEQ' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.inventoryCountItemSeqId }}</td>
+        </ng-container>
+        <ng-container matColumnDef="locationSeqId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.LOCATION' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.locationSeqId || '-' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="inventoryItemId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.LTN' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.inventoryItemId }}</td>
+        </ng-container>
+        <ng-container matColumnDef="productIdentifier">
+          <th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.PART_NUMBER' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.productIdentifier || row.productId || '-' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="systemQuantityOnHand">
+          <th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.SYSTEM_QOH' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.systemQuantityOnHand ?? 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="actualQuantityOnHand">
+          <th mat-header-cell *matHeaderCellDef>{{ 'CYCLE_COUNT.COUNTED_QOH' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.actualQuantityOnHand ?? 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="varianceQuantityOnHand">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.VARIANCE' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.varianceQuantityOnHand ?? 0 }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <!-- Mobile report cards -->
+    <div class="mobile-report-list" *ngIf="!loading()">
+      <div class="mobile-report-card" *ngFor="let row of rows">
+        <div class="mobile-report-header">
+          <div>
+            <div class="mobile-report-ltn">{{ row.inventoryItemId }}</div>
+            <div class="mobile-report-part" *ngIf="row.productIdentifier || row.productId">
+              {{ row.productIdentifier || row.productId }}
+            </div>
+          </div>
+          <div class="mobile-report-seq" *ngIf="row.inventoryCountItemSeqId">
+            #{{ row.inventoryCountItemSeqId }}
+          </div>
+        </div>
+
+        <div class="mobile-report-meta" *ngIf="row.locationSeqId">
+          <strong>{{ 'COMMON.LOCATION' | translate }}:</strong> {{ row.locationSeqId }}
+        </div>
+
+        <!-- Metric band: System QoH | Counted QoH | Variance -->
+        <div class="mobile-report-qty-row">
+          <div class="mobile-report-qty-item">
+            <span class="mobile-report-qty-label">{{ 'CYCLE_COUNT.SYSTEM_QOH' | translate }}</span>
+            <span class="mobile-report-qty-value">{{ row.systemQuantityOnHand ?? 0 }}</span>
+          </div>
+          <div class="mobile-report-qty-item">
+            <span class="mobile-report-qty-label">{{ 'CYCLE_COUNT.COUNTED_QOH' | translate }}</span>
+            <span class="mobile-report-qty-value">{{ row.actualQuantityOnHand ?? 0 }}</span>
+          </div>
+          <div class="mobile-report-qty-item">
+            <span class="mobile-report-qty-label">{{ 'COMMON.VARIANCE' | translate }}</span>
+            <span
+              class="mobile-report-qty-value"
+              [class.variance-neg]="(row.varianceQuantityOnHand ?? 0) < 0"
+              [class.variance-pos]="(row.varianceQuantityOnHand ?? 0) > 0"
+            >{{ row.varianceQuantityOnHand ?? 0 }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #loadingTpl>
+      <div class="loader-wrap"><mat-progress-spinner [diameter]="48" mode="indeterminate"></mat-progress-spinner></div>
+    </ng-template>
+  </mat-card-content>
+</mat-card>
+

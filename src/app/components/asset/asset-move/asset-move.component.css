@@ -1,0 +1,182 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.filters-row {
+  margin-bottom: 12px;
+  align-items: flex-start;
+}
+
+.filter-item {
+  min-width: 260px;
+  flex: 1;
+}
+
+.search-btn {
+  height: 56px;
+  min-width: 116px;
+  align-self: flex-start;
+  margin-top: 0;
+}
+
+.table-container {
+  overflow: auto;
+}
+
+.move-mobile-list {
+  display: none;
+}
+
+.move-mobile-card {
+  margin-bottom: 12px;
+}
+
+.move-mobile-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.move-mobile-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.move-mobile-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.move-mobile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.move-mobile-field .label {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+.mobile-row-input,
+.mobile-qty-input {
+  width: 100%;
+  min-width: 0;
+}
+
+.full-width-table {
+  width: max-content;
+  min-width: 100%;
+}
+
+.row-input,
+.qty-input {
+  width: 100%;
+  min-width: 140px;
+}
+
+.row-input {
+  width: 260px;
+  min-width: 260px;
+}
+
+.qty-input {
+  width: 140px;
+  min-width: 140px;
+  max-width: 140px;
+}
+
+.to-location-cell,
+.move-qty-cell {
+  padding-right: 20px !important;
+  vertical-align: top;
+  white-space: nowrap;
+  padding-top: 10px !important;
+  padding-bottom: 10px !important;
+}
+
+.action-cell {
+  white-space: nowrap;
+  vertical-align: top;
+  padding-right: 16px !important;
+  padding-top: 18px !important;
+  padding-bottom: 10px !important;
+}
+
+.action-cell button {
+  margin-top: 0;
+  height: 56px;
+  min-width: 100px;
+  line-height: 56px;
+}
+
+.to-location-cell .mat-mdc-form-field,
+.move-qty-cell .mat-mdc-form-field {
+  margin: 8px 0;
+}
+
+.to-location-cell .mat-mdc-form-field-subscript-wrapper,
+.move-qty-cell .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+.filters-row .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+.loader-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 24px;
+}
+
+@media (max-width: 768px) {
+  .filters-row {
+    flex-direction: column;
+  }
+
+  .filter-item,
+  .search-btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .table-container {
+    display: none;
+  }
+
+  .move-mobile-list {
+    display: block;
+  }
+
+  .move-mobile-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .search-btn {
+    align-self: stretch;
+  }
+
+  .mobile-move-btn {
+    width: 100%;
+    margin-top: 12px;
+  }
+}

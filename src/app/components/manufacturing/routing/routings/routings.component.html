@@ -1,0 +1,156 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<div class="routings-container">
+  <mat-card>
+    <mat-card-header class="card-header-with-action">
+      <mat-card-title>{{ 'MENU.ROUTINGS' | translate }}</mat-card-title>
+      <button mat-raised-button color="primary" routerLink="/routings/create">
+        <mat-icon>add</mat-icon> {{ 'MENU.CREATE_ROUTING' | translate }}
+      </button>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Search and Filter Section -->
+      <div class="filter-section">
+        <mat-form-field appearance="outline" class="search-field">
+          <mat-label>{{ 'COMMON.SEARCH' | translate }}</mat-label>
+          <input matInput [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" (keyup.enter)="onSearch()" [placeholder]="'MANUFACTURING.SEARCH_ROUTINGS_PLACEHOLDER' | translate">
+          <button mat-icon-button matSuffix type="button" [attr.aria-label]="'COMMON.SEARCH' | translate" (click)="onSearch()">
+            <mat-icon>search</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>{{ 'MANUFACTURING.DELIVERABLE_PRODUCTS' | translate }}</mat-label>
+          <mat-select [ngModel]="deliverableProductFilter()" (ngModelChange)="deliverableProductFilter.set($event)" (selectionChange)="onFilterChange()">
+            <mat-option value="">{{ 'COMMON.ALL' | translate }}</mat-option>
+            <mat-option *ngFor="let product of deliverableProducts(); trackBy: trackByDeliverableProduct" [value]="product.productId">
+              {{product.productId}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Loading Spinner -->
+      <div *ngIf="isLoading()" class="loading-spinner">
+        <mat-spinner diameter="50"></mat-spinner>
+      </div>
+
+      <!-- Routings Table -->
+      <div *ngIf="!isLoading()" class="table-container">
+        <table mat-table [dataSource]="routings()" [trackBy]="trackByRouting" class="routings()-table">
+          <!-- ID Column -->
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ID' | translate }}</th>
+            <td mat-cell *matCellDef="let routing">
+              <button type="button" class="routing-link" (click)="navigateToDetail(routing.workEffortId)">
+                {{routing.workEffortId}}
+              </button>
+            </td>
+          </ng-container>
+
+          <!-- Routing Column -->
+          <ng-container matColumnDef="routing">
+            <th mat-header-cell *matHeaderCellDef>{{ 'MANUFACTURING.ROUTING' | translate }}</th>
+            <td mat-cell *matCellDef="let routing">{{routing.workEffortName}}</td>
+          </ng-container>
+
+          <!-- Description Column -->
+          <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.DESCRIPTION' | translate }}</th>
+            <td mat-cell *matCellDef="let routing">{{routing.description || '-'}}</td>
+          </ng-container>
+
+          <!-- Deliverable Products Column -->
+          <ng-container matColumnDef="deliverableProducts">
+            <th mat-header-cell *matHeaderCellDef>{{ 'MANUFACTURING.DELIVERABLE_PRODUCTS' | translate }}</th>
+            <td mat-cell *matCellDef="let routing">
+              <span *ngIf="routing.deliverableProducts && routing.deliverableProducts.length > 0">
+                <a *ngFor="let product of routing.deliverableProducts; let last = last; trackBy: trackByDeliverableProduct"
+                   [routerLink]="['/products', product.productId]"
+                   class="product-link">
+                  {{product.productId}}<span *ngIf="!last">, </span>
+                </a>
+              </span>
+              <span *ngIf="!routing.deliverableProducts || routing.deliverableProducts.length === 0">-</span>
+            </td>
+          </ng-container>
+
+          <!-- Qty To Produce Column -->
+          <ng-container matColumnDef="qtyToProduce">
+            <th mat-header-cell *matHeaderCellDef>{{ 'MANUFACTURING.QTY_TO_PRODUCE' | translate }}</th>
+            <td mat-cell *matCellDef="let routing">{{routing.quantityToProduce || 0}}</td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="routing-row"></tr>
+        </table>
+
+        <!-- No Data Message -->
+        <div *ngIf="routings().length === 0" class="no-data">
+          <p>{{ 'MANUFACTURING.NO_ROUTINGS_FOUND' | translate }}</p>
+        </div>
+      </div>
+      <div *ngIf="!isLoading()" class="routing-mobile-list">
+        <div class="routing-mobile-card" *ngFor="let routing of routings(); trackBy: trackByRouting">
+          <div class="routing-mobile-header">
+            <span class="routing-mobile-label">{{ 'COMMON.ID' | translate }}</span>
+            <button type="button" class="routing-link" (click)="navigateToDetail(routing.workEffortId)">
+              {{ routing.workEffortId }}
+            </button>
+          </div>
+          <div class="routing-mobile-name">{{ routing.workEffortName || '-' }}</div>
+          <div class="routing-mobile-grid">
+            <div class="routing-mobile-field routing-mobile-field-wide">
+              <span class="routing-mobile-label">{{ 'COMMON.DESCRIPTION' | translate }}</span>
+              <span>{{ routing.description || '-' }}</span>
+            </div>
+            <div class="routing-mobile-field">
+              <span class="routing-mobile-label">{{ 'MANUFACTURING.DELIVERABLE_PRODUCTS' | translate }}</span>
+              <span *ngIf="routing.deliverableProducts?.length">
+                <a *ngFor="let product of routing.deliverableProducts; let last = last; trackBy: trackByDeliverableProduct"
+                  [routerLink]="['/products', product.productId]" class="product-link">
+                  {{ product.productId }}<span *ngIf="!last">, </span>
+                </a>
+              </span>
+              <span *ngIf="!routing.deliverableProducts?.length">-</span>
+            </div>
+            <div class="routing-mobile-field">
+              <span class="routing-mobile-label">{{ 'MANUFACTURING.QTY_TO_PRODUCE' | translate }}</span>
+              <span>{{ routing.quantityToProduce || 0 }}</span>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="routings().length === 0" class="no-data">
+          <p>{{ 'MANUFACTURING.NO_ROUTINGS_FOUND' | translate }}</p>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <mat-paginator
+        [length]="totalElements()"
+        [pageSize]="pagination().pageSize"
+        [pageIndex]="pagination().pageIndex"
+        [pageSizeOptions]="[5, 10, 25, 50]"
+        (page)="onPageChange($event)"
+        showFirstLastButtons>
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</div>

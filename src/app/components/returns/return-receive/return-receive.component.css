@@ -1,0 +1,108 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.mat-form-field {
+  width: 100%;
+}
+
+.field-cell {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.location-select-field {
+  width: 100%;
+}
+
+.qty-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  line-height: 1.35;
+}
+
+.qty-label {
+  font-weight: 600;
+}
+
+.receive-qty-field {
+  width: 140px;
+}
+
+.return-receive-mobile-list {
+  display: none;
+}
+
+.receive-submit-button {
+  min-height: 56px;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 56px;
+}
+
+@media (max-width: 768px) {
+  .return-receive-desktop-table {
+    display: none;
+  }
+
+  .return-receive-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .return-receive-mobile-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  }
+
+  .return-receive-mobile-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .return-receive-mobile-product {
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1.35;
+  }
+
+  .return-receive-mobile-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    line-height: 1.4;
+  }
+
+  .return-receive-mobile-card mat-form-field {
+    width: 100%;
+  }
+
+  .receive-submit-button {
+    width: 100%;
+  }
+}

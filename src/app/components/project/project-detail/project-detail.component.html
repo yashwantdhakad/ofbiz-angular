@@ -1,0 +1,162 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<section class="detail-page">
+  <div class="state-panel" *ngIf="isLoading()">
+    <mat-spinner diameter="32"></mat-spinner>
+  </div>
+
+  <div class="state-panel error" *ngIf="!isLoading() && errorKey()">
+    {{ (errorKey() || '') | translate }}
+  </div>
+
+  <ng-container *ngIf="!isLoading() && !errorKey() && project() as project">
+    <nav class="breadcrumb" aria-label="breadcrumb">
+      <a class="breadcrumb-link" routerLink="/projects">
+        {{ 'PROJECTS.TITLE' | translate }}
+      </a>
+      <mat-icon class="breadcrumb-sep">chevron_right</mat-icon>
+      <span class="breadcrumb-current">{{ project.workEffortId || projectId() }}</span>
+    </nav>
+
+    <mat-card class="mat-elevation-z10 detail-header-card">
+      <mat-card-header class="detail-card-header">
+        <mat-card-title>{{ project.workEffortName || project.workEffortId || projectId() }}</mat-card-title>
+        <div class="actions">
+          <button mat-stroked-button type="button" (click)="editProject()">
+            <mat-icon>edit</mat-icon>
+            {{ 'COMMON.EDIT' | translate }}
+          </button>
+          <button mat-stroked-button color="warn" type="button" (click)="deleteProject()">
+            <mat-icon>delete</mat-icon>
+            {{ 'COMMON.DELETE' | translate }}
+          </button>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <p class="detail-description">{{ project.description || project.workEffortId || '-' }}</p>
+        <div class="hero-pills">
+          <span class="pill">{{ project.currentStatusId || '-' }}</span>
+          <span class="pill">{{ project.workEffortTypeId || '-' }}</span>
+          <span class="pill">{{ project.percentComplete || '0' }}%</span>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="mat-elevation-z10 overview-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'COMMON.OVERVIEW' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="fact-list overview-list">
+          <div class="fact">
+            <span>{{ 'PROJECTS.PROJECT_ID' | translate }}</span>
+            <strong>{{ project.workEffortId || projectId() }}</strong>
+          </div>
+          <div class="fact">
+            <span>{{ 'PROJECTS.STATUS' | translate }}</span>
+            <strong>{{ project.currentStatusId || '-' }}</strong>
+          </div>
+          <div class="fact">
+            <span>{{ 'PROJECTS.TYPE' | translate }}</span>
+            <strong>{{ project.workEffortTypeId || '-' }}</strong>
+          </div>
+          <div class="fact">
+            <span>{{ 'PROJECTS.PERCENT_COMPLETE' | translate }}</span>
+            <strong>{{ project.percentComplete || '0' }}%</strong>
+          </div>
+          <div class="fact">
+            <span>{{ 'PROJECTS.BAC' | translate }}</span>
+            <strong>{{ (project.totalMoneyAllowed || '0') | amountWithCurrency:(project.moneyUomId || 'USD') }}</strong>
+          </div>
+          <div class="fact">
+            <span>{{ 'PROJECTS.PARENT_PROJECT' | translate }}</span>
+            <strong>{{ project.workEffortParentId || '-' }}</strong>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <section class="content-grid">
+      <mat-card class="mat-elevation-z10 panel">
+        <mat-card-header>
+          <mat-card-title>{{ 'PROJECTS.BAC' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+        <ng-container *ngIf="metrics() as projectMetrics; else metricsEmpty">
+          <div class="metric-grid compact">
+            <div>
+              <span>{{ 'PROJECTS.BAC' | translate }}</span>
+              <strong>{{ projectMetrics.budgetAtCompletion | amountWithCurrency:(projectMetrics.currencyUomId || 'USD') }}</strong>
+            </div>
+            <div>
+              <span>{{ 'PROJECTS.ACTUAL_COST' | translate }}</span>
+              <strong>{{ projectMetrics.actualCost | amountWithCurrency:(projectMetrics.currencyUomId || 'USD') }}</strong>
+            </div>
+            <div>
+              <span>{{ 'PROJECTS.EARNED_VALUE' | translate }}</span>
+              <strong>{{ projectMetrics.earnedValue | amountWithCurrency:(projectMetrics.currencyUomId || 'USD') }}</strong>
+            </div>
+            <div>
+              <span>{{ 'PROJECTS.EAC' | translate }}</span>
+              <strong>{{ projectMetrics.estimateAtCompletion | amountWithCurrency:(projectMetrics.currencyUomId || 'USD') }}</strong>
+            </div>
+          </div>
+        </ng-container>
+        <ng-template #metricsEmpty>
+          <div class="empty-state">{{ 'COMMON.NO_DATA' | translate }}</div>
+        </ng-template>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="mat-elevation-z10 panel panel-wide">
+        <mat-card-header>
+          <mat-card-title>{{ 'PROJECTS.WBS' | translate }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+        <ng-container *ngIf="wbs() as root; else wbsEmpty">
+          <ng-container *ngTemplateOutlet="nodeTemplate; context: { node: root }"></ng-container>
+        </ng-container>
+        <ng-template #wbsEmpty>
+          <div class="empty-state">{{ 'COMMON.NO_DATA' | translate }}</div>
+        </ng-template>
+        </mat-card-content>
+      </mat-card>
+    </section>
+  </ng-container>
+</section>
+
+<ng-template #nodeTemplate let-node="node">
+  <article class="wbs-node">
+    <div class="node-row">
+      <div>
+        <strong>{{ node.name || node.workEffortId }}</strong>
+        <span>{{ node.workEffortId }} · {{ node.type || '-' }}</span>
+      </div>
+      <div class="node-metrics">
+        <span>{{ node.percentComplete || '0' }}%</span>
+        <span>{{ (node.totalMoneyAllowed || '0') | amountWithCurrency:(node.moneyUomId || 'USD') }}</span>
+      </div>
+    </div>
+    <div class="children" *ngIf="node.children?.length">
+      <ng-container *ngFor="let child of node.children; trackBy: trackNode">
+        <ng-container *ngTemplateOutlet="nodeTemplate; context: { node: child }"></ng-container>
+      </ng-container>
+    </div>
+  </article>
+</ng-template>

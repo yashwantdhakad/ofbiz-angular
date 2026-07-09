@@ -1,0 +1,65 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-title mat-dialog-title>
+    <h1>{{ 'COMMON.PRODUCT' | translate }}</h1>
+  </mat-card-title>
+  <mat-card-content mat-dialog-content>
+    <form
+      (ngSubmit)="addProductToCategory()"
+      [formGroup]="addProductToCategoryForm"
+      fxLayout="row wrap"
+      fxLayoutAlign="start"
+    >
+      <mat-form-field appearance="outline" fxFlex="100%">
+        <mat-label>{{ 'COMMON.PRODUCT' | translate }}</mat-label>
+        <input
+          matInput
+          placeholder="{{ 'COMMON.PRODUCT' | translate }}"
+          [matAutocomplete]="auto"
+          formControlName="productId"
+        />
+        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayProduct">
+          <mat-option
+            *ngFor="let product of filteredProducts$ | async"
+            [value]="product"
+          >
+            {{ product.productName }}
+          </mat-option>
+        </mat-autocomplete>
+        <mat-error *ngIf="addProductToCategoryForm.get('productId')?.hasError('required')"
+          >{{ 'COMMON.PRODUCT_REQUIRED' | translate }}</mat-error
+        >
+      </mat-form-field>
+      <div fxFlex="100%" fxLayoutAlign="start">
+        <button
+          mat-raised-button
+          type="submit"
+          color="primary"
+          class="me-4"
+          [disabled]="isLoading()"
+        >
+          <span *ngIf="!isLoading()">{{ 'COMMON.SAVE' | translate }}</span>
+          <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+        </button>
+        <button mat-stroked-button mat-dialog-close>{{ 'COMMON.CANCEL' | translate }}</button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

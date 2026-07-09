@@ -1,0 +1,318 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-header>
+    <mat-card-title>
+      <h1>{{ createTitleKey | translate }}</h1>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <mat-horizontal-stepper #salesOrderStepper [linear]="false">
+      <mat-step [stepControl]="orderForm">
+        <ng-template matStepLabel>{{ 'SO.STEP_CART' | translate }}</ng-template>
+        <form
+          id="soCreateForm"
+          [formGroup]="orderForm"
+          (ngSubmit)="createOrder()"
+          fxLayout="row wrap"
+          fxLayoutAlign="start"
+          fxLayoutGap="16px"
+        >
+      <!-- Store -->
+      <mat-form-field appearance="outline" fxFlex="48%">
+        <mat-label>{{ 'SO.STORE' | translate }}</mat-label>
+        <mat-select formControlName="productStoreId" (selectionChange)="updateVendorParty()">
+          <mat-option *ngFor="let store of productStores; trackBy: trackByStore" [value]="store.productStoreId">
+            {{ store.storeName || store.companyName || store.productStoreId || ('COMMON.STORE' | translate) }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="orderForm.get('productStoreId')?.hasError('required')">
+          {{ 'SO.STORE_REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Facility -->
+      <mat-form-field appearance="outline" fxFlex="48%">
+        <mat-label>{{ 'COMMON.FACILITY' | translate }}</mat-label>
+        <mat-select formControlName="facilityId">
+          <mat-option *ngFor="let facility of facilities(); trackBy: trackByFacility" [value]="facility.facilityId">
+            {{ facility.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="orderForm.get('facilityId')?.hasError('required')">
+          {{ 'SO.FACILITY_REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Customer (Autocomplete) -->
+      <mat-form-field appearance="outline" fxFlex="48%">
+        <mat-label>{{ 'SO.BILL_TO' | translate }}</mat-label>
+        <input matInput #customerAutocompleteTrigger="matAutocompleteTrigger" formControlName="customerPartyId" [matAutocomplete]="auto" />
+        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayCustomer" (optionSelected)="onCustomerSelected($event)">
+          <mat-option *ngFor="let customer of filteredCustomers$ | async; trackBy: trackByCustomer" [value]="customer">
+            {{ customer.name }}
+          </mat-option>
+        </mat-autocomplete>
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          [attr.aria-label]="'COMMON.ADD_CUSTOMER' | translate"
+          (mousedown)="onAddCustomerMouseDown($event)"
+          (click)="addBillToCustomer()"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+        <mat-error *ngIf="orderForm.get('customerPartyId')?.hasError('required')">
+          {{ 'SO.CUSTOMER_REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+
+      <!-- Shipping Address -->
+      <mat-form-field appearance="outline" fxFlex="48%">
+        <mat-label>{{ 'COMMON.SHIPPING_ADDRESS' | translate }}</mat-label>
+        <mat-select formControlName="shippingAddress">
+          <mat-option *ngFor="let address of customerAddresses; trackBy: trackByAddress" [value]="address">
+            {{ formatAddress(address) }}
+          </mat-option>
+        </mat-select>
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          [attr.aria-label]="'PARTY.ADD_ADDRESS' | translate"
+          (click)="addCustomerAddress()"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <!-- Customer Phone -->
+      <mat-form-field appearance="outline" fxFlex="48%">
+        <mat-label>{{ 'SO.CUSTOMER_PHONE' | translate }}</mat-label>
+        <mat-select formControlName="customerPhone">
+          <mat-option *ngFor="let phone of customerPhones; trackBy: trackByPhone" [value]="phone">
+            {{ formatPhone(phone) }}
+          </mat-option>
+        </mat-select>
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          [attr.aria-label]="'COMMON.ADD_PHONE' | translate"
+          (click)="addCustomerPhone()"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <!-- PO Number -->
+      <mat-form-field appearance="outline" fxFlex="48%">
+        <mat-label>{{ 'SO.PO_NUMBER' | translate }}</mat-label>
+        <input matInput formControlName="poNumber" />
+      </mat-form-field>
+
+
+      <!-- Ship Before Date -->
+      <mat-form-field appearance="outline" fxFlex="48%">
+        <mat-label>{{ 'SO.SHIP_BEFORE_DATE' | translate }}</mat-label>
+        <input matInput [matDatepicker]="shipBeforePicker" formControlName="shipBeforeDate"  (click)="shipBeforePicker.open()"/>
+        <mat-datepicker-toggle matSuffix [for]="shipBeforePicker"></mat-datepicker-toggle>
+        <mat-datepicker #shipBeforePicker></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Estimated Delivery Date -->
+      <mat-form-field appearance="outline" fxFlex="48%">
+        <mat-label>{{ 'SO.EST_DELIVERY_DATE' | translate }}</mat-label>
+        <input matInput [matDatepicker]="deliveryPicker" formControlName="estimatedDeliveryDate"  (click)="deliveryPicker.open()"/>
+        <mat-datepicker-toggle matSuffix [for]="deliveryPicker"></mat-datepicker-toggle>
+        <mat-datepicker #deliveryPicker></mat-datepicker>
+      </mat-form-field>
+
+      <!-- Shipping Instructions -->
+      <mat-form-field appearance="outline" fxFlex="100%">
+        <mat-label>{{ 'COMMON.SHIPPING_INSTRUCTIONS' | translate }}</mat-label>
+        <textarea matInput rows="3" formControlName="shippingInstructions"></textarea>
+      </mat-form-field>
+
+        </form>
+
+        <mat-card class="mat-elevation-z10" style="margin-top: 16px;">
+          <mat-card-header>
+            <mat-card-title>
+              {{ 'COMMON.ITEMS' | translate }}
+              <button mat-stroked-button type="button" color="primary" (click)="addItemRow()">
+                {{ 'COMMON.ADD_ITEM' | translate }}
+              </button>
+            </mat-card-title>
+          </mat-card-header>
+          <br/>
+          <mat-card-content>
+            <div [formGroup]="orderForm">
+              <div formArrayName="items">
+                <div
+                  class="so-item-row"
+                  *ngFor="let item of items.controls; let i = index; trackBy: trackByFormIndex"
+                  [formGroupName]="i"
+                >
+                  <!-- Product — full width -->
+                  <mat-form-field appearance="outline" class="so-item-product" fxFlex="25%">
+                    <mat-label>{{ 'COMMON.PRODUCT' | translate }}</mat-label>
+                    <input matInput formControlName="productId" [matAutocomplete]="productAuto" autocomplete="off" spellcheck="false" />
+                    <mat-autocomplete #productAuto="matAutocomplete" [displayWith]="displayProduct" (optionSelected)="onProductSelected($event, i)">
+                      <mat-option *ngFor="let product of filteredProducts[i] | async; trackBy: trackByProduct" [value]="product">
+                        {{ product.productId }} - {{ product.productName }}
+                      </mat-option>
+                    </mat-autocomplete>
+                  </mat-form-field>
+
+                  <!-- Qty / Unit Price / ATP — 3-col row -->
+                  <div class="so-item-numbers" fxFlex="45%">
+                    <mat-form-field appearance="outline" fxFlex="15%" class="so-item-qty-field">
+                      <mat-label>{{ 'COMMON.QTY' | translate }}</mat-label>
+                      <input matInput type="number" formControlName="quantity" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" fxFlex="15%" class="so-item-unit-field">
+                      <mat-label>{{ 'COMMON.UNIT_PRICE' | translate }}</mat-label>
+                      <input matInput type="number" formControlName="unitAmount" />
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" fxFlex="15%" class="so-item-atp-field">
+                      <mat-label>{{ 'COMMON.ATP' | translate }}</mat-label>
+                      <input matInput type="number" formControlName="atpTotal" readonly />
+                    </mat-form-field>
+                  </div>
+
+                  <!-- Item Type + delete — inline row -->
+                  <div class="so-item-type-row" fxFlex="25%">
+                    <mat-form-field appearance="outline" fxFlex="15%" class="so-item-type-field">
+                      <mat-label>{{ 'COMMON.ITEM_TYPE' | translate }}</mat-label>
+                      <mat-select formControlName="itemTypeEnumId">
+                        <mat-option *ngFor="let type of itemTypes; trackBy: trackByOptionId" [value]="type.id">
+                          {{ type.label }}
+                        </mat-option>
+                      </mat-select>
+                    </mat-form-field>
+                    <button
+                      mat-icon-button
+                      color="warn"
+                      type="button"
+                      data-testid="so-create-remove-item"
+                      [attr.aria-label]="'COMMON.REMOVE_ITEM' | translate"
+                      (click)="removeItemRow(i)"
+                    >
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+          <mat-card-actions>
+            <div class="so-actions-row" fxFlex="100%" fxLayoutAlign="space-between center">
+              <button *ngIf="!isQuoteMode" mat-stroked-button type="button" color="primary" (click)="goToPaymentStep(salesOrderStepper)">
+                {{ 'COMMON.NEXT' | translate }}
+              </button>
+              <span
+                *ngIf="isQuoteMode"
+                [matTooltip]="getMissingFieldsTooltip()"
+                [matTooltipDisabled]="!isSubmitDisabled()"
+              >
+                <button
+                  mat-raised-button
+                  color="primary"
+                  type="submit"
+                  form="soCreateForm"
+                  data-testid="so-create-save"
+                  [disabled]="isLoading() || isSubmitDisabled()"
+                >
+                  <span *ngIf="!isLoading()">{{ submitLabelKey | translate }}</span>
+                  <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+                </button>
+              </span>
+            </div>
+          </mat-card-actions>
+        </mat-card>
+      </mat-step>
+
+      <mat-step *ngIf="!isQuoteMode" [stepControl]="paymentForm">
+        <ng-template matStepLabel>{{ 'SO.STEP_PAYMENTS' | translate }}</ng-template>
+        <mat-card class="mat-elevation-z10">
+          <mat-card-header>
+            <mat-card-title>{{ 'SO.PAYMENT_AND_SHIPPING' | translate }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form [formGroup]="paymentForm" fxLayout="row wrap" fxLayoutGap="16px">
+              <mat-form-field appearance="outline" fxFlex="48%">
+                <mat-label>{{ 'SO.SHIP_BY' | translate }}</mat-label>
+                <mat-select formControlName="shipByMethod">
+                  <mat-option *ngFor="let option of shipByOptions; trackBy: trackByOptionId" [value]="option.id">
+                    {{ option.label }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="paymentForm.get('shipByMethod')?.hasError('required')">
+                  {{ 'SO.SHIP_BY' | translate }} {{ 'COMMON.REQUIRED' | translate }}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" fxFlex="48%">
+                <mat-label>{{ 'SO.PAYMENT_TERM' | translate }}</mat-label>
+                <mat-select formControlName="paymentTerm">
+                  <mat-option *ngFor="let term of paymentTerms; trackBy: trackByOptionId" [value]="term.id">
+                    {{ term.label }}
+                  </mat-option>
+                </mat-select>
+                <mat-error *ngIf="paymentForm.get('paymentTerm')?.hasError('required')">
+                  {{ 'SO.PAYMENT_TERM' | translate }} {{ 'COMMON.REQUIRED' | translate }}
+                </mat-error>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" fxFlex="100%">
+                <mat-label>{{ 'SO.PAYMENT_INSTRUCTIONS' | translate }}</mat-label>
+                <textarea matInput rows="3" formControlName="paymentInstructions"></textarea>
+              </mat-form-field>
+            </form>
+          </mat-card-content>
+          <mat-card-actions>
+            <div class="so-actions-row" fxFlex="100%" fxLayoutAlign="space-between center">
+              <button mat-stroked-button matStepperPrevious type="button" color="primary">
+                {{ 'COMMON.BACK' | translate }}
+              </button>
+              <span
+                [matTooltip]="getMissingFieldsTooltip()"
+                [matTooltipDisabled]="!isSubmitDisabled()"
+              >
+                <button
+                  mat-raised-button
+                  color="primary"
+                  type="submit"
+                  form="soCreateForm"
+                  data-testid="so-create-save"
+                  [disabled]="isLoading() || isSubmitDisabled()"
+                >
+                  <span *ngIf="!isLoading()">{{ submitLabelKey | translate }}</span>
+                  <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+                </button>
+              </span>
+            </div>
+          </mat-card-actions>
+        </mat-card>
+      </mat-step>
+    </mat-horizontal-stepper>
+  </mat-card-content>
+</mat-card>

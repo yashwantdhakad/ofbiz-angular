@@ -1,0 +1,137 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-header class="card-header-with-action">
+    <mat-card-title>{{ 'TIMESHEET.TITLE' | translate }}</mat-card-title>
+    <button mat-raised-button color="primary" routerLink="/timesheets/create">
+      <mat-icon>add</mat-icon> {{ 'TIMESHEET.CREATE_TITLE' | translate }}
+    </button>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="filter-row">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'TIMESHEET.WORKER' | translate }}</mat-label>
+        <input matInput [ngModel]="partyId()" (ngModelChange)="partyId.set($event)" autocomplete="off" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'TIMESHEET.WORK_REFERENCE' | translate }}</mat-label>
+        <input matInput [ngModel]="workEffortId()" (ngModelChange)="workEffortId.set($event)" autocomplete="off" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'COMMON.STATUS' | translate }}</mat-label>
+        <mat-select [ngModel]="statusId()" (ngModelChange)="statusId.set($event)">
+          <mat-option value="">{{ 'COMMON.ALL' | translate }}</mat-option>
+          <mat-option *ngFor="let status of statuses" [value]="status">{{ statusLabel(status) }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'COMMON.FROM_DATE' | translate }}</mat-label>
+        <input matInput [matDatepicker]="fromPicker" [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event)" />
+        <mat-datepicker-toggle matIconSuffix [for]="fromPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'TIMESHEET.THRU_DATE' | translate }}</mat-label>
+        <input matInput [matDatepicker]="thruPicker" [ngModel]="thruDate()" (ngModelChange)="thruDate.set($event)" />
+        <mat-datepicker-toggle matIconSuffix [for]="thruPicker"></mat-datepicker-toggle>
+        <mat-datepicker #thruPicker></mat-datepicker>
+      </mat-form-field>
+
+      <div class="filter-actions">
+        <button mat-raised-button color="primary" type="button" (click)="search()">
+          <mat-icon>search</mat-icon>
+          {{ 'COMMON.SEARCH' | translate }}
+        </button>
+        <button mat-stroked-button type="button" (click)="clear()">
+          {{ 'COMMON.CLEAR' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <p *ngIf="!hasSearched()" class="search-hint">{{ 'COMMON.SEARCH_TO_LOAD' | translate }}</p>
+
+    <div class="state-panel" *ngIf="isLoading()">
+      <mat-spinner diameter="32"></mat-spinner>
+    </div>
+
+    <div class="table-container" *ngIf="hasSearched() && !isLoading()">
+      <table mat-table [dataSource]="timesheets()">
+        <ng-container matColumnDef="timesheetId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'TIMESHEET.TIMESHEET_ID' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let row">
+            <a [routerLink]="['/timesheets', row?.id]">{{ row?.timesheetId || row?.id }}</a>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="partyId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'TIMESHEET.WORKER' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let row">{{ row?.partyId || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="workEffort">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'TIMESHEET.WORK_REFERENCE' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let row">{{ firstWorkEffort(row) }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="date">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.DATE' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let row">{{ row?.fromDate | userDate : 'mediumDate' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="hours">
+          <th mat-header-cell class="text-right" *matHeaderCellDef>{{ 'TIMESHEET.HOURS' | translate }}</th>
+          <td mat-cell class="text-right" *matCellDef="let row">{{ row?.totalHours | fixedDecimal }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="statusId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let row">{{ statusLabel(row?.statusId) }}</td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <div class="mobile-list" *ngIf="hasSearched() && !isLoading()">
+      <a class="mobile-card" *ngFor="let row of timesheets()" [routerLink]="['/timesheets', row?.id]">
+        <strong>{{ row?.timesheetId || row?.id }}</strong>
+        <span>{{ row?.partyId || '-' }} · {{ row?.totalHours | fixedDecimal }} {{ 'TIMESHEET.HOURS' | translate }}</span>
+        <small>{{ statusLabel(row?.statusId) }}</small>
+      </a>
+    </div>
+
+    <div class="state-panel" *ngIf="hasSearched() && !isLoading() && timesheets().length === 0">
+      {{ 'COMMON.NO_RESULTS' | translate }}
+    </div>
+
+    <mat-paginator
+      *ngIf="hasSearched()"
+      [length]="totalTimesheets()"
+      [pageIndex]="pagination.page"
+      [pageSize]="pagination.size"
+      [pageSizeOptions]="[10, 20, 50, 100]"
+      (page)="onPageChange($event)">
+    </mat-paginator>
+  </mat-card-content>
+</mat-card>

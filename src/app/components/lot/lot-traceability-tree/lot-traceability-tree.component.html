@@ -1,0 +1,81 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<div class="tree-wrapper" *ngIf="hasData(); else noData">
+  <!-- Lot Node (Root) -->
+  <div class="tree-root-section">
+    <div class="node-card root-node">
+      <div class="node-header">
+        <mat-icon class="node-icon">layers</mat-icon>
+        <span class="node-title">Lot: {{ treeData?.lot?.lotId }}</span>
+      </div>
+      <div class="node-details">
+        <div class="detail-row"><strong>Heat Number:</strong> <span>{{ treeData?.lot?.heatNumber || '-' }}</span></div>
+        <div class="detail-row"><strong>Steel Grade:</strong> <span>{{ treeData?.lot?.steelGrade || '-' }}</span></div>
+        <div class="detail-row"><strong>Manufacturer:</strong> <span>{{ treeData?.lot?.manufacturer || '-' }}</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="vertical-connector"></div>
+
+  <!-- Parent Plates / Source Inventory Items -->
+  <div class="plates-container">
+    <div class="plate-branch" *ngFor="let plate of treeData?.parentPlates">
+      <!-- Plate Card -->
+      <div class="node-card plate-node">
+        <div class="node-header">
+          <mat-icon class="node-icon">crop_landscape</mat-icon>
+          <span class="node-title">Parent Plate: {{ plate.inventoryItemId }}</span>
+        </div>
+        <div class="node-details">
+          <div class="detail-row"><strong>Product ID:</strong> <span>{{ plate.productId }}</span></div>
+          <div class="detail-row"><strong>Serial/Tag:</strong> <span>{{ plate.serialNumber || '-' }}</span></div>
+          <div class="detail-row"><strong>Status:</strong> <span>{{ plate.statusId || '-' }}</span></div>
+        </div>
+      </div>
+
+      <!-- Arrow / Connector to Cut Sections -->
+      <div class="horizontal-connector-bar" *ngIf="plate.children && plate.children.length > 0"></div>
+
+      <!-- Child Cut Sections / Scrap Pieces -->
+      <div class="children-container" *ngIf="plate.children && plate.children.length > 0">
+        <div class="child-node-item" *ngFor="let child of plate.children" [class.scrap-item]="isScrap(child.nodeType)">
+          <div class="node-card child-node" [class.scrap-node]="isScrap(child.nodeType)">
+            <div class="node-header">
+              <mat-icon class="node-icon">{{ isScrap(child.nodeType) ? 'delete_sweep' : 'content_cut' }}</mat-icon>
+              <span class="node-title">{{ isScrap(child.nodeType) ? 'Scrap Piece' : 'Cut Section' }}</span>
+            </div>
+            <div class="node-details">
+              <div class="detail-row"><strong>Item ID:</strong> <span class="monospace">{{ child.inventoryItemId }}</span></div>
+              <div class="detail-row"><strong>Serial/Tag:</strong> <span>{{ child.serialNumber }}</span></div>
+              <div class="detail-row"><strong>Product:</strong> <span>{{ child.productId }}</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #noData>
+  <div class="tree-no-data">
+    <mat-icon class="no-data-icon">bubble_chart</mat-icon>
+    <p class="no-data-text">No genealogy data found for this Lot. Cut sections recorded in Steel Cutting jobs or mapped in inventory items will appear here dynamically.</p>
+  </div>
+</ng-template>

@@ -1,0 +1,91 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+<ng-template #content>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header class="card-header-with-action">
+      <mat-card-title>{{ 'FACILITY.TITLE' | translate }}</mat-card-title>
+      <button mat-raised-button color="primary" routerLink="/facilities/create">
+        <mat-icon>add</mat-icon> {{ 'MENU.CREATE_FACILITY' | translate }}
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="facility-table-container">
+        <table mat-table [dataSource]="pagedItems()">
+          <ng-container matColumnDef="facilityId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.ID' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">
+              <a [routerLink]="['/facilities', item.facilityId]">{{ item.facilityId }}</a>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="facilityName">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.NAME' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item.facilityName }}</td>
+          </ng-container>
+          <ng-container matColumnDef="facilityTypeId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.TYPE' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">
+              {{ getFacilityTypeDescription(item.facilityTypeId) }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="ownerPartyId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'FACILITY.OWNER' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item.ownerPartyId }}</td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
+
+      <!-- Mobile card list -->
+      <div class="facility-mobile-list">
+        <div class="facility-mobile-card" *ngFor="let item of pagedItems()">
+          <a class="facility-mobile-id" [routerLink]="['/facilities', item.facilityId]">
+            {{ item.facilityId }}
+          </a>
+          <div class="facility-mobile-grid">
+            <div class="facility-mobile-field wide-mobile-field">
+              <span class="facility-mobile-label">{{ 'COMMON.NAME' | translate }}</span>
+              <span>{{ item.facilityName || '-' }}</span>
+            </div>
+            <div class="facility-mobile-field">
+              <span class="facility-mobile-label">{{ 'COMMON.TYPE' | translate }}</span>
+              <span>{{ getFacilityTypeDescription(item.facilityTypeId) || '-' }}</span>
+            </div>
+            <div class="facility-mobile-field">
+              <span class="facility-mobile-label">{{ 'FACILITY.OWNER' | translate }}</span>
+              <span>{{ item.ownerPartyId || '-' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <mat-paginator
+        [length]="items().length"
+        [pageIndex]="pageIndex()"
+        [pageSize]="pageSize()"
+        [pageSizeOptions]="[10, 20, 50, 100]"
+        (page)="onPageChange($event)">
+      </mat-paginator>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

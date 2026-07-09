@@ -1,0 +1,177 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.shipment-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.detail-mobile-list {
+  display: none;
+}
+
+.mat-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+.mat-header-row, .mat-row {
+  display: table-row;
+}
+
+.mat-header-cell, .mat-cell {
+  display: table-cell;
+  padding: 8px;
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.mat-header-cell {
+  font-weight: bold;
+}
+
+.mat-row:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.mat-row:hover {
+  background-color: #e0e0e0;
+}
+
+.mat-paginator {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  mat-list {
+    padding: 0 4px;
+  }
+
+  mat-card-header,
+  mat-card-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .action-bar {
+    flex-direction: column;
+  }
+
+  .action-bar button {
+    width: 100%;
+  }
+
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .shipment-overview-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .overview-col {
+    border-right: none;
+    border-bottom: 1px solid #ddd;
+    padding-right: 0;
+    padding-bottom: 12px;
+  }
+
+  .field-with-action {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .pack-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .package-meta {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .detail-table-container {
+    display: none;
+  }
+
+  .detail-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .detail-mobile-card {
+    padding: 14px;
+    border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+    border-radius: 8px;
+    background: var(--mat-sys-surface, #fff);
+  }
+
+  .detail-mobile-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 8%, transparent);
+  }
+
+  .detail-mobile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding-top: 12px;
+  }
+
+  .detail-mobile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow-wrap: anywhere;
+  }
+
+  .detail-mobile-field-wide {
+    grid-column: 1 / -1;
+  }
+
+  .detail-mobile-label {
+    font-size: 0.88em;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    opacity: 0.85;
+    text-transform: uppercase;
+  }
+}
+
+@media (max-width: 480px) {
+  .detail-mobile-grid {
+    grid-template-columns: 1fr;
+  }
+}

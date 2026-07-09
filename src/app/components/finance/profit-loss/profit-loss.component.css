@@ -1,0 +1,144 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.report-shell {
+  padding: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.header-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header-actions h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.filter-card {
+  margin-bottom: 24px;
+}
+
+.filter-row {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filter-row mat-form-field {
+  margin-bottom: -1.25em; /* remove extra space from form-fields */
+}
+
+.pl-card {
+  padding: 32px 40px;
+}
+
+.pl-section {
+  margin-bottom: 32px;
+}
+
+.pl-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.pl-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  color: #555;
+}
+
+.pl-account {
+  padding-left: 16px;
+}
+
+.pl-amount {
+  text-align: right;
+  min-width: 120px;
+}
+
+.pl-total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  margin-top: 8px;
+  border-top: 1px dashed #ccc;
+  font-weight: 600;
+  color: #333;
+}
+
+.pl-summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 0;
+  margin-bottom: 32px;
+  font-weight: 700;
+  font-size: 16px;
+  border-top: 2px solid #ccc;
+  border-bottom: 2px solid #ccc;
+}
+
+.super-highlight {
+  border-top: 3px double #333;
+  border-bottom: 3px double #333;
+  font-size: 18px;
+  background-color: #f9f9f9;
+}
+
+.loading-state,
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+  color: #666;
+  gap: 16px;
+}
+
+.error-state {
+  color: #d32f2f;
+}
+
+/* Print Styles */
+@media print {
+  .header-actions button,
+  .filter-card {
+    display: none !important;
+  }
+  
+  .report-shell {
+    padding: 0;
+    margin: 0;
+  }
+  
+  .pl-card {
+    box-shadow: none !important;
+    padding: 0;
+  }
+}

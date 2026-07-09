@@ -1,0 +1,802 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-card mat-elevation-z10">
+  <mat-list>
+    <mat-list-item>
+      <a [routerLink]="['/customers']">{{ 'CUSTOMER.TITLE' | translate }}</a>
+      / {{ customerDetail?.partyId }}
+    </mat-list-item>
+  </mat-list>
+  <mat-card-header>
+    <mat-card-title>{{ 'COMMON.OVERVIEW' | translate }}</mat-card-title>
+  </mat-card-header>
+  <div class="overview-card-grid">
+    <mat-card class="mat-elevation-z10 customer-overview-quad-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'CUSTOMER.PERSONAL_DETAIL' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="customer-overview-field">
+          <div class="customer-overview-label-row">
+            <span class="customer-overview-label">{{ 'COMMON.NAME' | translate }}</span>
+          </div>
+          <div class="customer-overview-value-row">
+            {{ customerDetail?.firstName }} {{ customerDetail?.lastName }}
+            <button
+              mat-icon-button
+              type="button"
+              color="primary"
+              class="custom-icon-align"
+              data-testid="customer-detail-edit-personal"
+              [attr.aria-label]="'COMMON.EDIT' | translate"
+              (click)="editSupplierDialog()"
+            >
+              <mat-icon class="custom-mat-icon">edit</mat-icon>
+            </button>
+          </div>
+        </div>
+        <div class="customer-overview-field">
+          <div class="customer-overview-label-row">
+            <span class="customer-overview-label">{{ 'COMMON.ADDRESS' | translate }}</span>
+          </div>
+          <ng-container *ngIf="getOverviewPrimaryAddress() as primaryAddress; else noPrimaryAddress">
+            <div class="customer-overview-value-row">
+              {{ primaryAddress.toName }}
+              <button
+                mat-icon-button
+                type="button"
+                color="primary"
+                class="custom-icon-align"
+                data-testid="customer-detail-edit-address"
+                [attr.aria-label]="'COMMON.EDIT' | translate"
+                (click)="addEditAddressDialog(primaryAddress)"
+              >
+                <mat-icon class="custom-mat-icon">edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                type="button"
+                color="warn"
+                class="custom-icon-align"
+                data-testid="customer-detail-delete-address"
+                [attr.aria-label]="'COMMON.DELETE' | translate"
+                (click)="deleteAddressDialog({
+                  partyId: partyId,
+                  contactMechId: primaryAddress.contactMechId,
+                  contactMechPurposeId: primaryAddress.contactMechPurposeId
+                })"
+              >
+                <mat-icon class="custom-mat-icon">delete</mat-icon>
+              </button>
+            </div>
+            <div class="customer-overview-value">{{ primaryAddress.address1 }}</div>
+            <div class="customer-overview-value" *ngIf="primaryAddress.address2">{{ primaryAddress.address2 }}</div>
+            <div class="customer-overview-value">
+              {{ primaryAddress.city }}
+              <span *ngIf="primaryAddress.stateProvinceGeoId">, {{ primaryAddress.stateProvinceGeoId }}</span>
+              <span *ngIf="primaryAddress.postalCode"> {{ primaryAddress.postalCode }}</span>
+              <span *ngIf="primaryAddress.countryGeoId"> {{ primaryAddress.countryGeoId }}</span>
+            </div>
+          </ng-container>
+          <ng-template #noPrimaryAddress>
+            <div class="customer-overview-value-row">
+              <button
+                mat-icon-button
+                type="button"
+                class="custom-icon-align"
+                color="primary"
+                data-testid="customer-detail-add-address"
+                [attr.aria-label]="'COMMON.ADD' | translate"
+                (click)="addEditAddressDialog({ contactMechPurposeId: 'PRIMARY_LOCATION' })"
+              >
+                <mat-icon class="custom-mat-icon">add</mat-icon>
+              </button>
+            </div>
+          </ng-template>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="mat-elevation-z10 customer-overview-quad-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'CUSTOMER.EMAIL_AND_PHONE' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="customer-overview-contact-list">
+          <ng-container *ngIf="
+              filterTelecomNumberList(telecomNumberList, 'PRIMARY_PHONE')
+                .length > 0;
+              else noPhoneRecords
+            ">
+            <div class="customer-overview-field" *ngFor="
+                let primaryPhone of filterTelecomNumberList(
+                  telecomNumberList,
+                  'PRIMARY_PHONE'
+                )
+              ">
+              <div class="customer-overview-label-row">
+                <span class="customer-overview-label">{{ 'COMMON.PHONE' | translate }}</span>
+              </div>
+              <div class="customer-overview-value-row">
+                {{ primaryPhone.countryCode }}
+                {{ primaryPhone.areaCode }}
+                {{ primaryPhone.contactNumber }}
+                <button mat-icon-button type="button" color="primary" class="custom-icon-align" data-testid="customer-detail-edit-phone" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="
+                  addEditPhoneDialog({
+                    contactMechId: primaryPhone.contactMechId,
+                    contactMechPurposeId:
+                      primaryPhone.contactMechPurposeId,
+                    contactNumber: primaryPhone.contactNumber
+                  })
+                ">
+                  <mat-icon class="custom-mat-icon">edit</mat-icon>
+                </button>
+                <button mat-icon-button type="button" color="warn" class="custom-icon-align" data-testid="customer-detail-delete-phone" [attr.aria-label]="'COMMON.DELETE' | translate" (click)="
+                  deletePhoneDialog({
+                    partyId: partyId,
+                    contactMechId: primaryPhone.contactMechId,
+                    contactMechPurposeId:
+                      primaryPhone.contactMechPurposeId
+                  })
+                ">
+                  <mat-icon class="custom-mat-icon">delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+
+          <ng-template #noPhoneRecords>
+            <div class="customer-overview-field">
+              <div class="customer-overview-label-row">
+                <span class="customer-overview-label">{{ 'COMMON.PHONE' | translate }}</span>
+              </div>
+              <div class="customer-overview-value-row">
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="custom-icon-align"
+                  color="primary"
+                  data-testid="customer-detail-add-phone"
+                  [attr.aria-label]="'COMMON.ADD' | translate"
+                  (click)="
+                    addEditPhoneDialog({
+                      partyId: partyId,
+                      contactMechPurposeId: 'PRIMARY_PHONE'
+                    })
+                  ">
+                  <mat-icon class="custom-mat-icon">add</mat-icon>
+                </button>
+              </div>
+            </div>
+          </ng-template>
+          <ng-container *ngIf="
+              filterEmailAddressList(emailAddressList, 'PRIMARY_EMAIL').length >
+                0;
+              else noEmailRecords
+            ">
+            <div class="customer-overview-field" *ngFor="
+                let primaryEmailAddress of filterEmailAddressList(
+                  emailAddressList,
+                  'PRIMARY_EMAIL'
+                )
+              ">
+              <div class="customer-overview-label-row">
+                <span class="customer-overview-label">{{ 'COMMON.EMAIL' | translate }}</span>
+              </div>
+              <div class="customer-overview-value-row">
+                {{ primaryEmailAddress.emailAddress }}
+                <button mat-icon-button type="button" color="primary" class="custom-icon-align" data-testid="customer-detail-edit-email" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="
+                  addEditEmailDialog({
+                    contactMechId: primaryEmailAddress.contactMechId,
+                    contactMechPurposeId:
+                      primaryEmailAddress.contactMechPurposeId,
+                    emailAddress: primaryEmailAddress.emailAddress
+                  })
+                ">
+                  <mat-icon class="custom-mat-icon">edit</mat-icon>
+                </button>
+                <button mat-icon-button type="button" color="warn" class="custom-icon-align" data-testid="customer-detail-delete-email" [attr.aria-label]="'COMMON.DELETE' | translate" (click)="
+                  deleteEmailDialog({
+                    partyId: partyId,
+                    contactMechId: primaryEmailAddress.contactMechId,
+                    contactMechPurposeId:
+                      primaryEmailAddress.contactMechPurposeId
+                  })
+                ">
+                  <mat-icon class="custom-mat-icon">delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </ng-container>
+          <ng-template #noEmailRecords>
+            <div class="customer-overview-field">
+              <div class="customer-overview-label-row">
+                <span class="customer-overview-label">{{ 'COMMON.EMAIL' | translate }}</span>
+              </div>
+              <div class="customer-overview-value-row">
+                <button
+                  mat-icon-button
+                  type="button"
+                  class="custom-icon-align"
+                  color="primary"
+                  data-testid="customer-detail-add-email"
+                  [attr.aria-label]="'COMMON.ADD' | translate"
+                  (click)="
+                    addEditEmailDialog({
+                      partyId: partyId,
+                      contactMechPurposeId: 'PRIMARY_EMAIL',
+                    })
+                  ">
+                  <mat-icon class="custom-mat-icon">add</mat-icon>
+                </button>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="mat-elevation-z10 customer-overview-quad-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'CUSTOMER.ROLES' | translate }}
+          <button
+            mat-icon-button
+            type="button"
+            color="primary"
+            class="custom-icon-align"
+            data-testid="customer-detail-add-role"
+            [attr.aria-label]="'COMMON.ADD' | translate"
+            (click)="addRoleDialog()"
+          >
+            <mat-icon class="custom-mat-icon">add</mat-icon>
+          </button></mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <ul class="custom-list">
+          <li class="custom-list-item" *ngFor="let role of partyRoleList; trackBy: trackByRole">
+            {{ getRoleLabel(role) }}
+            <button
+              *ngIf="(role?.roleTypeId || '') !== 'CUSTOMER'"
+              mat-icon-button
+              type="button"
+              color="warn"
+              class="custom-icon-align"
+              data-testid="customer-detail-delete-role"
+              [attr.aria-label]="'COMMON.DELETE' | translate"
+              (click)="deleteRoleDialog(role)"
+            >
+              <mat-icon class="custom-mat-icon">delete</mat-icon>
+            </button>
+
+          </li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Classification card hidden temporarily
+    <mat-card class="mat-elevation-z10 customer-overview-quad-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'CUSTOMER.CLASSIFICATION' | translate }}
+          <mat-icon matListIcon class="custom-mat-icon custom-icon-align" color="primary"
+            (click)="addClassificationDialog()">add</mat-icon></mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <ul class="custom-list">
+          <li class="custom-list-item" *ngFor="let classification of partyClassifications">
+            <strong>{{ classification.typeDescription }}:</strong>
+            {{ classification.classDescription }}
+            <mat-icon matListIcon class="custom-mat-icon custom-icon-align" color="warn"
+              (click)="deleteClassificationDialog(classification)">delete</mat-icon>
+          </li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+    -->
+    <!-- Identification card hidden temporarily
+    <mat-card class="mat-elevation-z10 customer-overview-quad-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'COMMON.IDENTIFICATION' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <ul class="custom-list">
+          <li class="custom-list-item" *ngFor="let partyIdentification of partyIdentificationList">
+            <strong>{{ partyIdentification.description || partyIdentification.partyIdentificationTypeId }}:</strong>
+            {{ partyIdentification.idValue }}
+          </li>
+          <li class="custom-list-item" *ngIf="!partyIdentificationList.length">
+            {{ 'COMMON.NOT_AVAILABLE' | translate }}
+          </li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+    -->
+  </div>
+</mat-card>
+
+<br />
+
+<mat-card class="mat-elevation-z10">
+  <mat-card-header>
+    <mat-card-title>
+      {{ 'COMMON.NOTES' | translate }}
+      <button
+        mat-icon-button
+        type="button"
+        color="primary"
+        class="custom-icon-align"
+        data-testid="customer-detail-add-note"
+        (click)="addUpdateNoteDialog()"
+        [attr.aria-label]="'COMMON.ADD' | translate"
+      >
+        <mat-icon>add</mat-icon>
+      </button>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content class="notes-content">
+    <div class="notes-table">
+      <table mat-table [dataSource]="partyNotes">
+        <ng-container matColumnDef="noteText">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.NOTE' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            <span *ngIf="item.noteText">{{ item?.noteText }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="noteDate">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'CUSTOMER.NOTE_DATE' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.noteDate | userDate : "MMMM d, y" }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="userId">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'CUSTOMER.CREATED_BY' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            {{ item.createdByName || item.createdBy || item.userId }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="action">
+          <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.ACTION' | translate }}</th>
+          <td mat-cell class="text-left" *matCellDef="let item">
+            <button mat-icon-button type="button" color="primary" class="custom-icon-align" data-testid="customer-detail-edit-note" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="addUpdateNoteDialog(item)">
+              <mat-icon class="custom-mat-icon">edit</mat-icon>
+            </button>
+            <button mat-icon-button type="button" color="warn" class="custom-icon-align" data-testid="customer-detail-delete-note" [attr.aria-label]="'COMMON.DELETE' | translate" (click)="deleteNoteDialog(item)">
+              <mat-icon class="custom-mat-icon">delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="noteColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: noteColumns"></tr>
+      </table>
+    </div>
+
+    <div class="notes-mobile-list">
+      <article class="note-mobile-card" *ngFor="let item of partyNotes">
+        <div class="note-mobile-text">{{ item.noteText }}</div>
+        <div class="note-mobile-meta">
+          <div>
+            <span>{{ 'CUSTOMER.NOTE_DATE' | translate }}</span>
+            <strong>{{ item.noteDate | userDate : "MMMM d, y" }}</strong>
+          </div>
+          <div>
+            <span>{{ 'CUSTOMER.CREATED_BY' | translate }}</span>
+            <strong>{{ item.createdByName || item.createdBy || item.userId || '-' }}</strong>
+          </div>
+        </div>
+        <div class="note-mobile-actions">
+          <button mat-stroked-button type="button" color="primary" data-testid="customer-detail-edit-note" (click)="addUpdateNoteDialog(item)">
+            <mat-icon>edit</mat-icon>
+            {{ 'COMMON.EDIT' | translate }}
+          </button>
+          <button mat-stroked-button type="button" color="warn" data-testid="customer-detail-delete-note" (click)="deleteNoteDialog(item)">
+            <mat-icon>delete</mat-icon>
+            {{ 'COMMON.DELETE' | translate }}
+          </button>
+        </div>
+      </article>
+    </div>
+  </mat-card-content>
+</mat-card>
+
+<br />
+
+<mat-card class="mat-card mat-elevation-z10">
+  <mat-card-header>
+    <mat-card-title>{{ 'CUSTOMER.SHIPPING' | translate }}</mat-card-title>
+  </mat-card-header>
+  <div class="nested-card-grid" fxLayout="row wrap" fxLayout.xs="column" fxLayoutGap="16px">
+    <mat-card fxFlex.gt-xs="calc(50% - 8px)" class="mat-elevation-z10">
+      <mat-card-header>
+        <mat-card-title>{{ 'CUSTOMER.SHIP_TO_ADDRESS' | translate }} </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <app-party-address-list [addressList]="postalAddressList" [countries]="countries()" [states]="states()"
+          [purposeId]="'SHIPPING_LOCATION'" [partyId]="partyId ?? ''" [editable]="true"
+          (addressUpdated)="getCustomer($event)">
+        </app-party-address-list>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card fxFlex.gt-xs="calc(50% - 8px)" class="mat-elevation-z10">
+      <mat-card-header>
+        <mat-card-title>{{ 'CUSTOMER.EMAIL_AND_PHONE' | translate }} </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <ul class="custom-list">
+          <ng-container *ngIf="
+              filterTelecomNumberList(telecomNumberList, 'PHONE_SHIP_ORIG')
+                .length > 0;
+              else noShippingPhoneRecords
+            ">
+            <li class="custom-list-item" *ngFor="
+                let shippingPhone of filterTelecomNumberList(
+                  telecomNumberList,
+                  'PHONE_SHIP_ORIG'
+                )
+              ">
+              <strong>{{ 'COMMON.PHONE' | translate }}:</strong>
+              {{ shippingPhone.countryCode }}
+              {{ shippingPhone.areaCode }}
+              {{ shippingPhone.contactNumber }}
+              <button mat-icon-button type="button" color="primary" class="custom-icon-align" data-testid="customer-detail-edit-shipping-phone" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="
+                  addEditPhoneDialog({
+                    contactMechId: shippingPhone.contactMechId,
+                    contactMechPurposeId:
+                      shippingPhone.contactMechPurposeId,
+                    contactNumber: shippingPhone.contactNumber,
+                    areaCode: shippingPhone.areaCode,
+                    countryCode: shippingPhone.countryCode
+                  })
+                ">
+                <mat-icon class="custom-mat-icon">edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" color="warn" class="custom-icon-align" [attr.aria-label]="'COMMON.DELETE' | translate" (click)="
+                  deletePhoneDialog({
+                    partyId: partyId,
+                    contactMechId: shippingPhone.contactMechId,
+                    contactMechPurposeId:
+                      shippingPhone.contactMechPurposeId
+                  })
+                ">
+                <mat-icon class="custom-mat-icon">delete</mat-icon>
+              </button>
+            </li>
+          </ng-container>
+
+          <ng-template #noShippingPhoneRecords>
+            <li class="custom-list-item">
+              <strong>{{ 'COMMON.PHONE' | translate }}:</strong><button
+                mat-icon-button
+                type="button"
+                class="custom-icon-align"
+                color="primary"
+                data-testid="customer-detail-add-shipping-phone"
+                [attr.aria-label]="'COMMON.ADD' | translate"
+                (click)="
+                  addEditPhoneDialog({
+                    partyId: partyId,
+                    contactMechPurposeId: 'PHONE_SHIP_ORIG'
+                  })
+                ">
+                <mat-icon class="custom-mat-icon">add</mat-icon>
+              </button>
+            </li>
+          </ng-template>
+
+            <ng-container *ngIf="
+              filterEmailAddressList(emailAddressList, 'SHIPPING_EMAIL')
+                .length > 0;
+              else noShippingEmailRecords
+            ">
+            <li class="custom-list-item" *ngFor="
+                let shippingEmailAddress of filterEmailAddressList(
+                  emailAddressList,
+                  'SHIPPING_EMAIL'
+                )
+              ">
+              <strong>{{ 'COMMON.EMAIL' | translate }}:</strong> {{ shippingEmailAddress.emailAddress }}
+              <button mat-icon-button type="button" color="primary" class="custom-icon-align" data-testid="customer-detail-edit-shipping-email" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="
+                  addEditEmailDialog({
+                    contactMechId: shippingEmailAddress.contactMechId,
+                    contactMechPurposeId:
+                      shippingEmailAddress.contactMechPurposeId,
+                    emailAddress: shippingEmailAddress.emailAddress
+                  })
+                ">
+                <mat-icon class="custom-mat-icon">edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" color="warn" class="custom-icon-align" [attr.aria-label]="'COMMON.DELETE' | translate" (click)="
+                  deleteEmailDialog({
+                    partyId: partyId,
+                    contactMechId: shippingEmailAddress.contactMechId,
+                    contactMechPurposeId:
+                      shippingEmailAddress.contactMechPurposeId
+                  })
+                ">
+                <mat-icon class="custom-mat-icon">delete</mat-icon>
+              </button>
+            </li>
+          </ng-container>
+          <ng-template #noShippingEmailRecords>
+            <li class="custom-list-item">
+              <strong>{{ 'COMMON.EMAIL' | translate }}:</strong><button
+                mat-icon-button
+                type="button"
+                class="custom-icon-align"
+                color="primary"
+                data-testid="customer-detail-add-shipping-email"
+                [attr.aria-label]="'COMMON.ADD' | translate"
+                (click)="
+                    addEditEmailDialog({
+                      partyId: partyId,
+                      contactMechPurposeId: 'SHIPPING_EMAIL',
+                    })
+                  ">
+                <mat-icon class="custom-mat-icon">add</mat-icon>
+              </button>
+            </li>
+          </ng-template>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</mat-card>
+
+<br />
+
+<mat-card class="mat-card mat-elevation-z10">
+  <mat-card-header>
+    <mat-card-title>{{ 'CUSTOMER.BILLING' | translate }}</mat-card-title>
+  </mat-card-header>
+  <div class="nested-card-grid" fxLayout="row wrap" fxLayout.xs="column" fxLayoutGap="16px">
+    <mat-card fxFlex.gt-xs="calc(50% - 8px)" class="mat-elevation-z10">
+      <mat-card-header>
+        <mat-card-title>{{ 'CUSTOMER.PAYMENT_METHOD' | translate }}
+          <button mat-icon-button [matMenuTriggerFor]="menu" data-testid="customer-detail-add-payment-method" [attr.aria-label]="'COMMON.ADD_PAYMENT_METHOD' | translate">
+            <mat-icon matListIcon class="custom-mat-icon custom-icon-align" color="primary">add</mat-icon>
+          </button>
+          <mat-menu #menu="matMenu">
+            <button mat-menu-item (click)="addEditCreditCardDialog()">
+              {{ 'PARTY.CREDIT_CARD_TITLE' | translate }}
+            </button>
+            <button mat-menu-item (click)="addEditBankAccountDialog()">
+              {{ 'PARTY.BANK_ACCOUNT_TITLE' | translate }}
+            </button>
+          </mat-menu>
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <ul class="custom-list">
+          <li class="custom-list-item" *ngFor="let payment of payments; let last = last; trackBy: trackByPayment">
+            <div *ngIf="
+                payment.paymentMethod?.paymentMethodTypeEnumId === 'CREDIT_CARD'
+              ">
+              <strong>{{ 'COMMON.CREDIT_CARD' | translate }}:</strong>
+              <div>{{ payment.paymentMethod?.description }}</div>
+              <div>
+                {{ payment.creditCardTypeEnum?.description }}
+                {{ payment.creditCard?.cardNumber }}
+                <span *ngIf="payment.creditCard">
+                  {{ payment.creditCard.expireDate }}
+                </span>
+              </div>
+              <div>
+                {{ payment.paymentMethod?.firstNameOnAccount }}
+                {{ payment.paymentMethod?.lastNameOnAccount }}
+              </div>
+            </div>
+            <div *ngIf="
+                payment.paymentMethod?.paymentMethodTypeEnumId ===
+                'PmtBankAccount'
+              ">
+              <strong>{{ 'COMMON.BANK_ACCOUNT' | translate }}:</strong>
+              <div>{{ payment.paymentMethod?.description }}</div>
+              <div>{{ payment.bankAccount?.bankName }}</div>
+              <div>
+                {{ payment.bankAccount?.routingNumber }} :
+                {{ maskAccountNumber(payment.bankAccount?.accountNumber) }}
+              </div>
+            </div>
+            <strong> {{ 'COMMON.ADDRESS' | translate }} </strong>
+            <div>{{ payment.postalAddress?.toName }}</div>
+            <div>{{ payment.postalAddress?.address1 }}</div>
+            <div>{{ payment.postalAddress?.address2 }}</div>
+            <div>
+              {{ payment.postalAddress?.city }},
+              {{ payment.postalAddressStateGeo?.geoName }}
+              {{ payment.postalAddress?.postalCode }}
+              {{ payment.postalAddress?.countryGeoId }}
+            </div>
+            <mat-divider *ngIf="!last"></mat-divider>
+          </li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card fxFlex.gt-xs="calc(50% - 8px)" class="mat-elevation-z10">
+      <mat-card-header>
+        <mat-card-title>{{ 'CUSTOMER.EMAIL_AND_PHONE' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <ul class="custom-list">
+          <ng-container *ngIf="
+              filterTelecomNumberList(telecomNumberList, 'PHONE_PAYMENT')
+                .length > 0;
+              else noBillingPhoneRecords
+            ">
+            <li class="custom-list-item" *ngFor="
+                let billingPhone of filterTelecomNumberList(
+                  telecomNumberList,
+                  'PHONE_PAYMENT'
+                )
+              ">
+              <strong>{{ 'COMMON.PHONE' | translate }}:</strong>
+              {{ billingPhone.countryCode }}
+              {{ billingPhone.areaCode }}
+              {{ billingPhone.contactNumber }}
+              <button mat-icon-button type="button" color="primary" class="custom-icon-align" data-testid="customer-detail-edit-billing-phone" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="
+                  addEditPhoneDialog({
+                    contactMechId: billingPhone.contactMechId,
+                    contactMechPurposeId:
+                      billingPhone.contactMechPurposeId,
+                    contactNumber: billingPhone.contactNumber,
+                    areaCode: billingPhone.areaCode,
+                    countryCode: billingPhone.countryCode
+                  })
+                ">
+                <mat-icon class="custom-mat-icon">edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" color="warn" class="custom-icon-align" [attr.aria-label]="'COMMON.DELETE' | translate" (click)="
+                  deletePhoneDialog({
+                    partyId: partyId,
+                    contactMechId: billingPhone.contactMechId,
+                    contactMechPurposeId:
+                      billingPhone.contactMechPurposeId
+                  })
+                ">
+                <mat-icon class="custom-mat-icon">delete</mat-icon>
+              </button>
+            </li>
+          </ng-container>
+
+          <ng-template #noBillingPhoneRecords>
+            <li class="custom-list-item">
+              <strong>{{ 'COMMON.PHONE' | translate }}:</strong><button
+                mat-icon-button
+                type="button"
+                class="custom-icon-align"
+                color="primary"
+                data-testid="customer-detail-add-billing-phone"
+                [attr.aria-label]="'COMMON.ADD' | translate"
+                (click)="
+                  addEditPhoneDialog({
+                    partyId: partyId,
+                    contactMechPurposeId: 'PHONE_PAYMENT'
+                  })
+                ">
+                <mat-icon class="custom-mat-icon">add</mat-icon>
+              </button>
+            </li>
+          </ng-template>
+
+          <ng-container *ngIf="
+              filterEmailAddressList(emailAddressList, 'BILLING_EMAIL').length >
+                0;
+              else noBillingEmailRecords
+            ">
+            <li class="custom-list-item" *ngFor="
+                let billingEmailAddress of filterEmailAddressList(
+                  emailAddressList,
+                  'BILLING_EMAIL'
+                )
+              ">
+              <strong>{{ 'COMMON.EMAIL' | translate }}:</strong> {{ billingEmailAddress.emailAddress }}
+              <button mat-icon-button type="button" color="primary" class="custom-icon-align" data-testid="customer-detail-edit-billing-email" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="
+                  addEditEmailDialog({
+                    contactMechId: billingEmailAddress.contactMechId,
+                    contactMechPurposeId:
+                      billingEmailAddress.contactMechPurposeId,
+                    emailAddress: billingEmailAddress.emailAddress
+                  })
+                ">
+                <mat-icon class="custom-mat-icon">edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" color="warn" class="custom-icon-align" [attr.aria-label]="'COMMON.DELETE' | translate" (click)="
+                  deleteEmailDialog({
+                    partyId: partyId,
+                    contactMechId: billingEmailAddress.contactMechId,
+                    contactMechPurposeId:
+                      billingEmailAddress.contactMechPurposeId
+                  })
+                ">
+                <mat-icon class="custom-mat-icon">delete</mat-icon>
+              </button>
+            </li>
+          </ng-container>
+          <ng-template #noBillingEmailRecords>
+            <li class="custom-list-item">
+              <strong>{{ 'COMMON.EMAIL' | translate }}:</strong><button
+                mat-icon-button
+                type="button"
+                class="custom-icon-align"
+                color="primary"
+                data-testid="customer-detail-add-billing-email"
+                [attr.aria-label]="'COMMON.ADD' | translate"
+                (click)="
+                    addEditEmailDialog({
+                      partyId: partyId,
+                      contactMechPurposeId: 'BILLING_EMAIL',
+                    })
+                  ">
+                <mat-icon class="custom-mat-icon">add</mat-icon>
+              </button>
+            </li>
+          </ng-template>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</mat-card>
+<br />
+
+<mat-card class="mat-elevation-z10">
+  <mat-card-header>
+    <mat-card-title>
+      {{ 'CUSTOMER.CONTENTS' | translate }}
+      <button
+        mat-icon-button
+        type="button"
+        color="primary"
+        class="custom-icon-align"
+        data-testid="customer-detail-add-content"
+        [attr.aria-label]="'COMMON.ADD' | translate"
+        (click)="addUpdateContentDialog()"
+      >
+        <mat-icon class="custom-mat-icon">add</mat-icon>
+      </button></mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <table mat-table [dataSource]="contents">
+      <ng-container matColumnDef="description">
+        <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'CUSTOMER.TITLE_COL' | translate }}</th>
+        <td mat-cell class="text-left" *matCellDef="let item">
+          {{ item.description }}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="contentDate">
+        <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'CUSTOMER.CONTENT_COL' | translate }}</th>
+        <td mat-cell class="text-left" *matCellDef="let item">
+          {{ item.contentDate | userDate : "MMMM d, y" }}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="contentLocation">
+        <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'CUSTOMER.MIME_TYPE' | translate }}</th>
+        <td mat-cell class="text-left" *matCellDef="let item">
+          <ng-container *ngIf="item.contentId; else noContentFile">
+            <a href="#" (click)="$event.preventDefault(); openPartyContent(item)">
+              {{ item.contentLocation }}
+            </a>
+          </ng-container>
+          <ng-template #noContentFile>--</ng-template>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="contentColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: contentColumns"></tr>
+    </table>
+  </mat-card-content>
+</mat-card>

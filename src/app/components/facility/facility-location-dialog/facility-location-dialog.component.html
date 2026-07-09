@@ -1,0 +1,68 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10 dialog-card">
+  <mat-card-title mat-dialog-title>
+    {{ data?.id ? ('FACILITY.UPDATE_LOCATION' | translate) : ('FACILITY.ADD_LOCATION' | translate) }}
+  </mat-card-title>
+  <mat-card-content mat-dialog-content class="dialog-content">
+    <form [formGroup]="form" class="location-form">
+      <div class="location-form-grid">
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>{{ 'FACILITY.LOCATION_SEQ_ID' | translate }}</mat-label>
+          <input matInput formControlName="locationSeqId" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>{{ 'FACILITY.LOCATION_TYPE' | translate }}</mat-label>
+          <mat-select formControlName="locationTypeEnumId">
+            <mat-option *ngFor="let item of locationTypes; trackBy: trackByLocationType" [value]="item.enumId">
+              {{ item.description }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>{{ 'FACILITY.AREA_ID' | translate }}</mat-label>
+          <input matInput formControlName="areaId" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>{{ 'FACILITY.AISLE_ID' | translate }}</mat-label>
+          <input matInput formControlName="aisleId" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>{{ 'FACILITY.SECTION_ID' | translate }}</mat-label>
+          <input matInput formControlName="sectionId" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>{{ 'FACILITY.LEVEL_ID' | translate }}</mat-label>
+          <input matInput formControlName="levelId" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="form-field">
+          <mat-label>{{ 'FACILITY.POSITION_ID' | translate }}</mat-label>
+          <input matInput formControlName="positionId" />
+        </mat-form-field>
+      </div>
+    </form>
+    <div class="dialog-actions mt-2">
+      <button mat-raised-button color="primary" (click)="save()" [disabled]="form.invalid">
+        {{ 'COMMON.SAVE' | translate }}
+      </button>
+      <button mat-stroked-button (click)="cancel()">{{ 'COMMON.CANCEL' | translate }}</button>
+    </div>
+  </mat-card-content>
+</mat-card>
+

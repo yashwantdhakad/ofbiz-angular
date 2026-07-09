@@ -1,0 +1,64 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-title mat-dialog-title>
+    {{ 'PRODUCT.CONTENT_TITLE' | translate }}
+  </mat-card-title>
+  <mat-card-content mat-dialog-content>
+    <form
+      (ngSubmit)="createProductContent()"
+      [formGroup]="fileForm"
+      fxLayout="row wrap"
+      fxLayoutAlign="start"
+    >
+      <div fxFlex="100%" fxLayoutAlign="start" class="mb-10 file-input-row">
+        <input type="file" id="fileInput" (change)="onFileChange($event)" class="custom-file-input" />
+        <mat-error *ngIf="fileForm.get('contentFile')?.hasError('required') && fileForm.get('contentFile')?.touched">
+          {{ 'ORDER.FILE_REQUIRED' | translate }}
+        </mat-error>
+      </div>
+
+      <mat-form-field appearance="outline" fxFlex="100%">
+        <mat-label>{{ 'COMMON.DESCRIPTION' | translate }}</mat-label>
+        <textarea
+          matInput
+          [placeholder]="'COMMON.DESCRIPTION_PLACEHOLDER' | translate"
+          formControlName="description"
+        ></textarea>
+        <mat-error *ngIf="fileForm.get('description')?.hasError('required') && fileForm.get('description')?.touched">
+          {{ 'COMMON.DESCRIPTION' | translate }} {{ 'COMMON.REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+
+      <div fxFlex="100%" fxLayoutAlign="start">
+        <button
+          mat-raised-button
+          type="submit"
+          color="primary"
+          class="me-4"
+          [disabled]="isLoading() || fileForm.invalid"
+        >
+          <span *ngIf="!isLoading()">{{ 'COMMON.SAVE' | translate }}</span>
+          <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+        </button>
+        <button mat-stroked-button mat-dialog-close>{{ 'COMMON.CANCEL' | translate }}</button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

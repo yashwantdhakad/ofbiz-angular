@@ -1,0 +1,68 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-title mat-dialog-title>{{ 'BOM.ADD_COMPONENT' | translate }}</mat-card-title>
+  <mat-card-content mat-dialog-content>
+    <div class="form-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'BOM.COMPONENT' | translate }}</mat-label>
+        <input matInput [matAutocomplete]="componentAuto" [formControl]="componentProductControl" />
+        <mat-autocomplete #componentAuto="matAutocomplete" [displayWith]="displayProduct">
+          <mat-option *ngFor="let product of filteredProducts$ | async; trackBy: trackByProduct" [value]="product">
+            {{ product.productId }} - {{ product.productName || product.name }}
+          </mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'BOM.SEQ_NUM' | translate }}</mat-label>
+        <input matInput type="number" min="0" step="1" [(ngModel)]="sequenceNum" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'BOM.QTY' | translate }}</mat-label>
+        <input matInput type="number" [(ngModel)]="quantity" min="0.000001" step="any" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'BOM.FROM_DATE' | translate }}</mat-label>
+        <input matInput [matDatepicker]="dialogFromPicker" [(ngModel)]="fromDate"
+          [disabled]="isEdit" (click)="!isEdit && dialogFromPicker.open()" />
+        <mat-datepicker-toggle matSuffix [for]="dialogFromPicker"></mat-datepicker-toggle>
+        <mat-datepicker #dialogFromPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'BOM.SCRAP' | translate }}</mat-label>
+        <input matInput type="number" min="0" step="any" [(ngModel)]="scrapFactor" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'BOM.INST' | translate }}</mat-label>
+        <textarea matInput rows="2" [(ngModel)]="instruction"></textarea>
+      </mat-form-field>
+    </div>
+    <div fxLayout="row" fxLayoutAlign="start" class="mt-2">
+      <button mat-raised-button color="primary" (click)="save()" [disabled]="isSaving()" class="me-4">
+        {{ 'COMMON.SAVE' | translate }}
+      </button>
+      <button mat-stroked-button (click)="close()">{{ 'COMMON.CANCEL' | translate }}</button>
+    </div>
+  </mat-card-content>
+</mat-card>

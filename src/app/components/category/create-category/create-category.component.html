@@ -1,0 +1,87 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-header>
+    <mat-card-title>
+      <h3>{{ 'CATEGORY.CREATE_TITLE' | translate }}</h3>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form
+      (ngSubmit)="createCategory()"
+      [formGroup]="categoryForm"
+      class="create-form"
+    >
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'CATEGORY.NAME' | translate }}</mat-label>
+        <input
+          matInput
+          placeholder="{{ 'CATEGORY.NAME' | translate }}"
+          formControlName="categoryName"
+        />
+        <mat-error *ngIf="categoryForm.get('categoryName')?.hasError('required')">
+          {{ 'CATEGORY.NAME_REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'CATEGORY.TYPE' | translate }}</mat-label>
+        <mat-select formControlName="productCategoryTypeId" name="productCategoryTypeId">
+          <mat-option
+            *ngFor="let categoryType of categoryTypes(); trackBy: trackByCategoryType"
+            [value]="categoryType.productCategoryTypeId"
+          >{{ categoryType.description }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'COMMON.DESCRIPTION' | translate }}</mat-label>
+        <textarea
+          matInput
+          placeholder="{{ 'COMMON.DESCRIPTION' | translate }}"
+          formControlName="description"
+          name="description"
+        ></textarea>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'CATEGORY.PARENT' | translate }}</mat-label>
+        <input
+          matInput
+          formControlName="primaryParentCategoryId"
+          [placeholder]="'CATEGORY.PARENT_ID' | translate"
+        />
+      </mat-form-field>
+
+      <div class="form-actions">
+        <button
+          mat-raised-button
+          type="submit"
+          color="primary"
+          class="me-4"
+          data-testid="category-create-save"
+          [disabled]="isLoading()"
+        >
+          <span *ngIf="!isLoading()">{{ 'COMMON.SAVE' | translate }}</span>
+          <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

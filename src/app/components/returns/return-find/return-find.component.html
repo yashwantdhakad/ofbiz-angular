@@ -1,0 +1,163 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-header class="card-header-with-action">
+    <mat-card-title>{{ 'MENU.RETURNS' | translate }}</mat-card-title>
+    <button mat-raised-button color="primary" routerLink="/returns/create">
+      <mat-icon>add</mat-icon> {{ 'MENU.CREATE_RETURN' | translate }}
+    </button>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="filter-row">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'RETURN.RETURN_ID' | translate }}</mat-label>
+        <input matInput [ngModel]="filters().returnId" (ngModelChange)="updateFilter('returnId', $event)" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'COMMON.ORDER_ID' | translate }}</mat-label>
+        <input matInput [ngModel]="filters().orderId" (ngModelChange)="updateFilter('orderId', $event)" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'COMMON.STATUS' | translate }}</mat-label>
+        <mat-select [ngModel]="filters().statusId" (ngModelChange)="updateFilter('statusId', $event)">
+          <mat-option value="">{{ 'COMMON.ALL' | translate }}</mat-option>
+          <mat-option *ngFor="let item of statusOptions(); trackBy: trackByStatusOption" [value]="item.statusId">
+            {{ item.description || item.statusId }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'RETURN.RETURN_DIRECTION' | translate }}</mat-label>
+        <mat-select [ngModel]="filters().orderTypeId" (ngModelChange)="updateFilter('orderTypeId', $event)">
+          <mat-option *ngFor="let item of returnDirectionOptions; trackBy: trackByReturnDirectionOption" [value]="item.id">
+            {{ item.labelKey | translate }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div class="filter-actions">
+        <button mat-raised-button color="primary" class="field-action-btn" (click)="onSearchClick()">{{ 'COMMON.SEARCH' | translate }}</button>
+        <button mat-stroked-button class="field-link-btn" (click)="clear()">{{ 'COMMON.CLEAR' | translate }}</button>
+      </div>
+    </div>
+
+    <mat-progress-spinner *ngIf="loading()" [diameter]="40" mode="indeterminate"></mat-progress-spinner>
+    <div class="empty-state" *ngIf="showSearchPrompt()">{{ 'COMMON.SEARCH_TO_LOAD' | translate }}</div>
+    <div class="empty-state" *ngIf="showEmptyState()">{{ 'RETURN.NO_DATA' | translate }}</div>
+
+    <!-- Desktop table -->
+    <div class="table-wrapper" *ngIf="showResultsTable()">
+      <table mat-table [dataSource]="rows()">
+        <ng-container matColumnDef="returnId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'RETURN.RETURN_ID' | translate }}</th>
+          <td mat-cell *matCellDef="let row">
+            <a [routerLink]="['/returns', row.returnId]">{{ row.returnId }}</a>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="orderId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ORDER_ID' | translate }}</th>
+          <td mat-cell *matCellDef="let row">
+            <ng-container *ngIf="getOrderLink(row) as orderLink; else orderText">
+              <a [routerLink]="orderLink">{{ row.orderId }}</a>
+            </ng-container>
+            <ng-template #orderText>{{ row.orderId || '-' }}</ng-template>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="returnType">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.TYPE' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.returnTypeDescription || row.returnTypeId || row.orderTypeId || '-'
+            }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.statusDescription || row.statusId || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="entryDate">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.DATE' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.entryDate ? (row.entryDate | userDate : 'medium') : '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="itemCount">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ITEMS' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.itemCount || 0 }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="totalAmount">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.TOTAL_AMOUNT' | translate }}</th>
+          <td mat-cell *matCellDef="let row">{{ row.totalAmount | amountWithCurrency : (row.currencyUomId || 'USD') }}
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <!-- Mobile return cards -->
+    <div class="return-mobile-list" *ngIf="showResultsTable()">
+      <a
+        class="return-mobile-card"
+        *ngFor="let row of rows(); trackBy: trackByReturn"
+        [routerLink]="['/returns', row.returnId]"
+      >
+        <div class="return-mobile-heading">
+          <strong>{{ row.returnId }}</strong>
+          <app-status-chip [status]="row.statusDescription || row.statusId" [statusId]="row.statusId"></app-status-chip>
+        </div>
+
+        <div class="return-mobile-field" *ngIf="row.orderId">
+          <mat-icon>shopping_bag</mat-icon>
+          <span class="return-mobile-value">{{ 'COMMON.ORDER_ID' | translate }}: {{ row.orderId }}</span>
+        </div>
+
+        <div class="return-mobile-field" *ngIf="row.returnTypeDescription || row.returnTypeId || row.orderTypeId">
+          <mat-icon>info</mat-icon>
+          <span class="return-mobile-value">{{ row.returnTypeDescription || row.returnTypeId || row.orderTypeId }}</span>
+        </div>
+
+        <div class="return-mobile-field" *ngIf="row.entryDate">
+          <mat-icon>event</mat-icon>
+          <span class="return-mobile-value">{{ row.entryDate | userDate : 'MMMM d, y' }}</span>
+        </div>
+
+        <div class="return-mobile-field" *ngIf="row.itemCount">
+          <mat-icon>list</mat-icon>
+          <span class="return-mobile-value">{{ 'COMMON.ITEMS' | translate }}: {{ row.itemCount }}</span>
+        </div>
+
+        <div class="return-mobile-total">
+          <strong>{{ row.totalAmount | amountWithCurrency : (row.currencyUomId || 'USD') }}</strong>
+        </div>
+      </a>
+    </div>
+
+    <div *ngIf="showResultsTable()">
+      <mat-paginator [length]="totalElements()" [pageSize]="pageSize()" [pageIndex]="pageIndex()"
+        [pageSizeOptions]="pageSizeOptions" (page)="onPageChange($event)">
+      </mat-paginator>
+    </div>
+  </mat-card-content>
+</mat-card>

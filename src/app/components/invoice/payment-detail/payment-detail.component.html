@@ -1,0 +1,210 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+
+<ng-template #content>
+  <ng-container *ngIf="payment() as p">
+    <!-- Breadcrumb -->
+    <mat-list>
+      <mat-list-item>
+        <a routerLink="/payments">{{ 'PAYMENT.TITLE' | translate }}</a>
+        / #{{ p.paymentId || p.id }}
+      </mat-list-item>
+    </mat-list>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+      <div class="action-group">
+        <!-- Status dropdown with Send/Receive/Cancel/Void options -->
+        <button mat-raised-button color="primary" [matMenuTriggerFor]="statusMenu"
+                [disabled]="isSavingStatus()">
+          {{ getStatusLabel(p.statusId) }}
+          <mat-icon>arrow_drop_down</mat-icon>
+        </button>
+        <mat-menu #statusMenu="matMenu">
+          <button mat-menu-item *ngFor="let action of getStatusActions()" (click)="changeStatus(action.id)">
+            <mat-icon>{{ action.icon }}</mat-icon> {{ action.label }}
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+
+    <!-- Overview Card -->
+    <mat-card class="mat-elevation-z6 section-card">
+      <mat-card-header>
+        <mat-card-title>{{ getOverviewTitle() }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="overview-grid">
+          <div class="overview-col">
+            <div class="overview-row">
+              <span class="label">{{ getFromLabel() }}</span>
+              <span class="value party-name">{{ p.partyFromName || p.partyIdFrom }}</span>
+            </div>
+            <div class="overview-row">
+              <span class="label">{{ getToLabel() }}</span>
+              <span class="value party-name">{{ p.partyToName || p.partyIdTo }}</span>
+            </div>
+            <div class="overview-row">
+              <span class="label">{{ 'PAYMENT.METHOD' | translate }}</span>
+              <span class="value">{{ p.paymentMethodTypeId || '-' }}</span>
+            </div>
+          </div>
+          <div class="overview-col">
+            <div class="overview-row">
+              <span class="label">{{ 'COMMON.STATUS' | translate }}</span>
+              <mat-chip class="status-chip" [ngClass]="'status-' + (p.statusId || '').toLowerCase()">
+                {{ getStatusLabel(p.statusId) }}
+              </mat-chip>
+              <app-status-history-icon [entries]="statusHistoryEntries()"></app-status-history-icon>
+            </div>
+            <div class="overview-row">
+              <span class="label">{{ 'PAYMENT.REF_NO' | translate }}</span>
+              <ng-container *ngIf="!editingRefNum(); else refEdit">
+                <span class="value ref-num">{{ p.paymentRefNum || '-' }}</span>
+                <button mat-icon-button color="primary" (click)="startEditRefNum()" class="inline-edit-btn"
+                        [attr.aria-label]="'PAYMENT.EDIT_REF' | translate">
+                  <mat-icon>edit</mat-icon>
+                </button>
+              </ng-container>
+              <ng-template #refEdit>
+                <mat-form-field appearance="outline" class="ref-input">
+                  <input matInput [value]="refNumEditValue()"
+                         (input)="refNumEditValue.set($any($event.target).value)"
+                         [placeholder]="'PAYMENT.REF_PLACEHOLDER' | translate" />
+                </mat-form-field>
+                <button
+                  mat-icon-button
+                  color="primary"
+                  (click)="saveRefNum()"
+                  [disabled]="isSavingStatus()"
+                  [attr.aria-label]="'COMMON.SAVE' | translate"
+                >
+                  <mat-icon>check</mat-icon>
+                </button>
+                <button
+                  mat-icon-button
+                  (click)="cancelEditRefNum()"
+                  [attr.aria-label]="'COMMON.CANCEL' | translate"
+                >
+                  <mat-icon>close</mat-icon>
+                </button>
+              </ng-template>
+            </div>
+            <div class="overview-row">
+              <span class="label">{{ 'PAYMENT.DATE' | translate }}</span>
+              <span class="value">{{ p.effectiveDate | userDate:'MM/dd/yyyy' }}</span>
+            </div>
+          </div>
+          <div class="overview-col amount-col">
+            <div class="amount-box">
+              <div class="amount-label">{{ 'PAYMENT.AMOUNT' | translate }}</div>
+              <div class="amount-value">{{ p.amount | amountWithCurrency : (p.currencyUomId || p.currencyUom || 'USD') }}</div>
+            </div>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Invoices Section -->
+    <mat-expansion-panel [expanded]="true" class="section-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ 'PAYMENT.INVOICES' | translate }}</mat-panel-title>
+      </mat-expansion-panel-header>
+      <ng-container *ngIf="(p.invoices || []).length === 0; else invoiceTable">
+        <p class="empty-msg">{{ 'PAYMENT.NO_INVOICES' | translate }}</p>
+      </ng-container>
+      <ng-template #invoiceTable>
+        <div class="table-container">
+          <table mat-table [dataSource]="p.invoices || []" class="full-width">
+            <ng-container matColumnDef="invoiceId">
+              <th mat-header-cell *matHeaderCellDef>{{ 'PAYMENT.INVOICE_ID' | translate }}</th>
+              <td mat-cell *matCellDef="let inv">
+                <button type="button" class="invoice-link-button" (click)="navigateToInvoice(inv)">
+                  {{ inv.invoiceId }}
+                </button>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="invoiceDate">
+              <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.DATE' | translate }}</th>
+              <td mat-cell *matCellDef="let inv">{{ inv.invoiceDate | userDate:'MM/dd/yyyy' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="invoiceStatusId">
+              <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+              <td mat-cell *matCellDef="let inv">{{ getInvoiceStatusLabel(inv) }}</td>
+            </ng-container>
+            <ng-container matColumnDef="amountApplied">
+              <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'PAYMENT.AMT_APPLIED' | translate }}</th>
+              <td mat-cell *matCellDef="let inv" class="text-right">{{ inv.amountApplied | amountWithCurrency : (p.currencyUomId || p.currencyUom || 'USD') }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="invoiceColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: invoiceColumns"></tr>
+          </table>
+        </div>
+      </ng-template>
+    </mat-expansion-panel>
+
+    <!-- Transactions Section -->
+    <mat-expansion-panel class="section-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>{{ 'INVOICE.TRANSACTIONS' | translate }}</mat-panel-title>
+      </mat-expansion-panel-header>
+      <ng-container *ngIf="(p.transactions || []).length === 0; else txnTable">
+        <p class="empty-msg">{{ 'PAYMENT.NO_TRANSACTIONS' | translate }}</p>
+      </ng-container>
+      <ng-template #txnTable>
+        <div class="table-container">
+          <table mat-table [dataSource]="p.transactions || p.acctgTrans || []" class="full-width">
+            <ng-container matColumnDef="acctgTransId">
+              <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ID' | translate }}</th>
+              <td mat-cell *matCellDef="let t">{{ t.acctgTransId }}</td>
+            </ng-container>
+            <ng-container matColumnDef="transactionDate">
+              <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.DATE' | translate }}</th>
+              <td mat-cell *matCellDef="let t">{{ t.transactionDate | userDate:'MM/dd/yyyy' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="glAccountId">
+              <th mat-header-cell *matHeaderCellDef>{{ 'INVOICE.GL_ACCOUNT' | translate }}</th>
+              <td mat-cell *matCellDef="let t">{{ t.glAccountId }}</td>
+            </ng-container>
+            <ng-container matColumnDef="description">
+              <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.DESCRIPTION' | translate }}</th>
+              <td mat-cell *matCellDef="let t">{{ t.description }}</td>
+            </ng-container>
+            <ng-container matColumnDef="debit">
+              <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'INVOICE.DEBIT' | translate }}</th>
+              <td mat-cell *matCellDef="let t" class="text-right">{{ t.debit | amountWithCurrency : (p.currencyUomId || p.currencyUom || 'USD') }}</td>
+            </ng-container>
+            <ng-container matColumnDef="credit">
+              <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'INVOICE.CREDIT' | translate }}</th>
+              <td mat-cell *matCellDef="let t" class="text-right">{{ t.credit | amountWithCurrency : (p.currencyUomId || p.currencyUom || 'USD') }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="txnColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: txnColumns"></tr>
+          </table>
+        </div>
+      </ng-template>
+    </mat-expansion-panel>
+
+  </ng-container>
+</ng-template>

@@ -1,0 +1,138 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-header>
+    <mat-card-title>{{ 'SHIPMENT.CREATE_TITLE' | translate }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form [formGroup]="shipmentForm" (ngSubmit)="createShipment()">
+      <div class="shipment-form-grid">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'SHIPMENT.SHIPMENT_ID_OPTIONAL' | translate }}</mat-label>
+          <input matInput formControlName="shipmentId" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'SHIPMENT.TYPE' | translate }}</mat-label>
+          <mat-select formControlName="shipmentTypeId" required>
+            <mat-option *ngFor="let type of shipmentTypes" [value]="type.shipmentTypeId">
+              {{ type.description || type.shipmentTypeId }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'COMMON.STATUS' | translate }}</mat-label>
+          <mat-select formControlName="statusId" required>
+            <mat-option *ngFor="let status of shipmentStatuses" [value]="status.statusId">
+              {{ status.description || status.statusId }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'SHIPMENT.PRIMARY_ORDER' | translate }}</mat-label>
+          <input matInput formControlName="primaryOrderId" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'SHIPMENT.ORIGIN_FACILITY' | translate }}</mat-label>
+          <input matInput formControlName="originFacilityId" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'SHIPMENT.DESTINATION_FACILITY' | translate }}</mat-label>
+          <input matInput formControlName="destinationFacilityId" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'SHIPMENT.FROM_PARTY' | translate }}</mat-label>
+          <input matInput formControlName="partyIdFrom" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'SHIPMENT.TO_PARTY' | translate }}</mat-label>
+          <input matInput formControlName="partyIdTo" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'SHIPMENT.EST_SHIP_DATE' | translate }}</mat-label>
+          <input matInput type="date" formControlName="estimatedShipDate" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'SHIPMENT.EST_ARRIVAL_DATE' | translate }}</mat-label>
+          <input matInput type="date" formControlName="estimatedArrivalDate" />
+        </mat-form-field>
+      </div>
+
+      <mat-divider class="section-divider"></mat-divider>
+      <mat-card-header>
+        <mat-card-title>
+          {{ 'COMMON.ITEMS' | translate }}
+          <button mat-stroked-button type="button" color="primary" (click)="addItem()">
+            {{ 'COMMON.ADD_ITEM' | translate }}
+          </button>
+        </mat-card-title>
+      </mat-card-header>
+      <br/>
+      <mat-card-content>
+      <div formArrayName="items">
+        <div
+          *ngFor="let item of items.controls; let i = index"
+          [formGroupName]="i"
+          class="form-row"
+        >
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'SHIPMENT.ITEM_SEQ_ID' | translate }}</mat-label>
+            <input matInput formControlName="shipmentItemSeqId" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'SHIPMENT.PRODUCT_ID' | translate }}</mat-label>
+            <input matInput formControlName="productId" required />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>{{ 'COMMON.QTY' | translate }}</mat-label>
+            <input matInput formControlName="quantity" required />
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="wide-field">
+            <mat-label>{{ 'COMMON.DESCRIPTION' | translate }}</mat-label>
+            <input matInput formControlName="shipmentContentDescription" />
+          </mat-form-field>
+          <button
+            mat-icon-button
+            type="button"
+            class="remove-item-button"
+            color="warn"
+            [attr.aria-label]="'COMMON.REMOVE_ITEM' | translate"
+            (click)="removeItem(i)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+      </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <div class="actions">
+          <button
+            mat-raised-button
+            color="primary"
+            type="submit"
+            data-testid="shipment-create-submit"
+            [disabled]="isLoading()"
+          >
+            {{ 'SHIPMENT.CREATE_ACTION' | translate }}
+          </button>
+        </div>
+      </mat-card-actions>
+    </form>
+  </mat-card-content>
+</mat-card>

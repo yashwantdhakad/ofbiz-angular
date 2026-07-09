@@ -1,0 +1,136 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<div class="contenedor-padre">
+  <mat-toolbar class="barra" color="primary" *ngIf="isLoggedIn()">
+    <mat-toolbar-row>
+      <button (click)="toggleNavBar()" mat-icon-button class="nav-toggle-button" [attr.aria-label]="'APP.OPEN_APP_MENU' | translate">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <button mat-button class="company-button mobile-hidden" (click)="openCompanyPage()">
+        <span class="company-button-content">
+          <img *ngIf="companyLogoUrl()" class="company-logo" [src]="companyLogoUrl()" alt="Company logo" />
+          <mat-icon *ngIf="!companyLogoUrl()">apartment</mat-icon>
+          <span class="company-name">{{ companyName() || ('APP.TITLE' | translate) }}</span>
+        </span>
+      </button>
+      <span class="toolbar-spacer"></span>
+      <div class="toolbar-actions mobile-hidden">
+        <button mat-icon-button (click)="toggleTheme()" [matTooltip]="'APP.TOGGLE_THEME' | translate">
+          <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+        <button mat-stroked-button class="lang-button" (click)="openLanguageDialog()">
+          <mat-icon>language</mat-icon>
+          <span>{{ getCurrentLanguageLabel() }}</span>
+        </button>
+        <button mat-stroked-button class="timezone-button" [matMenuTriggerFor]="timeZoneMenu"
+          [matTooltip]="'APP.TIMEZONE' | translate">
+          <mat-icon>schedule</mat-icon>
+          <span>{{ getCurrentTimeZoneLabel() }}</span>
+        </button>
+        <mat-menu #timeZoneMenu="matMenu" xPosition="before" class="timezone-menu">
+          <button mat-menu-item *ngFor="let timeZone of timeZones()" (click)="switchTimeZone(timeZone)">
+            <mat-icon *ngIf="timeZone === currentTimeZone()">check</mat-icon>
+            <span>{{ timeZone }}</span>
+          </button>
+        </mat-menu>
+        <button mat-stroked-button class="user-button" *ngIf="currentUserLoginId()" [matMenuTriggerFor]="profileMenu">
+          <mat-icon>person</mat-icon>
+          <span>{{ currentUserLoginId() }}</span>
+        </button>
+        <button
+          mat-stroked-button
+          class="warehouse-button"
+          *ngIf="availableFacilities().length"
+          [matMenuTriggerFor]="warehouseMenu"
+          [matTooltip]="'COMMON.FACILITY' | translate"
+        >
+          <span class="warehouse-label">{{ getCurrentWarehouseLabel() }}</span>
+        </button>
+      </div>
+      <mat-menu #warehouseMenu="matMenu" xPosition="before" class="warehouse-menu">
+        <button mat-menu-item *ngFor="let facility of availableFacilities()" (click)="switchWarehouse(facility.facilityId)">
+          <mat-icon *ngIf="isSelectedWarehouse(facility.facilityId)">check</mat-icon>
+          <span>{{ facility.label || facility.facilityName || facility.facilityId }}</span>
+        </button>
+      </mat-menu>
+      <mat-menu #profileMenu="matMenu" xPosition="before">
+        <button mat-menu-item (click)="openMyProfile()">
+          <mat-icon>account_circle</mat-icon>
+          <span>{{ 'APP.PROFILE' | translate }}</span>
+        </button>
+        <button mat-menu-item (click)="logout()">
+          <mat-icon>logout</mat-icon>
+          <span>{{ 'COMMON.LOGOUT' | translate }}</span>
+        </button>
+      </mat-menu>
+    </mat-toolbar-row>
+  </mat-toolbar>
+  <mat-sidenav-container class="contenido">
+    <mat-sidenav class="sidenav" mode="side" *ngIf="isLoggedIn()" [opened]="navBarToggleOpened()">
+      <mat-nav-list>
+        <ng-container *ngFor="let item of items(); let i = index; trackBy: trackByMenuItem">
+          <ng-container *ngIf="item.children; else listItem">
+            <mat-accordion>
+              <mat-expansion-panel [expanded]="getSubmenuState(item, i)" (opened)="setSubmenuState(item, i, true)"
+                (closed)="setSubmenuState(item, i, false)">
+                <mat-expansion-panel-header class="custom-expansion-panel">
+                  <mat-panel-title>
+                    <mat-icon matListItemIcon class="custom-icon">{{
+                      item.meta.icon
+                      }}</mat-icon>
+                    {{ item.name | translate }}
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <mat-nav-list class="custom-expansion-panel-body">
+                  <a mat-list-item *ngFor="let childItem of item.children; trackBy: trackByChildItem"
+                    [routerLink]="childItem.path"
+                    routerLinkActive="active-link"
+                    [routerLinkActiveOptions]="{ exact: false }">
+                    {{ childItem.name | translate }}
+                  </a>
+                </mat-nav-list>
+              </mat-expansion-panel>
+            </mat-accordion>
+          </ng-container>
+          <ng-template #listItem>
+            <a mat-list-item class="single-nav-item" [routerLink]="item.path" routerLinkActive="active-link"
+              [routerLinkActiveOptions]="{ exact: item.path === '/' }">
+              <mat-icon matListItemIcon>{{ item.meta.icon }}</mat-icon>
+              <span>{{ item.name | translate }}</span>
+            </a>
+          </ng-template>
+        </ng-container>
+      </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content class="sidenav-content" [class.auth-content]="!isLoggedIn()">
+      <ng-container *ngIf="isLoggedIn(); else notLoggedIn">
+        <mat-card class="mat-elevation-z10">
+          <mat-card-content>
+            <router-outlet></router-outlet>
+          </mat-card-content>
+        </mat-card>
+      </ng-container>
+      <ng-template #notLoggedIn>
+        <div>
+          <router-outlet></router-outlet>
+        </div>
+      </ng-template>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

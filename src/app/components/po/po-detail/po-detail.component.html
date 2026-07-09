@@ -1,0 +1,830 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+<ng-template #content>
+  <nav class="breadcrumb" aria-label="breadcrumb">
+    <a class="breadcrumb-link" [routerLink]="[listBasePath]">
+      {{ isQuoteMode ? ('PO.QUOTE_TITLE' | translate) : ('PO.TITLE' | translate) }}
+    </a>
+    <mat-icon class="breadcrumb-sep">chevron_right</mat-icon>
+    <span class="breadcrumb-current">{{ orderHeader()?.orderId }}</span>
+  </nav>
+  <div class="detail-sections">
+  <mat-card class="mat-elevation-z10 po-header-card">
+    <mat-card-header class="order-header-card-header">
+      <mat-card-title>{{ 'PO.HEADER' | translate }}</mat-card-title>
+      <div class="order-header-actions">
+          <button mat-icon-button color="primary" (click)="openPdf()" [attr.aria-label]="'COMMON.OPEN_PDF' | translate">
+            <mat-icon>picture_as_pdf</mat-icon>
+          </button>
+          <button mat-raised-button color="primary" (click)="reorderOrder()" *ngIf="orderId && !isQuoteMode">{{ 'COMMON.REORDER' | translate }}</button>
+          <button mat-raised-button color="accent" (click)="goToCreateReturn()" *ngIf="canCreateReturn()">{{ 'MENU.CREATE_RETURN' | translate }}</button>
+          <button mat-raised-button color="warn" (click)="rejectQuote()" *ngIf="canRejectQuote()">
+            {{ 'QUOTE.REJECT' | translate }}
+          </button>
+          <button mat-raised-button color="accent" (click)="convertQuoteToPo()" *ngIf="canConvertQuoteToPo()">
+            {{ 'PO.CONVERT_TO_PO' | translate }}
+          </button>
+
+
+          <ng-container *ngIf="validStatusChanges().length">
+            <div class="split-btn-group">
+              <button mat-raised-button color="primary" [class.split-btn-primary]="validStatusChanges().length > 1"
+                (click)="changeOrderStatus(validStatusChanges()[0].statusIdTo)">
+                {{ getStatusActionLabel(validStatusChanges()[0]) }}
+              </button>
+              <button mat-raised-button color="primary" class="split-btn-dropdown" [matMenuTriggerFor]="statusMenu"
+                *ngIf="validStatusChanges().length > 1">
+                <mat-icon>arrow_drop_down</mat-icon>
+              </button>
+            </div>
+
+            <mat-menu #statusMenu="matMenu">
+              <ng-container *ngFor="let change of validStatusChanges(); let i = index">
+                <button mat-menu-item *ngIf="i > 0" (click)="changeOrderStatus(change.statusIdTo)">
+                  {{ getStatusActionLabel(change) }}
+                </button>
+              </ng-container>
+            </mat-menu>
+          </ng-container>
+
+          <button mat-raised-button color="primary" *ngIf="canApprove() && !validStatusChanges().length"
+            (click)="approveOrder()">
+            {{ getFallbackApproveLabel() }}
+          </button>
+          <button mat-raised-button color="accent" *ngIf="canReceive() && !isQuoteMode" data-testid="po-detail-receive" (click)="goToReceive()">{{ 'COMMON.RECEIVE' | translate }}</button>
+      </div>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="po-header-grid">
+    <mat-card class="mat-elevation-z10 po-overview-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'COMMON.OVERVIEW' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="po-overview-list">
+          <div class="po-overview-row" *ngFor="let field of overviewFields()">
+            <span class="po-overview-label">{{ field.label | translate }}:</span>
+            <span class="po-overview-value">
+              {{ field.value }}
+              <app-status-history-icon
+                *ngIf="field.isStatus"
+                [entries]="statusHistoryEntries()"
+              ></app-status-history-icon>
+            </span>
+          </div>
+          <div class="po-overview-row" *ngIf="relatedOrderPrimaryId && relatedOrderId">
+            <span class="po-overview-label">{{ (isQuoteMode ? 'COMMON.ORDER_ID' : 'QUOTE.ID') | translate }}:</span>
+            <span class="po-overview-value">
+              <a [routerLink]="[getRelatedOrderRouteBase(), relatedOrderPrimaryId]">{{ relatedOrderId }}</a>
+            </span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="mat-elevation-z10 po-summary-card">
+      <mat-card-header>
+        <mat-card-title>{{ 'PO.AMOUNT_SUMMARY' | translate }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="po-summary-list">
+          <div class="po-summary-row">
+            <span class="po-summary-label">{{ 'PO.SUBTOTAL' | translate }}:</span>
+            <span class="po-summary-value">{{ itemSubtotal() | amountWithCurrency : getCurrencyUom() }}</span>
+          </div>
+          <div class="po-summary-row">
+            <span class="po-summary-label">{{ 'PO.SHIPPING_AMOUNT' | translate }}:</span>
+            <span class="po-summary-value">{{ shippingTotal() | amountWithCurrency : getCurrencyUom() }}</span>
+          </div>
+          <div class="po-summary-row">
+            <span class="po-summary-label">{{ 'PO.DISCOUNT_AMOUNT' | translate }}:</span>
+            <span class="po-summary-value">{{ discountTotal() | amountWithCurrency : getCurrencyUom() }}</span>
+          </div>
+          <div class="po-summary-row">
+            <span class="po-summary-label">{{ 'PO.TOTAL' | translate }}:</span>
+            <span class="po-summary-value">{{ orderTotal() | amountWithCurrency : getCurrencyUom() }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <mat-card class="mat-elevation-z10" *ngIf="!isQuoteMode && orderAdjustments().length > 0">
+    <mat-card-header>
+      <mat-card-title>Landed Costs &amp; Import Charges</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <table mat-table [dataSource]="orderAdjustments()" class="full-width-table">
+        <ng-container matColumnDef="orderAdjustmentTypeId">
+          <th mat-header-cell *matHeaderCellDef>Charge Type</th>
+          <td mat-cell *matCellDef="let adj">{{ adj.description || adj.orderAdjustmentTypeId }}</td>
+        </ng-container>
+        <ng-container matColumnDef="amount">
+          <th mat-header-cell class="text-right" *matHeaderCellDef>Amount</th>
+          <td mat-cell class="text-right" *matCellDef="let adj">
+            {{ adj.amount | amountWithCurrency : getCurrencyUom() }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="comments">
+          <th mat-header-cell *matHeaderCellDef>Notes</th>
+          <td mat-cell *matCellDef="let adj">{{ adj.comments || '-' }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="['orderAdjustmentTypeId', 'amount', 'comments']"></tr>
+        <tr mat-row *matRowDef="let row; columns: ['orderAdjustmentTypeId', 'amount', 'comments']"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="mat-elevation-z10" *ngIf="!isQuoteMode">
+    <mat-card-header>
+      <mat-card-title>{{ 'PO.PAYMENT_TERMS_PREFERENCES' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="part-summary-grid" fxLayout="row wrap" fxLayout.xs="column" fxLayoutGap="16px">
+        <mat-card fxFlex.gt-xs="calc(50% - 8px)" class="mat-elevation-z10">
+          <mat-card-header>
+            <mat-card-title>{{ 'PO.PAYMENT_TERMS' | translate }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <table mat-table [dataSource]="orderTerms()">
+              <ng-container matColumnDef="termTypeId">
+                <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'PO.PAYMENT_TERM' | translate }}</th>
+                <td mat-cell class="text-left" *matCellDef="let term">
+                  {{ term?.description || term?.termTypeId }}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="termValue">
+                <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'PO.RATE' | translate }}</th>
+                <td mat-cell class="text-left" *matCellDef="let term">
+                  {{ term?.termValue || '-' }}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="termDays">
+                <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'PO.DAYS' | translate }}</th>
+                <td mat-cell class="text-left" *matCellDef="let term">
+                  {{ term?.termDays || '-' }}
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="termColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: termColumns"></tr>
+              <tr *ngIf="!orderTerms().length">
+                <td class="text-left" colspan="3">{{ 'COMMON.NOT_AVAILABLE' | translate }}</td>
+              </tr>
+            </table>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card fxFlex.gt-xs="calc(50% - 8px)" class="mat-elevation-z10">
+          <mat-card-header>
+            <mat-card-title>{{ 'PO.PAYMENT_PREFERENCES' | translate }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <table mat-table [dataSource]="orderPaymentPreferences()">
+              <ng-container matColumnDef="paymentMethodTypeId">
+                <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'PO.PAYMENT_METHOD' | translate }}</th>
+                <td mat-cell class="text-left" *matCellDef="let pref">
+                  {{ pref?.paymentMethodTypeId || '-' }}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="statusId">
+                <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+                <td mat-cell class="text-left" *matCellDef="let pref">
+                  {{ pref?.statusId || '-' }}
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="maxAmount">
+                <th mat-header-cell class="text-right" *matHeaderCellDef>{{ 'PO.AMOUNT' | translate }}</th>
+                <td mat-cell class="text-right" *matCellDef="let pref">
+                  {{ pref?.maxAmount !== null && pref?.maxAmount !== undefined ? (pref?.maxAmount | amountWithCurrency : getCurrencyUom()) : '-' }}
+                </td>
+              </ng-container>
+              <tr mat-header-row *matHeaderRowDef="preferenceColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: preferenceColumns"></tr>
+              <tr *ngIf="!orderPaymentPreferences().length">
+                <td class="text-left" colspan="3">{{ 'COMMON.NOT_AVAILABLE' | translate }}</td>
+              </tr>
+            </table>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <mat-card class="mat-elevation-z10" *ngIf="!isQuoteMode">
+    <mat-card-header>
+      <mat-card-title>{{ 'COMMON.NOTES' | translate }}
+        <button mat-icon-button type="button" color="primary" class="custom-icon-align" data-testid="po-detail-add-note" [attr.aria-label]="'COMMON.ADD' | translate"
+          (click)="addUpdateNoteDialog()">
+          <mat-icon class="custom-mat-icon">add</mat-icon>
+        </button>
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="notes-table-container">
+        <table mat-table [dataSource]="orderNotes()">
+          <ng-container matColumnDef="noteText">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.NOTE' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.noteText }}</td>
+          </ng-container>
+          <ng-container matColumnDef="noteDate">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.DATE' | translate }}</th>
+            <td mat-cell *matCellDef="let item">
+              {{ item.noteDate | userDate : "MMMM d, y" }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="userId">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.CREATED_BY' | translate }}</th>
+            <td mat-cell *matCellDef="let item">{{ item.createdByName || item.userId }}</td>
+          </ng-container>
+          <ng-container matColumnDef="action">
+            <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ACTION' | translate }}</th>
+            <td mat-cell *matCellDef="let item">
+              <button mat-icon-button type="button" color="primary" class="custom-icon-align" data-testid="po-detail-edit-note" [attr.aria-label]="'COMMON.EDIT' | translate"
+                (click)="addUpdateNoteDialog(item)">
+                <mat-icon class="custom-mat-icon">edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" color="warn" class="custom-icon-align" data-testid="po-detail-delete-note" [attr.aria-label]="'COMMON.DELETE' | translate"
+                (click)="deleteNote(item)">
+                <mat-icon class="custom-mat-icon">delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="noteColumnKeys"></tr>
+          <tr mat-row *matRowDef="let row; columns: noteColumnKeys"></tr>
+        </table>
+      </div>
+
+      <div class="notes-mobile-list">
+        <div class="note-mobile-card" *ngFor="let item of orderNotes()">
+          <div class="note-mobile-header">
+            <div class="note-mobile-meta">
+              <strong>{{ item.createdByName || item.userId }}</strong>
+              <span>{{ item.noteDate | userDate : "MMMM d, y" }}</span>
+            </div>
+            <div class="note-mobile-actions">
+              <button mat-icon-button type="button" color="primary" data-testid="po-detail-edit-note-mobile" [attr.aria-label]="'COMMON.EDIT' | translate"
+                (click)="addUpdateNoteDialog(item)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" color="warn" data-testid="po-detail-delete-note-mobile" [attr.aria-label]="'COMMON.DELETE' | translate"
+                (click)="deleteNote(item)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+          <div class="note-mobile-body">{{ item.noteText }}</div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <mat-card *ngFor="let part of parts()">
+    <mat-card-header>
+      <mat-card-title>{{ 'PO.PARTS' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="po-parts-grid" fxLayout="row wrap" fxLayout.xs="column" fxLayoutGap="16px">
+        <mat-card fxFlex.gt-xs="calc(33.333% - 11px)" class="mat-elevation-z10">
+          <mat-card-header>
+            <mat-card-title>{{ 'PO.PART_DETAILS' | translate }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <ul class="custom-list">
+              <li class="custom-list-item">
+                <strong>{{ 'PO.PART_NO' | translate }}:</strong> {{ part.orderPartSeqId }}
+              </li>
+              <li class="custom-list-item">
+                <strong>{{ 'PO.PART_STATUS' | translate }}:</strong>
+                {{ part?.status?.description || getStatusDescription(part?.status?.statusId || part?.statusId) }}
+              </li>
+              <li class="custom-list-item">
+                <strong>{{ 'PO.SHIP_BEFORE_DATE' | translate }}:</strong>
+                {{ formatShipBeforeDate(part?.shipBeforeDate) }}
+                <button mat-icon-button type="button" color="primary" class="custom-icon-align" data-testid="po-detail-edit-ship-before-date" [attr.aria-label]="'COMMON.EDIT' | translate"
+                  (click)="updateShipBeforeDate(part)">
+                  <mat-icon class="custom-mat-icon">edit</mat-icon>
+                </button>
+              </li>
+              <li class="custom-list-item">
+                <strong>{{ 'COMMON.SHIPPING_INSTRUCTIONS' | translate }}:</strong>
+                {{ part.shippingInstructions || '-' }}
+                <button mat-icon-button type="button" color="primary" class="custom-icon-align" data-testid="po-detail-edit-shipping-instructions" [attr.aria-label]="'COMMON.EDIT' | translate"
+                  (click)="editShippingInstructions(part)">
+                  <mat-icon class="custom-mat-icon">edit</mat-icon>
+                </button>
+              </li>
+              <li class="custom-list-item">
+                <strong>{{ 'PO.PART_TOTAL' | translate }}:</strong>
+                {{ part?.partTotal | amountWithCurrency : getCurrencyUom() }}
+              </li>
+            </ul>
+          </mat-card-content>
+        </mat-card>
+        <mat-card fxFlex.gt-xs="calc(33.333% - 11px)" class="mat-elevation-z10">
+          <mat-card-header>
+            <mat-card-title>{{ 'PO.SHIP_TO' | translate }}:</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <ul class="custom-list">
+              <li class="custom-list-item">
+                <strong>{{ 'COMMON.FACILITY' | translate }}:</strong> {{ part.facility?.facilityName }}
+              </li>
+              <li class="custom-list-item">
+                <strong>{{ 'COMMON.ADDRESS' | translate }}:</strong>
+                <div>
+                  {{ facilityAddress()?.toName || orderShipToAddress()?.toName }}
+                </div>
+                <div>{{ facilityAddress()?.address1 || orderShipToAddress()?.address1 }}</div>
+                <div>{{ facilityAddress()?.address2 || orderShipToAddress()?.address2 }}</div>
+                <div>
+                  {{ facilityAddress()?.city || orderShipToAddress()?.city }},
+                  {{ facilityAddress()?.stateProvinceGeoId || orderShipToAddress()?.stateProvinceGeoId }}
+                  {{ facilityAddress()?.postalCode || orderShipToAddress()?.postalCode }}
+                  {{ facilityAddress()?.countryGeoId || orderShipToAddress()?.countryGeoId }}
+                </div>
+              </li>
+              <li class="custom-list-item" *ngIf="!facilityAddress() && !orderShipToAddress()">
+                <strong>{{ 'COMMON.ADDRESS' | translate }}:</strong>
+                <button mat-icon-button type="button" color="primary" class="custom-icon-align" [attr.aria-label]="'COMMON.ADD' | translate"
+                  (click)="addShipToAddress()">
+                  <mat-icon class="custom-mat-icon">add</mat-icon>
+                </button>
+              </li>
+            </ul>
+          </mat-card-content>
+        </mat-card>
+        <mat-card fxFlex.gt-xs="calc(33.333% - 11px)" class="mat-elevation-z10">
+          <mat-card-header>
+            <mat-card-title>{{ 'PO.SHIP_FROM' | translate }}:</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <ul class="custom-list">
+              <li class="custom-list-item">
+                <strong>{{ 'COMMON.NAME' | translate }}:</strong>
+                {{ vendorName() || part?.vendor?.organization?.organizationName || vendorPartyId }}
+              </li>
+              <li class="custom-list-item tax-badges" *ngIf="vendorTaxProfile()?.gstReverseChargeApplicable || vendorTaxProfile()?.tdsSection195Percent">
+                <span class="tax-badge tax-badge--rcm" *ngIf="vendorTaxProfile()?.gstReverseChargeApplicable">
+                  {{ 'PO.GST_RCM_BADGE' | translate }}
+                </span>
+                <span class="tax-badge tax-badge--tds" *ngIf="vendorTaxProfile()?.tdsSection195Percent as tdsRate">
+                  {{ 'PO.TDS_195_BADGE' | translate:{rate: tdsRate} }}
+                </span>
+              </li>
+              <li class="custom-list-item" *ngIf="currencyInfo() as currency">
+                <strong>{{ 'PO.TRANSACTION_CURRENCY' | translate }}:</strong>
+                {{ currency.transactionCurrencyUomId }}
+                <span *ngIf="currency.transactionCurrencyUomId !== currency.baseCurrencyUomId">
+                  · 1 {{ currency.transactionCurrencyUomId }} = {{ currency.exchangeRate }} {{ currency.baseCurrencyUomId }}
+                </span>
+              </li>
+              <li class="custom-list-item">
+                <strong>{{ 'PO.PHONE_NO' | translate }}:</strong>
+                {{ part?.telecom?.telecomNumber?.countryCode }}
+                {{ part?.telecom?.telecomNumber?.areaCode }}
+                {{ part?.telecom?.telecomNumber?.contactNumber }}
+              </li>
+            </ul>
+
+            <ul class="custom-list" *ngIf="vendorAddresses().length; else noVendorAddress">
+              <li class="custom-list-item" *ngFor="let primaryAddress of vendorAddresses()">
+                <strong>{{ 'COMMON.ADDRESS' | translate }}:</strong>
+                <button mat-icon-button type="button" color="primary" class="custom-icon-align" [attr.aria-label]="'COMMON.EDIT' | translate"
+                  (click)="editVendorAddress(primaryAddress)">
+                  <mat-icon class="custom-mat-icon">edit</mat-icon>
+                </button>
+                <div>{{ primaryAddress.toName }}</div>
+                <div>{{ primaryAddress.address1 }}</div>
+                <div>{{ primaryAddress.address2 }}</div>
+                <div>
+                  {{ primaryAddress.city }},
+                  {{ primaryAddress.stateProvinceGeoId }}
+                  {{ primaryAddress.postalCode }}
+                  {{ primaryAddress.countryGeoId }}
+                </div>
+              </li>
+            </ul>
+            <ng-template #noVendorAddress>
+              <div class="custom-list-item">
+                <strong>{{ 'COMMON.ADDRESS' | translate }}:</strong>
+                <button mat-icon-button type="button" color="primary" class="custom-icon-align" [attr.aria-label]="'COMMON.ADD' | translate"
+                  (click)="editVendorAddress()">
+                  <mat-icon class="custom-mat-icon">add</mat-icon>
+                </button>
+              </div>
+            </ng-template>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-card-content>
+    <mat-card-content>
+      <mat-card class="mat-elevation-z10 part-items-card">
+        <mat-card-header>
+          <mat-card-title>{{ 'COMMON.ITEMS' | translate }}
+            <button mat-icon-button type="button" class="custom-icon-align" color="primary" [attr.aria-label]="'COMMON.ADD' | translate"
+              *ngIf="canManageOrderItems()"
+              (click)="addItemDialog({ orderPartSeqId: part.orderPartSeqId })">
+              <mat-icon class="custom-mat-icon">add</mat-icon>
+            </button>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="part-items-table-container">
+            <table mat-table [dataSource]="part.items || []">
+            <ng-container matColumnDef="productId">
+              <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.PRODUCT_ID' | translate }}</th>
+              <td mat-cell *matCellDef="let item">{{ item.productId }}</td>
+            </ng-container>
+            <ng-container matColumnDef="productName">
+              <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.PRODUCT_NAME' | translate }}</th>
+              <td mat-cell *matCellDef="let item">
+                {{ getProductName(item) }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="itemDescription">
+              <th mat-header-cell *matHeaderCellDef>{{ 'PO.ITEM_DESCRIPTION' | translate }}</th>
+              <td mat-cell *matCellDef="let item">
+                {{ item.itemDescription }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="description">
+              <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ITEM_TYPE' | translate }}</th>
+              <td mat-cell *matCellDef="let item">
+                {{
+                getOrderItemTypeDescription(
+                item.itemType?.description ||
+                item.orderItemTypeId ||
+                item.itemTypeEnumId
+                )
+                }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="requiredByDate">
+              <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.REQUIRED_BY_DATE' | translate }}</th>
+              <td mat-cell *matCellDef="let item">
+                {{ item.requiredByDate | userDate : "MMMM d, y" }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="unitAmount">
+              <th mat-header-cell class="text-right" *matHeaderCellDef>{{ 'COMMON.PRICE' | translate }}</th>
+              <td mat-cell class="text-right" *matCellDef="let item">
+                {{ item.unitAmount | amountWithCurrency : getCurrencyUom() }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="quantity">
+              <th mat-header-cell class="text-right" *matHeaderCellDef>{{ 'COMMON.QUANTITY' | translate }}</th>
+              <td mat-cell class="text-right" *matCellDef="let item" [style.padding-top.px]="8"
+                [style.padding-bottom.px]="8">
+                <div class="quantity-column-container">
+                  <div class="quantity-row">
+                    <span class="quantity-label">{{ 'COMMON.ORDER_QTY' | translate }}:</span>
+                    <span class="quantity-value">{{ item.quantity }}</span>
+                  </div>
+                  <div class="quantity-row">
+                    <span class="quantity-label">{{ 'PO.RECEIVED_QTY' | translate }}:</span>
+                    <span class="quantity-value">{{ item.receivedQuantity || 0 }}</span>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="totalAmount">
+              <th mat-header-cell class="text-right" *matHeaderCellDef>{{ 'PO.TOTAL_AMOUNT' | translate }}</th>
+              <td mat-cell class="text-right" *matCellDef="let item">
+                {{
+                item.quantity * item.unitAmount
+                | amountWithCurrency : getCurrencyUom()
+                }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="action">
+              <th mat-header-cell class="text-center" *matHeaderCellDef>{{ 'COMMON.ACTION' | translate }}</th>
+              <td mat-cell class="text-center" *matCellDef="let item">
+                <div fxLayout="row" fxLayoutAlign="center center">
+                  <button mat-icon-button color="primary" data-testid="po-detail-edit-item" [attr.aria-label]="'COMMON.EDIT' | translate" (click)="editItem(item)" *ngIf="canManageOrderItems(item)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="accent" data-testid="po-detail-complete-item" [attr.aria-label]="'COMMON.COMPLETE' | translate" (click)="completeItem(item)" *ngIf="canManageOrderItems(item)">
+                    <mat-icon>done</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" data-testid="po-detail-cancel-item" [attr.aria-label]="'COMMON.CANCEL' | translate" (click)="cancelItem(item)" *ngIf="canManageOrderItems(item)">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </div>
+              </td>
+            </ng-container>
+              <tr mat-header-row *matHeaderRowDef="partColumnKeys"></tr>
+              <tr mat-row *matRowDef="let row; columns: partColumnKeys" [ngClass]="getRowClass(row)"></tr>
+            </table>
+          </div>
+
+          <div class="part-items-mobile-list">
+            <div class="part-item-mobile-card" *ngFor="let item of part.items || []" [ngClass]="getRowClass(item)">
+              <div class="part-item-mobile-header">
+                <div class="part-item-mobile-title">
+                  <a [routerLink]="['/products', item.productId]"><strong>{{ item.productId }}</strong></a>
+                  <span class="part-item-mobile-type">
+                    {{ getOrderItemTypeDescription(item.itemType?.description || item.orderItemTypeId || item.itemTypeEnumId) }}
+                  </span>
+                </div>
+                <div class="part-item-mobile-actions" *ngIf="canManageOrderItems(item)">
+                  <button mat-icon-button color="primary" data-testid="po-detail-edit-item-mobile" [attr.aria-label]="'COMMON.EDIT' | translate"
+                    (click)="editItem(item)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button color="accent" data-testid="po-detail-complete-item-mobile" [attr.aria-label]="'COMMON.COMPLETE' | translate"
+                    (click)="completeItem(item)">
+                    <mat-icon>done</mat-icon>
+                  </button>
+                  <button mat-icon-button color="warn" data-testid="po-detail-cancel-item-mobile" [attr.aria-label]="'COMMON.CANCEL' | translate"
+                    (click)="cancelItem(item)">
+                    <mat-icon>cancel</mat-icon>
+                  </button>
+                </div>
+              </div>
+
+              <div class="part-item-mobile-body">
+                <div class="part-item-mobile-name" *ngIf="getProductName(item)">
+                  {{ getProductName(item) }}
+                </div>
+                <div class="part-item-mobile-description" *ngIf="item.itemDescription">
+                  <em>{{ item.itemDescription }}</em>
+                </div>
+                <div class="part-item-mobile-details-grid">
+                  <div class="part-item-mobile-detail">
+                    <span class="detail-label">{{ 'COMMON.PRICE' | translate }}:</span>
+                    <span class="detail-value">{{ item.unitAmount | amountWithCurrency : getCurrencyUom() }}</span>
+                  </div>
+                  <div class="part-item-mobile-detail" *ngIf="item.requiredByDate">
+                    <span class="detail-label">{{ 'COMMON.REQUIRED_BY_DATE' | translate }}:</span>
+                    <span class="detail-value">{{ item.requiredByDate | userDate : "MMMM d, y" }}</span>
+                  </div>
+                </div>
+                <div class="part-item-mobile-quantities">
+                  <div class="quantity-badge">
+                    <span class="badge-label">{{ 'COMMON.ORDER_QTY' | translate }}:</span>
+                    <span class="badge-value">{{ item.quantity }}</span>
+                  </div>
+                  <div class="quantity-badge">
+                    <span class="badge-label">{{ 'PO.RECEIVED_QTY' | translate }}:</span>
+                    <span class="badge-value">{{ item.receivedQuantity || 0 }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="part-item-mobile-footer">
+                <span class="footer-label">{{ 'PO.TOTAL_AMOUNT' | translate }}:</span>
+                <span class="footer-value">
+                  {{ (item.quantity || 0) * (item.unitAmount || 0) | amountWithCurrency : getCurrencyUom() }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </mat-card-content>
+  </mat-card>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>
+        {{ 'PO.CONTENTS' | translate }}
+        <button mat-icon-button type="button" color="primary" class="custom-icon-align" [attr.aria-label]="'COMMON.ADD' | translate"
+          (click)="addUpdateContentDialog()">
+          <mat-icon class="custom-mat-icon">add</mat-icon>
+        </button></mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <table mat-table [dataSource]="contents()">
+        <ng-container matColumnDef="description">
+          <th mat-header-cell *matHeaderCellDef>{{ 'PO.TITLE_COL' | translate }}</th>
+          <td mat-cell *matCellDef="let item">{{ item.description }}</td>
+        </ng-container>
+        <ng-container matColumnDef="contentDate">
+          <th mat-header-cell *matHeaderCellDef>{{ 'PO.CONTENT_COL' | translate }}</th>
+          <td mat-cell *matCellDef="let item">
+            {{ item.contentDate | userDate : "MMMM d, y" }}
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="contentLocation">
+          <th mat-header-cell *matHeaderCellDef>{{ 'PO.MIME_TYPE' | translate }}</th>
+          <td mat-cell *matCellDef="let item">
+            <ng-container *ngIf="item.contentId; else noContentFile">
+              <a href="#" (click)="$event.preventDefault(); openOrderContent(item)">
+                {{ item.contentLocation }}
+              </a>
+            </ng-container>
+            <ng-template #noContentFile>--</ng-template>
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="contentColumnKeys"></tr>
+        <tr mat-row *matRowDef="let row; columns: contentColumnKeys"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>{{ 'COMMON.SHIPMENTS' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="related-table-container">
+        <table mat-table [dataSource]="shipments()">
+        <ng-container matColumnDef="shipmentId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.SHIPMENT' | translate }}</th>
+          <td mat-cell *matCellDef="let item">
+            <a [routerLink]="['/shipments', item.shipmentId]">{{ item.shipmentId }}</a>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="shipmentTypeId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.ITEM_TYPE' | translate }}</th>
+          <td mat-cell *matCellDef="let item">{{ getShipmentTypeDescription(item.shipmentTypeId) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="statusId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+          <td mat-cell *matCellDef="let item">{{ getStatusDescription(item.statusId) }}</td>
+        </ng-container>
+        <ng-container matColumnDef="createdDate">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.CREATED' | translate }}</th>
+          <td mat-cell *matCellDef="let item">
+            {{ item.createdDate | userDate : "MMMM d, y" }}
+          </td>
+        </ng-container>
+          <tr mat-header-row *matHeaderRowDef="shipmentColumnKeys"></tr>
+          <tr mat-row *matRowDef="let row; columns: shipmentColumnKeys"></tr>
+        </table>
+      </div>
+      <div class="related-mobile-list">
+        <div class="related-mobile-card" *ngFor="let item of shipments()">
+          <div class="related-mobile-card-header">
+            <span class="related-mobile-label">{{ 'COMMON.SHIPMENT' | translate }}</span>
+            <a [routerLink]="['/shipments', item.shipmentId]">{{ item.shipmentId }}</a>
+          </div>
+          <div class="related-mobile-card-body">
+            <div class="related-mobile-field">
+              <span class="related-mobile-label">{{ 'COMMON.ITEM_TYPE' | translate }}</span>
+              <span>{{ getShipmentTypeDescription(item.shipmentTypeId || '') }}</span>
+            </div>
+            <div class="related-mobile-field">
+              <span class="related-mobile-label">{{ 'COMMON.STATUS' | translate }}</span>
+              <span>{{ getStatusDescription(item.statusId) }}</span>
+            </div>
+            <div class="related-mobile-field">
+              <span class="related-mobile-label">{{ 'COMMON.CREATED' | translate }}</span>
+              <span>{{ item.createdDate | userDate : "MMMM d, y" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>{{ 'MENU.RETURNS' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <table mat-table [dataSource]="returnItems()">
+        <ng-container matColumnDef="returnId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'MANUFACTURING.RETURN' | translate }}</th>
+          <td mat-cell *matCellDef="let item">
+            <a [routerLink]="['/returns', item.returnId]">{{ item.returnId }}</a>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="returnType">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.TYPE' | translate }}</th>
+          <td mat-cell *matCellDef="let item">{{ item.returnTypeDescription || item.returnTypeId || '-' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+          <td mat-cell *matCellDef="let item">{{ item.statusDescription || item.statusId || '-' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="entryDate">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.DATE' | translate }}</th>
+          <td mat-cell *matCellDef="let item">{{ item.entryDate | userDate : "MMMM d, y" }}</td>
+        </ng-container>
+        <ng-container matColumnDef="totalAmount">
+          <th mat-header-cell class="text-right" *matHeaderCellDef>{{ 'COMMON.AMOUNT' | translate }}</th>
+          <td mat-cell class="text-right" *matCellDef="let item">
+            {{ item.totalAmount | amountWithCurrency : (item.currencyUomId || getCurrencyUom()) }}
+          </td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="returnColumnKeys"></tr>
+        <tr mat-row *matRowDef="let row; columns: returnColumnKeys"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header>
+      <mat-card-title>{{ 'COMMON.INVOICES' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="related-table-container">
+        <table mat-table [dataSource]="invoiceItems()">
+        <ng-container matColumnDef="invoiceId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.INVOICE' | translate }}</th>
+          <td mat-cell *matCellDef="let item">
+            <a *ngIf="item?.id" [routerLink]="['/invoices/purchase', item.id]">{{ item.invoiceId }}</a>
+            <span *ngIf="!item?.id">{{ item.invoiceId }}</span>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="productId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.PRODUCT' | translate }}</th>
+          <td mat-cell *matCellDef="let item">{{ item.productId }}</td>
+        </ng-container>
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.QTY' | translate }}</th>
+          <td mat-cell *matCellDef="let item">{{ item.quantity }}</td>
+        </ng-container>
+        <ng-container matColumnDef="amount">
+          <th mat-header-cell class="text-right" *matHeaderCellDef>{{ 'COMMON.AMOUNT' | translate }}</th>
+          <td mat-cell class="text-right" *matCellDef="let item">
+            {{ item.amount | amountWithCurrency : (item.currencyUomId || getCurrencyUom()) }}
+          </td>
+        </ng-container>
+          <tr mat-header-row *matHeaderRowDef="invoiceColumnKeys"></tr>
+          <tr mat-row *matRowDef="let row; columns: invoiceColumnKeys"></tr>
+        </table>
+      </div>
+      <div class="related-mobile-list">
+        <div class="related-mobile-card" *ngFor="let item of invoiceItems()">
+          <div class="related-mobile-card-header">
+            <span class="related-mobile-label">{{ 'COMMON.INVOICE' | translate }}</span>
+            <a *ngIf="item?.id" [routerLink]="['/invoices/purchase', item.id]">{{ item.invoiceId }}</a>
+            <span *ngIf="!item?.id">{{ item.invoiceId }}</span>
+          </div>
+          <div class="related-mobile-card-body">
+            <div class="related-mobile-field">
+              <span class="related-mobile-label">{{ 'COMMON.PRODUCT' | translate }}</span>
+              <span>{{ item.productId }}</span>
+            </div>
+            <div class="related-mobile-field">
+              <span class="related-mobile-label">{{ 'COMMON.QTY' | translate }}</span>
+              <span>{{ item.quantity }}</span>
+            </div>
+          </div>
+          <div class="related-mobile-card-footer">
+            <span>{{ 'COMMON.AMOUNT' | translate }}</span>
+            <strong>{{ item.amount | amountWithCurrency : (item.currencyUomId || getCurrencyUom()) }}</strong>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Receipts -->
+  <mat-card class="mat-elevation-z4" *ngIf="receipts().length > 0">
+    <mat-card-header>
+      <mat-card-title>{{ 'PO.RECEIPTS' | translate }}</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <table mat-table [dataSource]="receipts()" class="po-related-table">
+        <ng-container matColumnDef="receiptId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'PO.RECEIPT_ID' | translate }}</th>
+          <td mat-cell *matCellDef="let r">{{ r.receiptId || '-' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="productId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.PRODUCT_ID' | translate }}</th>
+          <td mat-cell *matCellDef="let r">
+            <a [routerLink]="['/products', r.productId]">{{ r.productId || '-' }}</a>
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="orderItemSeqId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'PO.ITEM_SEQ' | translate }}</th>
+          <td mat-cell *matCellDef="let r">{{ r.orderItemSeqId || '-' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="quantityAccepted">
+          <th mat-header-cell *matHeaderCellDef>{{ 'PO.QTY_ACCEPTED' | translate }}</th>
+          <td mat-cell *matCellDef="let r">{{ r.quantityAccepted ?? 0 }}</td>
+        </ng-container>
+        <ng-container matColumnDef="datetimeReceived">
+          <th mat-header-cell *matHeaderCellDef>{{ 'PO.DATE_RECEIVED' | translate }}</th>
+          <td mat-cell *matCellDef="let r">{{ r.datetimeReceived | userDate:'MMMM d, y' }}</td>
+        </ng-container>
+        <ng-container matColumnDef="locationSeqId">
+          <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.LOCATION' | translate }}</th>
+          <td mat-cell *matCellDef="let r">{{ r.locationSeqId || '-' }}</td>
+        </ng-container>
+        <tr mat-header-row *matHeaderRowDef="receiptColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: receiptColumns"></tr>
+      </table>
+    </mat-card-content>
+  </mat-card>
+
+  </div>
+</ng-template>

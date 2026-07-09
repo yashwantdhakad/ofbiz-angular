@@ -1,0 +1,152 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<ng-container *ngIf="isLoading(); else content">
+  <div class="page-spinner">
+    <mat-progress-spinner [diameter]="60" mode="indeterminate" color="primary"></mat-progress-spinner>
+  </div>
+</ng-container>
+<ng-template #content>
+  <mat-card class="mat-elevation-z10">
+    <mat-card-header class="card-header-with-action">
+      <mat-card-title>{{ 'PICKLIST.TITLE' | translate }}</mat-card-title>
+      <button mat-raised-button color="primary" routerLink="/picklists/create">
+        <mat-icon>add</mat-icon> {{ 'MENU.CREATE_PICKLIST' | translate }}
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      <div fxLayout="row wrap" fxLayoutGap="16px" class="filter-row">
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'COMMON.FACILITY' | translate }}</mat-label>
+          <mat-select [ngModel]="filters().facilityId" (ngModelChange)="updateFilter('facilityId', $event)">
+            <mat-option value="">{{ 'COMMON.ALL' | translate }}</mat-option>
+            <mat-option *ngFor="let facility of facilities(); trackBy: trackByFacility" [value]="facility.facilityId">
+              {{ facility.label || facility.facilityId }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'COMMON.STATUS' | translate }}</mat-label>
+          <mat-select [ngModel]="filters().statusId" (ngModelChange)="updateFilter('statusId', $event)">
+            <mat-option value="">{{ 'COMMON.ALL' | translate }}</mat-option>
+            <mat-option *ngFor="let status of statusOptions(); trackBy: trackByStatus" [value]="status.statusId">
+              {{ status.description || status.statusId }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'PICKLIST.FROM_DATE' | translate }}</mat-label>
+          <input matInput [matDatepicker]="fromPicker" [ngModel]="filters().fromDate" (ngModelChange)="updateDateFilter('fromDate', $event)" />
+          <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+          <mat-datepicker #fromPicker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>{{ 'PICKLIST.TO_DATE' | translate }}</mat-label>
+          <input matInput [matDatepicker]="toPicker" [ngModel]="filters().toDate" (ngModelChange)="updateDateFilter('toDate', $event)" />
+          <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+          <mat-datepicker #toPicker></mat-datepicker>
+        </mat-form-field>
+        <div class="filter-actions">
+          <button mat-raised-button color="primary" (click)="loadPicklists()">
+            {{ 'COMMON.SEARCH' | translate }}
+          </button>
+          <button mat-stroked-button (click)="resetFilters()">
+            {{ 'COMMON.CLEAR' | translate }}
+          </button>
+        </div>
+      </div>
+      <div class="table-container">
+        <table mat-table [dataSource]="picklists()" [trackBy]="trackByPicklist">
+          <ng-container matColumnDef="picklistId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'PICKLIST.ID' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">
+              <a [routerLink]="['/picklists', item.picklistId]">{{ item.picklistId }}</a>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="statusId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item.statusDescription || item.statusId }}</td>
+          </ng-container>
+          <ng-container matColumnDef="facilityId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'COMMON.FACILITY' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ item.facilityName || item.facilityId }}</td>
+          </ng-container>
+          <ng-container matColumnDef="orderCount">
+            <th mat-header-cell class="text-right" *matHeaderCellDef>{{ 'PICKLIST.ORDER_COUNT' | translate }}</th>
+            <td mat-cell class="text-right" *matCellDef="let item">{{ item.orderCount }}</td>
+          </ng-container>
+          <ng-container matColumnDef="itemCount">
+            <th mat-header-cell class="text-right" *matHeaderCellDef>{{ 'PICKLIST.ITEM_COUNT' | translate }}</th>
+            <td mat-cell class="text-right" *matCellDef="let item">{{ item.itemCount }}</td>
+          </ng-container>
+          <ng-container matColumnDef="pickerId">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'PICKLIST.PICKER' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">{{ getPickerName(item.pickerId) }}</td>
+          </ng-container>
+          <ng-container matColumnDef="createdDate">
+            <th mat-header-cell class="text-left" *matHeaderCellDef>{{ 'PICKLIST.CREATED_DATE' | translate }}</th>
+            <td mat-cell class="text-left" *matCellDef="let item">
+              {{ item.createdDate | userDate : "MMMM d, y" }}
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+        <mat-paginator
+          [length]="totalPicklists()"
+          [pageIndex]="pagination.page"
+          [pageSize]="pagination.size"
+          [pageSizeOptions]="[10, 20, 50, 100]"
+          (page)="onPageChange($event)">
+        </mat-paginator>
+      </div>
+      <div class="picklist-mobile-list">
+        <mat-card *ngFor="let item of picklists(); trackBy: trackByPicklist" class="picklist-mobile-card">
+          <mat-card-content>
+            <div class="picklist-mobile-title">
+              <a [routerLink]="['/picklists', item.picklistId]">{{ item.picklistId }}</a>
+              <span>{{ item.statusDescription || item.statusId || '--' }}</span>
+            </div>
+            <div class="picklist-mobile-fields">
+              <div class="picklist-mobile-field">
+                <span class="label">{{ 'COMMON.FACILITY' | translate }}</span>
+                <span>{{ item.facilityName || item.facilityId || '--' }}</span>
+              </div>
+              <div class="picklist-mobile-field">
+                <span class="label">{{ 'PICKLIST.ORDER_COUNT' | translate }}</span>
+                <span>{{ item.orderCount }}</span>
+              </div>
+              <div class="picklist-mobile-field">
+                <span class="label">{{ 'PICKLIST.ITEM_COUNT' | translate }}</span>
+                <span>{{ item.itemCount }}</span>
+              </div>
+              <div class="picklist-mobile-field">
+                <span class="label">{{ 'PICKLIST.PICKER' | translate }}</span>
+                <span>{{ getPickerName(item.pickerId) }}</span>
+              </div>
+              <div class="picklist-mobile-field">
+                <span class="label">{{ 'PICKLIST.CREATED_DATE' | translate }}</span>
+                <span>{{ item.createdDate | userDate : "MMMM d, y" }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

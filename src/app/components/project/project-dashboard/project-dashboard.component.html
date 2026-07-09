@@ -1,0 +1,109 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-header class="card-header-with-action">
+    <mat-card-title>{{ 'PROJECTS.TITLE' | translate }}</mat-card-title>
+    <div class="header-actions">
+      <button mat-stroked-button type="button" (click)="openPlanning()">
+        <mat-icon>timeline</mat-icon> {{ 'PROJECTS.PLANNING_TITLE' | translate }}
+      </button>
+      <button mat-raised-button color="primary" routerLink="/projects/new">
+        <mat-icon>add</mat-icon> {{ 'COMMON.CREATE' | translate }}
+      </button>
+    </div>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="filter-row">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'PROJECTS.PROJECT_ID' | translate }}</mat-label>
+        <input matInput name="projectId" [ngModel]="projectId()" (ngModelChange)="projectId.set($event)" autocomplete="off">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'PROJECTS.PROJECT_NAME' | translate }}</mat-label>
+        <input matInput name="projectName" [ngModel]="projectName()" (ngModelChange)="projectName.set($event)" autocomplete="off">
+      </mat-form-field>
+
+      <div class="filter-actions">
+        <button mat-raised-button color="primary" type="button" (click)="searchProjects()">
+          <mat-icon>search</mat-icon>
+          {{ 'COMMON.SEARCH' | translate }}
+        </button>
+        <button mat-stroked-button type="button" (click)="clearFilters()">
+          {{ 'COMMON.CLEAR' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <p *ngIf="!hasSearched()" class="search-hint">{{ 'PROJECTS.SEARCH_TO_LOAD' | translate }}</p>
+
+    <div class="table-container" *ngIf="hasSearched()">
+      <table mat-table [dataSource]="displayedProjects()">
+        <ng-container matColumnDef="workEffortId">
+          <th mat-header-cell *matHeaderCellDef class="text-left">{{ 'PROJECTS.PROJECT_ID' | translate }}</th>
+          <td mat-cell *matCellDef="let row" class="text-left">
+            <a [routerLink]="['/projects', row.workEffortId]">{{ row.workEffortId || '-' }}</a>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="workEffortName">
+          <th mat-header-cell *matHeaderCellDef class="text-left">{{ 'PROJECTS.PROJECT_NAME' | translate }}</th>
+          <td mat-cell *matCellDef="let row" class="text-left">{{ row.workEffortName || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="currentStatusId">
+          <th mat-header-cell *matHeaderCellDef class="text-left">{{ 'PROJECTS.STATUS' | translate }}</th>
+          <td mat-cell *matCellDef="let row" class="text-left">{{ row.currentStatusId || '-' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="percentComplete">
+          <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'PROJECTS.PERCENT_COMPLETE' | translate }}</th>
+          <td mat-cell *matCellDef="let row" class="text-right">{{ row.percentComplete || '0' }}%</td>
+        </ng-container>
+
+        <ng-container matColumnDef="totalMoneyAllowed">
+          <th mat-header-cell *matHeaderCellDef class="text-right">{{ 'PROJECTS.BAC' | translate }}</th>
+          <td mat-cell *matCellDef="let row" class="text-right">
+            {{ (row.totalMoneyAllowed || '0') | amountWithCurrency:(row.moneyUomId || 'USD') }}
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+      </table>
+    </div>
+
+    <div class="mobile-list" *ngIf="hasSearched()">
+      <a class="mobile-card" *ngFor="let row of displayedProjects()" [routerLink]="['/projects', row.workEffortId]">
+        <strong>{{ row.workEffortName || row.workEffortId }}</strong>
+        <span>{{ row.workEffortId }}</span>
+        <small>{{ row.currentStatusId || '-' }} · {{ row.percentComplete || '0' }}%</small>
+      </a>
+    </div>
+
+    <div class="state-panel" *ngIf="isLoading()">
+      <mat-spinner diameter="32"></mat-spinner>
+    </div>
+
+    <div class="state-panel" *ngIf="hasSearched() && !isLoading() && displayedProjects().length === 0">
+      {{ 'COMMON.NO_RESULTS' | translate }}
+    </div>
+  </mat-card-content>
+</mat-card>

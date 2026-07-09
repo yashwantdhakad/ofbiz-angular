@@ -1,0 +1,269 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.dialog-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.dialog-header-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e53935, #b71c1c);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.dialog-header-icon mat-icon {
+  color: #fff;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.dialog-title {
+  margin: 0 0 4px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1a2e;
+}
+
+.dialog-subtitle {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.dialog-body {
+  padding: 24px;
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+/* Info banner */
+.info-banner {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  background: #e3f2fd;
+  border-left: 4px solid #1976d2;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  font-size: 0.88rem;
+  color: #1a237e;
+  line-height: 1.5;
+}
+
+.banner-icon {
+  color: #1976d2;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+code {
+  background: rgba(25, 118, 210, 0.12);
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-family: monospace;
+  font-size: 0.85em;
+}
+
+/* Status flow diagram */
+.status-flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 20px 0;
+  padding: 16px;
+  background: #f9f9fb;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+}
+
+.flow-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: #777;
+  font-weight: 500;
+}
+
+.flow-step mat-icon {
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  color: #bbb;
+}
+
+.flow-step.active mat-icon {
+  color: #1976d2;
+}
+
+.flow-step.active {
+  color: #1976d2;
+  font-weight: 700;
+}
+
+.flow-arrow {
+  color: #bdbdbd;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+/* Warning banner */
+.warning-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background: #fff8e1;
+  border-left: 4px solid #f9a825;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  color: #5d4037;
+}
+
+.warning-banner mat-icon {
+  color: #f9a825;
+  flex-shrink: 0;
+}
+
+/* Loading state */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 20px;
+}
+
+.loading-text {
+  font-size: 0.9rem;
+  color: #666;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* Success state */
+.success-banner {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 14px 16px;
+  background: #e8f5e9;
+  border-left: 4px solid #388e3c;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  color: #1b5e20;
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.success-banner p {
+  margin: 4px 0 0;
+}
+
+.success-icon {
+  color: #388e3c;
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+/* Child items list */
+.child-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.child-item-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.child-item-row:hover {
+  background: #f0f7ff;
+}
+
+.child-item-index {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #1976d2;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.child-item-icon {
+  color: #1976d2;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.child-item-link {
+  font-weight: 600;
+  color: #1976d2;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-family: monospace;
+}
+
+.child-item-link:hover {
+  text-decoration: underline;
+}
+
+.child-item-empty {
+  font-size: 0.85rem;
+  color: #999;
+  text-align: center;
+  padding: 16px;
+}
+
+/* Dialog actions */
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 24px;
+  border-top: 1px solid rgba(0,0,0,0.08);
+}

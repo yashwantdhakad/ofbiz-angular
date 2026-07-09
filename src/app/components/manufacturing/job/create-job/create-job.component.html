@@ -1,0 +1,215 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="mat-elevation-z10">
+  <mat-card-header>
+    <mat-card-title>
+      <h1>{{ 'MANUFACTURING.CREATE_TITLE' | translate }}</h1>
+    </mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <form
+      (ngSubmit)="createJob()"
+      [formGroup]="createJobForm"
+      fxLayout="column"
+      fxLayoutGap="16px"
+    >
+      <div fxLayout="row wrap" fxLayoutGap="16px" class="create-job-row">
+        <mat-form-field fxFlex="32%" appearance="outline" class="create-job-field">
+          <mat-label>{{ 'MANUFACTURING.JOB_NAME' | translate }}</mat-label>
+          <input
+            matInput
+            [placeholder]="'MANUFACTURING.JOB_NAME' | translate"
+            formControlName="workEffortName"
+          />
+          <mat-error
+            *ngIf="createJobForm.get('workEffortName')?.hasError('required')"
+            >{{ 'MANUFACTURING.JOB_NAME_REQUIRED' | translate }}</mat-error
+          >
+        </mat-form-field>
+
+        <mat-form-field fxFlex="32%" appearance="outline" class="create-job-field">
+          <mat-label>{{ 'MANUFACTURING.FACILITY_ID' | translate }}</mat-label>
+          <mat-select [placeholder]="'COMMON.FACILITY' | translate" formControlName="facilityId">
+            <mat-option
+              *ngFor="let facility of facilities"
+              [value]="facility.facilityId"
+              >{{ facility.label || facility.facilityName || facility.facilityId }}</mat-option
+            >
+          </mat-select>
+          <mat-error
+            *ngIf="createJobForm.get('facilityId')?.hasError('required')"
+            >{{ 'MANUFACTURING.FACILITY_REQUIRED' | translate }}</mat-error
+          >
+        </mat-form-field>
+
+        <mat-form-field fxFlex="31%" appearance="outline" class="create-job-field">
+          <mat-label>{{ 'MANUFACTURING.JOB_PURPOSE' | translate }}</mat-label>
+          <mat-select formControlName="workEffortPurposeTypeId">
+            <mat-option *ngFor="let purpose of jobPurposeOptions" [value]="purpose.id">
+              {{ purpose.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div fxLayout="row wrap" fxLayoutGap="16px" class="create-job-row">
+        <mat-form-field fxFlex="32%" appearance="outline" class="create-job-field">
+          <mat-label>{{ 'MANUFACTURING.PRODUCT' | translate }}</mat-label>
+          <input
+            matInput
+            [placeholder]="'MANUFACTURING.PRODUCT' | translate"
+            [matAutocomplete]="auto"
+            formControlName="produceProductId"
+          />
+          <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayProduct">
+            <mat-option
+              *ngFor="let product of filteredProducts$ | async"
+              [value]="product"
+            >
+              {{ product.productName || product.name || product.productId }}
+            </mat-option>
+          </mat-autocomplete>
+          <mat-error
+            *ngIf="createJobForm.get('produceProductId')?.hasError('required')"
+            >{{ 'MANUFACTURING.PRODUCT_REQUIRED' | translate }}</mat-error
+          >
+        </mat-form-field>
+
+        <mat-form-field fxFlex="32%" appearance="outline" class="create-job-field">
+          <mat-label>{{ 'MANUFACTURING.EST_QUANTITY' | translate }}</mat-label>
+          <input
+            matInput
+            [placeholder]="'COMMON.QUANTITY' | translate"
+            formControlName="produceEstimatedQuantity"
+          />
+          <mat-error
+            *ngIf="
+              createJobForm.get('produceEstimatedQuantity')?.hasError('required')
+            "
+            >{{ 'MANUFACTURING.EST_QUANTITY_REQUIRED' | translate }}</mat-error
+          >
+        </mat-form-field>
+
+        <mat-form-field fxFlex="31%" appearance="outline" class="create-job-field">
+          <mat-label>{{ 'MANUFACTURING.EST_COST' | translate }}</mat-label>
+          <input
+            matInput
+            [placeholder]="'MANUFACTURING.EST_COST' | translate"
+            formControlName="produceEstimatedAmount"
+          />
+        </mat-form-field>
+      </div>
+
+      <div fxLayout="row wrap" fxLayoutGap="16px" class="create-job-row">
+        <mat-form-field fxFlex="48%" appearance="outline" class="create-job-field">
+          <mat-label>{{ 'MANUFACTURING.EST_START_DATE' | translate }}</mat-label>
+          <input
+            matInput
+            [matDatepicker]="estimatedStartDate"
+            formControlName="estimatedStartDate"
+            [placeholder]="'MANUFACTURING.EST_START_DATE' | translate"
+            (click)="estimatedStartDate.open()"
+          />
+          <mat-datepicker-toggle
+            matSuffix
+            [for]="estimatedStartDate"
+          ></mat-datepicker-toggle>
+          <mat-datepicker #estimatedStartDate></mat-datepicker>
+        </mat-form-field>
+
+        <mat-form-field fxFlex="48%" appearance="outline" class="create-job-field">
+          <mat-label>{{ 'MANUFACTURING.EST_HOURS' | translate }}</mat-label>
+          <input
+            matInput
+            [placeholder]="'MANUFACTURING.EST_HOURS' | translate"
+            formControlName="estimatedWorkDuration"
+          />
+        </mat-form-field>
+      </div>
+      
+      <mat-card class="mat-elevation-z2" formArrayName="consumeItems">
+        <mat-card-header class="consume-items-header">
+          <mat-card-title class="consume-items-title">
+            <span>{{ 'MANUFACTURING.ITEMS' | translate }}</span>
+            <button mat-stroked-button type="button" color="primary" class="consume-add-button" (click)="addConsumeItemRow()">
+              {{ 'MANUFACTURING.ADD_ITEM' | translate }}
+            </button>
+          </mat-card-title>
+        </mat-card-header>
+        <br/>
+        <mat-card-content class="consume-items-scroll">
+          <div
+            *ngFor="let item of consumeItemsArray.controls; let i = index"
+            [formGroupName]="i"
+            fxLayout="row wrap"
+            fxLayoutGap="16px"
+            fxLayoutAlign="start center"
+            class="mb-2 consume-item-row"
+          >
+            <mat-form-field fxFlex="60%" appearance="outline" class="consume-product-field">
+              <mat-label>{{ 'MANUFACTURING.CONSUME_PRODUCT' | translate }}</mat-label>
+              <input
+                matInput
+                [matAutocomplete]="consumeAuto"
+                formControlName="productId"
+              />
+              <mat-autocomplete #consumeAuto="matAutocomplete" [displayWith]="displayProduct">
+                <mat-option
+                  *ngFor="let product of filteredConsumeProducts[i] | async"
+                  [value]="product"
+                >
+                  {{ product.productName || product.name || product.productId }}
+                </mat-option>
+              </mat-autocomplete>
+            </mat-form-field>
+
+            <mat-form-field fxFlex="25%" appearance="outline" class="consume-qty-field">
+              <mat-label>{{ 'MANUFACTURING.CONSUME_QTY' | translate }}</mat-label>
+              <input matInput formControlName="estimatedQuantity" />
+            </mat-form-field>
+
+            <div fxFlex="10%" fxLayoutAlign="center" class="consume-delete-field">
+              <button
+                mat-icon-button
+                type="button"
+                (click)="removeConsumeItemRow(i)"
+                [disabled]="consumeItemsArray.length <= 1"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <div fxLayoutAlign="start" class="create-job-submit-row">
+        <button
+          mat-raised-button
+          type="submit"
+          color="primary"
+          class="me-4 create-job-submit-button"
+          [disabled]="isLoading()"
+        >
+          <span *ngIf="!isLoading()">{{ 'MENU.CREATE_JOB' | translate }}</span>
+          <mat-spinner *ngIf="isLoading()" diameter="20"></mat-spinner>
+        </button>
+      </div>
+    </form>
+  </mat-card-content>
+</mat-card>

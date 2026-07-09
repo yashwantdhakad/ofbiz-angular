@@ -1,0 +1,182 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.routings-container {
+  padding: 20px;
+}
+
+mat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header-actions {
+  margin-left: auto;
+}
+
+.filter-section {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.search-field {
+  flex: 2;
+}
+
+.filter-field {
+  flex: 1;
+}
+
+.loading-spinner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.routings-table {
+  width: 100%;
+}
+
+.routing-link,
+.product-link {
+  background: none;
+  border: 0;
+  color: #1976d2;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  text-decoration: none;
+}
+
+.routing-link:hover,
+.product-link:hover {
+  text-decoration: underline;
+}
+
+tr.mat-mdc-row.routing-row:hover,
+tr.mat-row.routing-row:hover {
+  background-color: transparent !important;
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+mat-paginator {
+  margin-top: 16px;
+}
+
+.routing-mobile-list {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .routings-container {
+    padding: 8px;
+  }
+
+  mat-card-header,
+  mat-card-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .filter-section {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .search-field,
+  .filter-field {
+    flex: none;
+    width: 100%;
+  }
+
+  .table-container {
+    display: none;
+  }
+
+  .routing-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .routing-mobile-card {
+    padding: 14px;
+    border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
+    border-radius: 8px;
+    background: var(--mat-sys-surface, #fff);
+  }
+
+  .routing-mobile-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid color-mix(in srgb, currentColor 8%, transparent);
+    font-weight: 600;
+  }
+
+  .routing-mobile-name {
+    padding-top: 10px;
+    font-weight: 600;
+  }
+
+  .routing-mobile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    padding-top: 12px;
+  }
+
+  .routing-mobile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    overflow-wrap: anywhere;
+  }
+
+  .routing-mobile-field-wide {
+    grid-column: 1 / -1;
+  }
+
+  .routing-mobile-label {
+    font-size: 0.78em;
+    font-weight: 500;
+    letter-spacing: 0.4px;
+    opacity: 0.65;
+    text-transform: uppercase;
+  }
+}
+
+@media (max-width: 480px) {
+  .routing-mobile-grid {
+    grid-template-columns: 1fr;
+  }
+}

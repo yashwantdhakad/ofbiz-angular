@@ -1,0 +1,110 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<div class="page-shell">
+  <div class="breadcrumb-row">
+    <a [routerLink]="['/home']">{{ 'MENU.HOME' | translate }}</a>
+    <span>/</span>
+    <span>{{ 'MENU.SETTINGS' | translate }}</span>
+    <span>/</span>
+    <span>{{ 'MENU.SYSTEM' | translate }}</span>
+  </div>
+
+  <mat-card class="header-card">
+    <div class="header-row">
+      <div>
+        <h1>{{ 'SYSTEM.TITLE' | translate }}</h1>
+        <div class="header-meta" *ngIf="summary() as item">
+          <span><strong>{{ 'SYSTEM.SERVICE' | translate }}:</strong> {{ item.serviceName }}</span>
+          <span><strong>{{ 'SYSTEM.HOST' | translate }}:</strong> {{ item.hostname }}</span>
+          <span><strong>{{ 'COMMON.STATUS' | translate }}:</strong> {{ isLoading() ? ('COMMON.LOADING' | translate) : ('COMMON.READY' | translate) }}</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <mat-form-field appearance="outline" class="service-select-field">
+          <mat-label>{{ 'SYSTEM.VIEW_SERVICE' | translate }}</mat-label>
+          <mat-select [value]="selectedService()" (selectionChange)="onServiceChange($event.value)">
+            <mat-option *ngFor="let option of serviceOptions" [value]="option.value">
+              {{ option.labelKey | translate }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-raised-button color="primary" type="button" (click)="refresh()">
+          {{ 'COMMON.REFRESH' | translate }}
+        </button>
+      </div>
+    </div>
+  </mat-card>
+
+  <mat-card class="content-card" *ngIf="summary() as item; else emptyState">
+    <div class="summary-grid">
+      <section class="summary-panel">
+        <h2>{{ 'SYSTEM.RUNTIME' | translate }}</h2>
+        <div class="kv"><strong>{{ 'SYSTEM.START_TIME' | translate }}:</strong> {{ item.startTime }}</div>
+        <div class="kv"><strong>{{ 'SYSTEM.UPTIME_HOURS' | translate }}:</strong> {{ item.uptimeHours | number:'1.2-2' }}</div>
+        <div class="kv"><strong>{{ 'SYSTEM.JAVA_VERSION' | translate }}:</strong> {{ item.runtime.javaVersion }}</div>
+        <div class="kv"><strong>{{ 'SYSTEM.LOCALE' | translate }}:</strong> {{ item.locale }}</div>
+        <div class="kv"><strong>{{ 'SYSTEM.TIMEZONE' | translate }}:</strong> {{ item.timeZone }}</div>
+      </section>
+
+      <section class="summary-panel">
+        <h2>{{ 'SYSTEM.MEMORY' | translate }}</h2>
+        <div class="kv"><strong>{{ 'SYSTEM.HEAP_USED' | translate }}:</strong> {{ bytesToMiB(item.memory.heapUsedBytes) }}</div>
+        <div class="kv"><strong>{{ 'SYSTEM.HEAP_COMMITTED' | translate }}:</strong> {{ bytesToMiB(item.memory.heapCommittedBytes) }}</div>
+        <div class="kv"><strong>{{ 'SYSTEM.HEAP_MAX' | translate }}:</strong> {{ bytesToMiB(item.memory.heapMaxBytes) }}</div>
+        <div class="kv"><strong>{{ 'SYSTEM.NON_HEAP_USED' | translate }}:</strong> {{ bytesToMiB(item.memory.nonHeapUsedBytes) }}</div>
+        <div class="kv"><strong>{{ 'SYSTEM.NON_HEAP_COMMITTED' | translate }}:</strong> {{ bytesToMiB(item.memory.nonHeapCommittedBytes) }}</div>
+      </section>
+
+      <section class="summary-panel">
+        <h2>{{ 'SYSTEM.PLATFORM' | translate }}</h2>
+        <div class="kv"><strong>{{ 'SYSTEM.OS' | translate }}:</strong> {{ item.runtime.osName }}</div>
+        <div class="kv"><strong>{{ 'SYSTEM.ARCH' | translate }}:</strong> {{ item.runtime.osArch }}</div>
+        <div class="kv"><strong>{{ 'SYSTEM.PROCESSORS' | translate }}:</strong> {{ item.runtime.processors }}</div>
+        <div class="kv"><strong>{{ 'SYSTEM.LOAD_AVERAGE' | translate }}:</strong> {{ item.runtime.systemLoadAverage | number:'1.2-2' }}</div>
+        <div class="kv"><strong>{{ 'SYSTEM.LIVE_THREADS' | translate }}:</strong> {{ item.threads.liveThreads }}</div>
+        <div class="kv"><strong>{{ 'SYSTEM.PEAK_THREADS' | translate }}:</strong> {{ item.threads.peakThreads }}</div>
+      </section>
+
+      <section class="summary-panel">
+        <h2>{{ 'SYSTEM.DISK' | translate }}</h2>
+        <div class="kv"><strong>{{ 'SYSTEM.PATH' | translate }}:</strong> {{ item.disk.path }}</div>
+        <div class="kv"><strong>{{ 'SYSTEM.TOTAL_SPACE' | translate }}:</strong> {{ bytesToGiB(item.disk.totalBytes) }}</div>
+        <div class="kv"><strong>{{ 'SYSTEM.FREE_SPACE' | translate }}:</strong> {{ bytesToGiB(item.disk.freeBytes) }}</div>
+        <div class="kv"><strong>{{ 'SYSTEM.USABLE_SPACE' | translate }}:</strong> {{ bytesToGiB(item.disk.usableBytes) }}</div>
+      </section>
+    </div>
+
+    <section class="environment-panel" *ngIf="item.environment.length">
+      <h2>{{ 'SYSTEM.ENVIRONMENT' | translate }}</h2>
+      <div class="environment-grid">
+        <div class="kv" *ngFor="let entry of item.environment">
+          <strong>{{ entry.label }}:</strong> {{ entry.value }}
+        </div>
+      </div>
+    </section>
+  </mat-card>
+
+  <ng-template #emptyState>
+    <mat-card class="content-card empty-state">
+      <span *ngIf="isLoading()">{{ 'COMMON.LOADING' | translate }}</span>
+      <span *ngIf="!isLoading()">{{ 'COMMON.NO_DATA' | translate }}</span>
+    </mat-card>
+  </ng-template>
+</div>

@@ -1,0 +1,63 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<div class="page-shell">
+  <div class="breadcrumb-row">
+    <a [routerLink]="['/home']">{{ 'MENU.HOME' | translate }}</a>
+    <span>/</span>
+    <span>{{ 'MENU.SETTINGS' | translate }}</span>
+    <span>/</span>
+    <span>{{ 'MENU.LOAD_TESTING' | translate }}</span>
+  </div>
+
+  <mat-card class="header-card">
+    <div class="header-row">
+      <div>
+        <h1>{{ 'LOAD_TESTING.TITLE' | translate }}</h1>
+        <div class="header-copy">{{ 'LOAD_TESTING.SUBTITLE' | translate }}</div>
+      </div>
+      <button mat-raised-button color="primary" type="button" (click)="refresh()">
+        {{ 'COMMON.REFRESH' | translate }}
+      </button>
+    </div>
+  </mat-card>
+
+  <mat-card class="content-card">
+    <div class="empty-state" *ngIf="isLoading()">{{ 'COMMON.LOADING' | translate }}</div>
+
+    <div class="report-grid" *ngIf="!isLoading() && reports().length">
+      <div class="report-card" *ngFor="let report of reports()">
+        <div class="report-header">
+          <h2>{{ report.scenarioLabel }}</h2>
+          <span class="report-type">{{ report.reportType }}</span>
+        </div>
+        <div class="kv"><strong>{{ 'LOAD_TESTING.FILE' | translate }}:</strong> {{ report.fileName }}</div>
+        <div class="kv"><strong>{{ 'COMMON.DATE' | translate }}:</strong> {{ report.modifiedAt }}</div>
+        <div class="kv"><strong>{{ 'LOAD_TESTING.SIZE' | translate }}:</strong> {{ bytesToKiB(report.sizeBytes) }}</div>
+        <div class="kv"><strong>{{ 'LOAD_TESTING.GROUPS' | translate }}:</strong> {{ report.groupCount }}</div>
+        <div class="kv"><strong>{{ 'LOAD_TESTING.PASSES' | translate }}:</strong> {{ report.totalPasses }}</div>
+        <div class="kv"><strong>{{ 'LOAD_TESTING.FAILS' | translate }}:</strong> {{ report.totalFails }}</div>
+        <div class="kv"><strong>{{ 'LOAD_TESTING.PASS_RATE' | translate }}:</strong> {{ report.passRate | number:'1.2-2' }}%</div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="!isLoading() && !reports().length">
+      {{ 'COMMON.NO_DATA' | translate }}
+    </div>
+  </mat-card>
+</div>

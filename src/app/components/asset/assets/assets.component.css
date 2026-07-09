@@ -1,0 +1,128 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.asset-mobile-list {
+  display: none;
+}
+
+.asset-mobile-card {
+  margin-bottom: 12px;
+}
+
+.asset-mobile-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.asset-mobile-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.asset-mobile-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.asset-mobile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.asset-mobile-field .label {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.75;
+}
+
+.empty-state {
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.assets-actions {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.assets-actions .mat-mdc-form-field {
+  min-width: 260px;
+}
+
+.search-btn {
+  height: 56px;
+  margin-top: 0;
+  align-self: flex-start;
+}
+
+.assets-actions .mat-mdc-form-field-subscript-wrapper {
+  display: none;
+}
+
+table {
+  min-width: 1200px; /* Adjust this as per your column count */
+}
+
+th.mat-header-cell, td.mat-cell {
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .assets-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .assets-actions .mat-mdc-form-field {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .search-btn {
+    width: 100%;
+    align-self: stretch;
+  }
+
+  .table-container {
+    display: none;
+  }
+
+  .asset-mobile-list {
+    display: block;
+  }
+
+  .asset-mobile-fields {
+    grid-template-columns: 1fr;
+  }
+}

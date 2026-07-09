@@ -1,0 +1,165 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+#poCreateForm {
+  padding-top: 12px;
+}
+
+/* --- Desktop layout for items row --- */
+.po-item-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.po-item-product {
+  flex: 0 0 35%;
+}
+
+.po-item-numbers {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+  flex: 0 0 35%;
+}
+
+.po-item-numbers mat-form-field {
+  flex: 1 1 auto !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.po-item-type-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 25%;
+}
+
+.po-item-type-row mat-form-field {
+  flex: 1 1 auto !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.po-item-type-row button {
+  flex: 0 0 auto;
+}
+
+/* ─── Mobile ─────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  /* --- Force all standard form fields to full width --- */
+  :host ::ng-deep mat-form-field {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex: 0 0 100% !important;
+    min-width: 0 !important;
+  }
+
+  /* Suppress subscript wrapper to keep fields compact */
+  :host ::ng-deep mat-form-field .mat-mdc-form-field-subscript-wrapper {
+    margin-bottom: 0;
+  }
+
+  /* --- Items section: card per item, stacked layout --- */
+  .po-item-row {
+    flex-direction: column !important;
+    gap: 8px !important;
+    padding: 12px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.015);
+    margin-bottom: 10px;
+  }
+
+  .po-item-product {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+  }
+
+  .po-item-numbers {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+  }
+
+  :host ::ng-deep .po-item-numbers mat-form-field {
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .po-item-type-row {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    gap: 8px !important;
+  }
+
+  :host ::ng-deep .po-item-type-row mat-form-field {
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+
+  /* --- Action buttons full-width --- */
+  .po-actions-row {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    width: 100% !important;
+  }
+
+  .po-actions-row button,
+  .po-actions-row span {
+    width: 100% !important;
+    display: block !important;
+  }
+
+  .po-actions-row span button {
+    width: 100% !important;
+  }
+
+  .po-actions-row button {
+    min-height: 48px !important;
+    height: 48px !important;
+    line-height: 48px !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+  }
+
+  /* Items card header */
+  :host ::ng-deep .mat-mdc-card-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+}

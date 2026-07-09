@@ -1,0 +1,248 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.page-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.page-header h1 {
+  margin: 0;
+}
+
+.page-header p {
+  margin: 4px 0 0;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.actions,
+.filter-row,
+.loading-state,
+.detail-grid {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.filter-row {
+  align-items: center;
+}
+
+.filter-row mat-form-field {
+  margin-bottom: -1.25em;
+}
+
+.filter-row mat-form-field {
+  min-width: 240px;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.filter-actions button {
+  height: 56px;
+}
+
+.state-card,
+.details-card {
+  margin-top: 4px;
+}
+
+.loading-state {
+  align-items: center;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.journal-table {
+  width: 100%;
+}
+
+.action-cell {
+  white-space: nowrap;
+}
+
+.selected-row {
+  background: rgba(63, 81, 181, 0.06);
+}
+
+.link-button {
+  padding-left: 0;
+  min-width: auto;
+}
+
+.journal-mobile-list {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  .page-shell {
+    gap: 12px;
+  }
+
+  .page-header {
+    gap: 12px;
+  }
+
+  .page-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .actions,
+  .filter-row,
+  .filter-actions {
+    width: 100%;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .actions button {
+    min-height: 48px;
+  }
+
+  .filter-row {
+    align-items: stretch;
+  }
+
+  .filter-row mat-form-field {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .filter-actions button {
+    flex: 1 1 0;
+  }
+
+  .journal-desktop-list {
+    display: none;
+  }
+
+  .journal-mobile-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .journal-mobile-card {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 14px;
+    background: var(--mat-sys-surface, #fff);
+  }
+
+  .journal-mobile-card.selected-card {
+    border-color: var(--mat-sys-primary, #3f51b5);
+    background: color-mix(in srgb, var(--mat-sys-primary, #3f51b5) 5%, transparent);
+  }
+
+  .journal-mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .journal-mobile-title {
+    min-width: 0;
+  }
+
+  .journal-mobile-id {
+    display: block;
+    max-width: 100%;
+    padding: 0;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    overflow-wrap: anywhere;
+  }
+
+  .journal-mobile-actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: 2px;
+  }
+
+  .journal-mobile-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px 18px;
+  }
+
+  .journal-mobile-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .journal-mobile-wide {
+    grid-column: 1 / -1;
+  }
+
+  .journal-mobile-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(0, 0, 0, 0.55);
+  }
+}
+
+@media (max-width: 480px) {
+  .actions {
+    grid-template-columns: 1fr;
+  }
+
+  .journal-mobile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .journal-mobile-wide {
+    grid-column: auto;
+  }
+}

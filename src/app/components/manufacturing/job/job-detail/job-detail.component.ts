@@ -31,6 +31,11 @@ import { ProduceItemComponent } from '../../produce-item/produce-item.component'
 import { SetConsumableInventoryDialogComponent } from '../set-consumable-inventory-dialog/set-consumable-inventory-dialog.component';
 import { AddJobContentDialogComponent } from '../add-job-content-dialog/add-job-content-dialog.component';
 import { JobAssignWorkerDialogComponent } from './job-assign-worker-dialog.component';
+import { JobEditDialogComponent } from './job-edit-dialog.component';
+import {
+  UpdateProduceQuantityDialogComponent,
+  UpdateProduceQuantityDialogResult,
+} from './update-produce-quantity-dialog.component';
 import { JobNoteDialogComponent } from './job-note-dialog.component';
 import { CompleteTaskDialogComponent } from './complete-task-dialog.component';
 import { SteelCuttingDialogComponent, SteelCuttingDialogData } from './steel-cutting-dialog/steel-cutting-dialog.component';
@@ -53,6 +58,7 @@ import {
   JobNoteRecord,
   JobProducedItem,
   JobProductLine,
+  JobEditDialogResult,
   JobReferenceLine,
   JobStatusHistoryEntry,
   JobTaskLine,
@@ -531,6 +537,64 @@ export class JobDetailComponent {
           this.refreshJobDetailSilently();
         },
         error: () => {
+        },
+      });
+    });
+  }
+
+  openEditJobDialog(): void {
+    if (!this.workEffortId || !this.canEditComponents()) {
+      return;
+    }
+    const dialogRef = this.dialog.open(JobEditDialogComponent, {
+      width: '560px',
+      data: { job: this.jobDetail() },
+    });
+    dialogRef.afterClosed().subscribe((result: JobEditDialogResult | null | undefined) => {
+      if (!result || !this.workEffortId) {
+        return;
+      }
+      this.manufacturingService.updateJob(this.workEffortId, result).subscribe({
+        next: () => {
+          this.snackbarService.showSuccess(this.translate.instant('MANUFACTURING.JOB_UPDATED_SUCCESS'));
+          this.refreshJobDetailSilently();
+        },
+        error: (err) => {
+          const message = err?.error?.message || this.translate.instant('MANUFACTURING.JOB_UPDATED_ERROR');
+          this.snackbarService.showError(message);
+        },
+      });
+    });
+  }
+
+  updateProduceQuantity(item: JobProductLine): void {
+    if (!this.workEffortId || !this.canEditComponents()) {
+      return;
+    }
+    const dialogRef = this.dialog.open(UpdateProduceQuantityDialogComponent, {
+      width: '420px',
+      data: {
+        productId: item?.productId,
+        productName: item?.productName,
+        estimatedQuantity: item?.estimatedQuantity,
+        produced: item?.produced,
+      },
+    });
+    dialogRef.afterClosed().subscribe((result: UpdateProduceQuantityDialogResult | null | undefined) => {
+      if (!result || !this.workEffortId) {
+        return;
+      }
+      this.manufacturingService.updateJob(this.workEffortId, {
+        quantity: result.quantity,
+        productId: item?.productId,
+      }).subscribe({
+        next: () => {
+          this.snackbarService.showSuccess(this.translate.instant('MANUFACTURING.JOB_UPDATED_SUCCESS'));
+          this.refreshJobDetailSilently();
+        },
+        error: (err) => {
+          const message = err?.error?.message || this.translate.instant('MANUFACTURING.JOB_UPDATED_ERROR');
+          this.snackbarService.showError(message);
         },
       });
     });

@@ -25,6 +25,8 @@ import { TranslateHttpLoader } from '@ngx-translate/http-loader';
 import { HttpClient } from '@angular/common/http';
 
 import { JobDetailComponent } from './job-detail.component';
+import { JobEditDialogComponent } from './job-edit-dialog.component';
+import { UpdateProduceQuantityDialogComponent } from './update-produce-quantity-dialog.component';
 import { JobAssignWorkerDialogComponent } from './job-assign-worker-dialog.component';
 import { JobNoteDialogComponent } from './job-note-dialog.component';
 import { CompleteTaskDialogComponent } from './complete-task-dialog.component';
@@ -40,6 +42,8 @@ import { ConfirmationDialogComponent } from '../../../common/confirmation-dialog
 @NgModule({
   declarations: [
     JobDetailComponent,
+    JobEditDialogComponent,
+    UpdateProduceQuantityDialogComponent,
     JobAssignWorkerDialogComponent,
     JobNoteDialogComponent,
     CompleteTaskDialogComponent,

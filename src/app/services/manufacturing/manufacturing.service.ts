@@ -34,6 +34,7 @@ import {
   JobNoteRecord,
   JobProductLine,
   JobProducedItem,
+  JobUpdatePayload,
   OperationDetailResponse,
   EditOperationDialogResult,
   RoutingApiResponse,
@@ -110,6 +111,12 @@ export class ManufacturingService {
 
   createJob(params: Partial<JobDetailResponse>): Observable<unknown> {
     return this.apiService.post<any>('/common/jobs', params).pipe(
+      map((response: any) => this.unwrapServiceData(response))
+    );
+  }
+
+  updateJob(workEffortId: string, params: JobUpdatePayload): Observable<unknown> {
+    return this.apiService.put<any>(`/common/jobs/${encodeURIComponent(workEffortId)}`, params).pipe(
       map((response: any) => this.unwrapServiceData(response))
     );
   }

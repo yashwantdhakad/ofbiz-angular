@@ -37,6 +37,32 @@ export interface JobDetailState {
   estimatedMilliSeconds?: number | string;
   assignedWorkerPartyId?: string;
   assignedWorkerName?: string;
+  productId?: string;
+  productName?: string;
+  quantityToProduce?: number | string;
+  quantityProduced?: number | string;
+  description?: string;
+}
+
+export interface JobUpdatePayload {
+  workEffortName?: string;
+  description?: string;
+  facilityId?: string;
+  estimatedStartDate?: string;
+  quantity?: NumericInput;
+  productId?: string;
+}
+
+export interface JobEditDialogData {
+  job: JobDetailState | null;
+}
+
+export interface JobEditDialogResult {
+  workEffortName: string;
+  description?: string;
+  facilityId?: string;
+  estimatedStartDate?: string;
+  quantity?: NumericInput;
 }
 
 export interface JobProductLine {

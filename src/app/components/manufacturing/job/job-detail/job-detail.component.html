@@ -37,6 +37,16 @@
         mat-stroked-button
         color="primary"
         type="button"
+        (click)="openEditJobDialog()"
+        *ngIf="canEditComponents()"
+      >
+        <mat-icon>edit</mat-icon>
+        {{ 'COMMON.EDIT' | translate }}
+      </button>
+      <button
+        mat-stroked-button
+        color="primary"
+        type="button"
         (click)="openJobCardPdf()"
         [disabled]="!jobDetail().workEffortId"
       >
@@ -693,6 +703,16 @@
               >
                 {{ 'MANUFACTURING.PRODUCE' | translate }}
               </button>
+              <button
+                mat-icon-button
+                color="primary"
+                type="button"
+                (click)="updateProduceQuantity(item)"
+                *ngIf="canEditComponents()"
+                [attr.aria-label]="'MANUFACTURING.UPDATE_QUANTITY' | translate"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
             </td>
           </ng-container>
           <tr mat-header-row *matHeaderRowDef="productsToProduceColumns"></tr>
@@ -735,6 +755,16 @@
               (click)="produceItem(item)"
             >
               {{ 'MANUFACTURING.PRODUCE' | translate }}
+            </button>
+          </div>
+          <div class="job-mobile-actions" *ngIf="canEditComponents()">
+            <button
+              mat-stroked-button
+              color="primary"
+              (click)="updateProduceQuantity(item)"
+            >
+              <mat-icon>edit</mat-icon>
+              {{ 'MANUFACTURING.UPDATE_QUANTITY' | translate }}
             </button>
           </div>
         </div>

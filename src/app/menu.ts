@@ -197,6 +197,17 @@ export const menuItems = [
           permissions: ['ADMIN'],
           erpFeature: 'ORDER'
         }
+      },
+      {
+        path: '/returns',
+        name: 'MENU.RETURNS',
+        nav: ['side'],
+        meta: {
+          title: 'MENU.RETURNS',
+          requiredAuth: true,
+          permissions: ['ADMIN'],
+          erpFeature: 'ORDER'
+        }
       }
     ]
   },

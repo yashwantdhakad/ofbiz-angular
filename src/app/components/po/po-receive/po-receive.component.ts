@@ -320,7 +320,7 @@ export class POReceiveComponent implements OnInit {
 
     this.isLoading.set(true);
     this.orderService.receivePurchaseOrder(this.orderId, payload).pipe(
-      timeout(20000),
+      timeout(180000),
       finalize(() => this.isLoading.set(false)),
       takeUntilDestroyed(this.destroyRef)
     ).subscribe({

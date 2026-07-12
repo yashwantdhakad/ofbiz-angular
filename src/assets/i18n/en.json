@@ -1874,7 +1874,12 @@
     "GST_RCM_BADGE": "GST Reverse Charge Applicable",
     "TDS_195_BADGE": "{{rate}}% TDS Deductible (Section 195)",
     "GST_RCM_APPLICABLE": "GST Reverse Charge Applicable",
-    "TDS_195_PERCENT": "TDS Section 195 (%)"
+    "TDS_195_PERCENT": "TDS Section 195 (%)",
+    "RECEIPTS": "Receipts",
+    "RECEIPT_ID": "Receipt ID",
+    "ITEM_SEQ": "Item Seq",
+    "QTY_ACCEPTED": "Qty Accepted",
+    "DATE_RECEIVED": "Date Received"
   },
   "PRODUCT": {
     "ASSOCIATED_FROM_TITLE": "Associated From",

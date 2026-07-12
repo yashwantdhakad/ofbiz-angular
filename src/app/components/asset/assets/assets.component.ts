@@ -46,6 +46,7 @@ export class AssetsComponent implements OnInit {
     { initialValue: this.route.snapshot.routeConfig?.path === 'inspection' }
   );
   queryString: string = '';
+  productId: string = '';
   selectedStatusId = '';
   readonly statusOptions = [
     { id: '', label: 'COMMON.ALL' },
@@ -138,7 +139,8 @@ export class AssetsComponent implements OnInit {
       page - 1,
       queryString,
       this.selectedFacilityId || undefined,
-      this.isInspectionQueue() ? 'INV_PENDING_INSP' : (this.selectedStatusId || undefined)
+      this.isInspectionQueue() ? 'INV_PENDING_INSP' : (this.selectedStatusId || undefined),
+      this.productId.trim() || undefined
     )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({

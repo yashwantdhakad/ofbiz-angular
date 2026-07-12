@@ -298,7 +298,9 @@ describe('AppComponent', () => {
   it('covers menu filtering, no-op helpers, and preference fallbacks', async () => {
     authSpy.isAuthenticated.and.returnValue(false);
     authSpy.getUserLoginId.and.returnValue('');
-    authSpy.hasAnyPermission.and.callFake((permissions: string[]) => permissions.length === 0);
+    authSpy.hasAnyPermission.and.callFake((permissions: string[]) =>
+      permissions.length === 0 || permissions.includes('MENU_ORDERS_VIEW')
+    );
     userPreferenceServiceSpy.getMyPreferences.and.returnValue(throwError(() => new Error('pref failed')));
 
     const fixture = TestBed.createComponent(AppComponent);
@@ -322,9 +324,11 @@ describe('AppComponent', () => {
       { name: 'Denied', meta: { requiredAuth: true } },
       { name: 'Parent', children: [{ name: 'Child', path: '/customer' }] },
       { name: 'Allowed', meta: { permissions: [] }, path: '/about' },
+      { name: 'Returns', path: '/returns', meta: { permissions: ['ADMIN'] } },
     ]);
-    expect(filtered).toHaveSize(2);
+    expect(filtered).toHaveSize(3);
     expect(filtered[0].name).toBe('Parent');
+    expect(authSpy.hasAnyPermission).toHaveBeenCalledWith(['MENU_ORDERS_VIEW']);
 
     component.items.set([{ name: 'Keep', children: [{}] } as any]);
     component.submenuOpenStateByKey.set({ Keep: true, stale: true });

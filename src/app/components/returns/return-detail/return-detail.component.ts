@@ -174,7 +174,8 @@ export class ReturnDetailComponent implements OnInit {
   }
 
   canReceiveIntoInventory(): boolean {
-    if (String(this.detail?.summary?.statusId || '').toUpperCase() !== 'RETURN_ACCEPTED') {
+    const statusId = String(this.detail?.summary?.statusId || '').toUpperCase();
+    if (statusId !== 'RETURN_ACCEPTED' && statusId !== 'SUP_RETURN_ACCEPTED') {
       return false;
     }
     return Array.isArray(this.detail?.items)

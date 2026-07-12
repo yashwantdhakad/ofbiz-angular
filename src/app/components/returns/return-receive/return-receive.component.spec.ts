@@ -111,6 +111,22 @@ describe('ReturnReceiveComponent', () => {
     expect(component.isLoading()).toBeFalse();
   });
 
+  it('loads a supplier accepted return for receiving', () => {
+    returnServiceSpy.getReturn.and.returnValue(of({
+      ...acceptedReturn,
+      summary: {
+        ...acceptedReturn.summary,
+        statusId: 'SUP_RETURN_ACCEPTED',
+      },
+    }));
+
+    component.loadReturn('RET1');
+
+    expect(routerSpy.navigate).not.toHaveBeenCalled();
+    expect(component.items).toHaveSize(1);
+    expect(component.detail()?.summary?.statusId).toBe('SUP_RETURN_ACCEPTED');
+  });
+
   it('redirects when the return is not accepted', () => {
     returnServiceSpy.getReturn.and.returnValue(of({
       summary: { statusId: 'RETURN_REQUESTED', destinationFacilityId: 'FAC1' },

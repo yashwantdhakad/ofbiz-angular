@@ -27,7 +27,7 @@ import { map } from 'rxjs/operators';
 export class AssetService {
   constructor(private apiService: ApiService) { }
 
-  getAssets(pageIndex: number, keyword: string, facilityId?: string, statusId?: string): Observable<any> {
+  getAssets(pageIndex: number, keyword: string, facilityId?: string, statusId?: string, productId?: string): Observable<any> {
     const params = new URLSearchParams();
     params.append('page', pageIndex.toString());
     params.append('size', '10');
@@ -39,6 +39,9 @@ export class AssetService {
     }
     if (statusId) {
       params.append('statusId', statusId);
+    }
+    if (productId) {
+      params.append('productId', productId);
     }
 
     const url = `/common/assets?${params.toString()}`;

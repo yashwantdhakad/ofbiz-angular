@@ -124,7 +124,7 @@ export class ReturnReceiveComponent implements OnInit {
         const eligibleItems = items.filter((item: ReturnItem) =>
           Number(item?.returnQuantity || 0) > Number(item?.receivedQuantity || 0)
         );
-        if (statusId !== 'RETURN_ACCEPTED') {
+        if (statusId !== 'RETURN_ACCEPTED' && statusId !== 'SUP_RETURN_ACCEPTED') {
           this.snackbarService.showError(this.translate.instant('RETURN.RECEIVE_ONLY_ACCEPTED'));
           this.router.navigate(['/returns', returnId]);
           return;

@@ -49,6 +49,10 @@
         </mat-select>
       </mat-form-field>
       <mat-form-field appearance="outline">
+        <mat-label>{{ 'COMMON.PRODUCT_ID' | translate }}</mat-label>
+        <input matInput [(ngModel)]="productId" />
+      </mat-form-field>
+      <mat-form-field appearance="outline">
         <mat-label>{{ 'COMMON.SEARCH' | translate }}</mat-label>
         <input matInput [(ngModel)]="queryString" />
         <mat-icon matSuffix>search</mat-icon>

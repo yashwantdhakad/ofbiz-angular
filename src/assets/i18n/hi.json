@@ -1166,7 +1166,12 @@
     "GST_RCM_BADGE": "GST Reverse Charge Applicable",
     "TDS_195_BADGE": "{{rate}}% TDS Deductible (Section 195)",
     "GST_RCM_APPLICABLE": "GST Reverse Charge Applicable",
-    "TDS_195_PERCENT": "TDS Section 195 (%)"
+    "TDS_195_PERCENT": "TDS Section 195 (%)",
+    "RECEIPTS": "रसीदें",
+    "RECEIPT_ID": "रसीद आईडी",
+    "ITEM_SEQ": "आइटम अनुक्रम",
+    "QTY_ACCEPTED": "स्वीकृत मात्रा",
+    "DATE_RECEIVED": "प्राप्त होने की तिथि"
   },
   "PRODUCT": {
     "ASSOCIATED_FROM_TITLE": "यहाँ से संबद्ध",

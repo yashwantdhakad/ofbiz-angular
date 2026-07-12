@@ -259,4 +259,15 @@ describe('ReturnDetailComponent', () => {
     expect(component.canReviewReturn()).toBeFalse();
     expect(component.canReceiveIntoInventory()).toBeFalse();
   });
+
+  it('allows supplier accepted returns to receive remaining inventory', () => {
+    component.detail = {
+      summary: { statusId: 'SUP_RETURN_ACCEPTED' },
+      items: [
+        { returnQuantity: 4, receivedQuantity: 1 },
+      ],
+    };
+
+    expect(component.canReceiveIntoInventory()).toBeTrue();
+  });
 });

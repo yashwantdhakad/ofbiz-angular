@@ -82,9 +82,9 @@ describe('AssetService', () => {
   it('should build asset search queries with optional filters', () => {
     apiServiceSpy.get.and.returnValue(of({} as any));
 
-    service.getAssets(1, '', 'FAC/1', 'INV_AVAILABLE').subscribe();
+    service.getAssets(1, '', 'FAC/1', 'INV_AVAILABLE', 'PROD/1').subscribe();
 
-    expect(apiServiceSpy.get).toHaveBeenCalledWith('/common/assets?page=1&size=10&facilityId=FAC%2F1&statusId=INV_AVAILABLE');
+    expect(apiServiceSpy.get).toHaveBeenCalledWith('/common/assets?page=1&size=10&facilityId=FAC%2F1&statusId=INV_AVAILABLE&productId=PROD%2F1');
   });
 
   it('should patch assets and build inspection endpoints with encoded ids', () => {

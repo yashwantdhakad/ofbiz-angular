@@ -121,6 +121,7 @@ describe('AssetsComponent', () => {
 
   it('searches assets with facility and inspection filters and keeps selected ids present in results', () => {
     component.selectedFacilityId = 'FAC1';
+    component.productId = ' TST_PROD_001 ';
     component.isInspectionQueue.set(true);
     component.selectedAssetIds.set(new Set(['INV1', 'INV3']));
     assetService.getAssets.and.returnValue(of({
@@ -135,7 +136,7 @@ describe('AssetsComponent', () => {
 
     component.getAssets(2, 'widget');
 
-    expect(assetService.getAssets).toHaveBeenCalledWith(1, 'widget', 'FAC1', 'INV_PENDING_INSP');
+    expect(assetService.getAssets).toHaveBeenCalledWith(1, 'widget', 'FAC1', 'INV_PENDING_INSP', 'TST_PROD_001');
     expect(component.items()).toHaveSize(2);
     expect(component.pages()).toBe(2);
     expect(Array.from(component.selectedAssetIds())).toEqual(['INV1']);
@@ -181,7 +182,7 @@ describe('AssetsComponent', () => {
     component.hasSearched.set(true);
     assetService.getAssets.and.returnValue(of({ responseMap: { resultList: [], total: 0 } } as any));
     component.onPageChange(2);
-    expect(assetService.getAssets).toHaveBeenCalledWith(2, '', 'FAC2', undefined);
+    expect(assetService.getAssets).toHaveBeenCalledWith(2, '', 'FAC2', undefined, undefined);
   });
 
   it('manages row selection helpers and bulk inspection branches', () => {

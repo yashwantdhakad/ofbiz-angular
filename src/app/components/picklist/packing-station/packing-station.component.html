@@ -1,0 +1,162 @@
+<!--
+ Licensed to the Apache Software Foundation (ASF) under one
+ or more contributor license agreements.  See the NOTICE file
+ distributed with this work for additional information
+ regarding copyright ownership.  The ASF licenses this file
+ to you under the Apache License, Version 2.0 (the
+ "License"); you may not use this file except in compliance
+ with the License.  You may obtain a copy of the License at
+
+ http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing,
+ software distributed under the License is distributed on an
+ "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ KIND, either express or implied.  See the License for the
+ specific language governing permissions and limitations
+ under the License.
+-->
+<mat-card class="packing-station-shell mat-elevation-z10">
+  <mat-card-header class="card-header-with-action">
+    <mat-card-title>{{ 'PACKING_STATION.TITLE' | translate }}</mat-card-title>
+    <button mat-stroked-button type="button" routerLink="/shipments">
+      <mat-icon>local_shipping</mat-icon>
+      {{ 'MENU.SHIPMENTS' | translate }}
+    </button>
+  </mat-card-header>
+
+  <mat-card-content>
+    <form [formGroup]="searchForm" class="scan-form" (ngSubmit)="resolveScan()">
+      <mat-form-field appearance="outline" class="scan-field">
+        <mat-label>{{ 'PACKING_STATION.SCAN_LABEL' | translate }}</mat-label>
+        <input matInput formControlName="scanCode" autocomplete="off" />
+        <mat-icon matPrefix>qr_code_scanner</mat-icon>
+        <mat-error *ngIf="searchForm.controls.scanCode.hasError('required')">
+          {{ 'PACKING_STATION.SCAN_REQUIRED' | translate }}
+        </mat-error>
+      </mat-form-field>
+      <button mat-raised-button color="primary" type="submit" [disabled]="isLoading()">
+        <mat-icon>search</mat-icon>
+        {{ 'COMMON.SEARCH' | translate }}
+      </button>
+    </form>
+
+    <mat-progress-bar *ngIf="isLoading() || isWorking()" mode="indeterminate"></mat-progress-bar>
+
+    <mat-card class="station-message" *ngIf="errorMessage() as errorKey">
+      {{ errorKey | translate }}
+    </mat-card>
+
+    <mat-card class="station-empty" *ngIf="!detail() && !errorMessage() && !isLoading()">
+      <mat-icon>inventory_2</mat-icon>
+      <div>
+        <strong>{{ 'PACKING_STATION.READY_TITLE' | translate }}</strong>
+        <p>{{ 'PACKING_STATION.READY_TEXT' | translate }}</p>
+      </div>
+    </mat-card>
+
+    <ng-container *ngIf="detail() as picklistDetail">
+      <section class="station-summary">
+        <div class="summary-main">
+          <span class="eyebrow">{{ scanType() ? ('PACKING_STATION.SCAN_TYPE_' + scanType() | translate) : ('COMMON.PICKLIST' | translate) }}</span>
+          <h2>{{ picklistDetail.picklist?.picklistId }}</h2>
+          <p>{{ picklistDetail.picklist?.facilityName || picklistDetail.picklist?.facilityId || '-' }}</p>
+        </div>
+        <div class="summary-metrics">
+          <div>
+            <span>{{ 'COMMON.STATUS' | translate }}</span>
+            <strong>{{ picklistDetail.picklist?.statusDescription || picklistDetail.picklist?.statusId || '-' }}</strong>
+          </div>
+          <div>
+            <span>{{ 'PICKLIST.ORDER_COUNT' | translate }}</span>
+            <strong>{{ orderCount() }}</strong>
+          </div>
+          <div>
+            <span>{{ 'PICKLIST.ITEM_COUNT' | translate }}</span>
+            <strong>{{ itemCount() }}</strong>
+          </div>
+          <div>
+            <span>{{ 'COMMON.SHIPMENT_ID' | translate }}</span>
+            <strong>{{ shipmentId() || '-' }}</strong>
+          </div>
+        </div>
+      </section>
+
+      <div class="station-actions">
+        <button mat-stroked-button type="button" (click)="openPicklist()">
+          <mat-icon>list_alt</mat-icon>
+          {{ 'PACKING_STATION.OPEN_PICKLIST' | translate }}
+        </button>
+        <button mat-stroked-button color="primary" type="button" *ngIf="canMarkPicked()" (click)="markPicked()" [disabled]="isWorking()">
+          <mat-icon>done_all</mat-icon>
+          {{ 'COMMON.MARK_PICKED' | translate }}
+        </button>
+        <button mat-raised-button color="primary" type="button" *ngIf="canCreateShipment()" (click)="createShipment()" [disabled]="isWorking()">
+          <mat-icon>local_shipping</mat-icon>
+          {{ 'PICKLIST.CREATE_SHIPMENT' | translate }}
+        </button>
+        <button mat-raised-button color="accent" type="button" *ngIf="shipmentId()" (click)="openShipment()" [disabled]="isWorking()">
+          <mat-icon>inventory</mat-icon>
+          {{ 'PACKING_STATION.PACK_SHIPMENT' | translate }}
+        </button>
+      </div>
+
+      <div class="station-layout">
+        <mat-card class="bin-list">
+          <mat-card-title>{{ 'PICKLIST.BINS' | translate }}</mat-card-title>
+          <button
+            mat-button
+            type="button"
+            *ngFor="let bin of bins(); trackBy: trackByBin"
+            [class.selected]="bin.picklistBinId === selectedBinId()"
+            (click)="setSelectedBin(bin.picklistBinId)">
+            <span>{{ bin.picklistBinId }}</span>
+            <small>{{ bin.primaryOrderId || '-' }}</small>
+          </button>
+        </mat-card>
+
+        <mat-card class="bin-detail" *ngIf="selectedBin() as bin">
+          <mat-card-header>
+            <mat-card-title>{{ 'PICKLIST.BIN' | translate }} {{ bin.picklistBinId }}</mat-card-title>
+            <mat-card-subtitle>
+              {{ 'PICKLIST.ORDER' | translate }} {{ bin.primaryOrderId || '-' }}
+            </mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="table-container">
+              <table mat-table [dataSource]="bin.items || []" [trackBy]="trackByItem">
+                <ng-container matColumnDef="product">
+                  <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.PRODUCT' | translate }}</th>
+                  <td mat-cell *matCellDef="let item">{{ item.inventoryProductName || item.inventoryProductId || '-' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="inventory">
+                  <th mat-header-cell *matHeaderCellDef>{{ 'PICKLIST.INVENTORY_ITEM' | translate }}</th>
+                  <td mat-cell *matCellDef="let item">{{ item.inventoryItemId || '-' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="location">
+                  <th mat-header-cell *matHeaderCellDef>{{ 'FACILITY.LOCATION_SEQ_ID' | translate }}</th>
+                  <td mat-cell *matCellDef="let item">{{ item.locationSeqId || '-' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="quantity">
+                  <th mat-header-cell class="text-right" *matHeaderCellDef>{{ 'COMMON.QTY' | translate }}</th>
+                  <td mat-cell class="text-right" *matCellDef="let item">{{ item.quantity | number : '1.2-2' }}</td>
+                </ng-container>
+
+                <ng-container matColumnDef="status">
+                  <th mat-header-cell *matHeaderCellDef>{{ 'COMMON.STATUS' | translate }}</th>
+                  <td mat-cell *matCellDef="let item">{{ item.statusDescription || item.itemStatusId || '-' }}</td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="['product', 'inventory', 'location', 'quantity', 'status']"></tr>
+                <tr mat-row *matRowDef="let row; columns: ['product', 'inventory', 'location', 'quantity', 'status']"></tr>
+              </table>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </ng-container>
+  </mat-card-content>
+</mat-card>

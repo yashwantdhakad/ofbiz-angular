@@ -37,7 +37,7 @@
           <button mat-icon-button color="primary" (click)="openPdf()" [attr.aria-label]="'COMMON.OPEN_PDF' | translate">
             <mat-icon>picture_as_pdf</mat-icon>
           </button>
-          <button mat-raised-button color="primary" (click)="reorderOrder()" *ngIf="orderId && !isQuoteMode">{{ 'COMMON.REORDER' | translate }}</button>
+          <button mat-raised-button color="primary" (click)="reorderOrder()" *ngIf="orderId && !isQuoteMode && orderHeader()?.statusId !== 'ORDER_CANCELLED'">{{ 'COMMON.REORDER' | translate }}</button>
           <button mat-raised-button color="accent" (click)="goToCreateReturn()" *ngIf="canCreateReturn()">{{ 'MENU.CREATE_RETURN' | translate }}</button>
           <button mat-raised-button color="warn" (click)="rejectQuote()" *ngIf="canRejectQuote()">
             {{ 'QUOTE.REJECT' | translate }}

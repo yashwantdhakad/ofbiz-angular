@@ -27,7 +27,7 @@ describe('PartyService', () => {
 
   beforeEach(() => {
     const spy = jasmine.createSpyObj('ApiService', [
-      'get', 'post', 'put', 'delete', 'getOms', 'postOms', 'putOms', 'deleteOms', 'getWms', 'getOmsBlob', 'postOmsFormData', 'postFormData',
+      'get', 'post', 'put', 'delete', 'getLookup', 'getOms', 'postOms', 'putOms', 'deleteOms', 'getWms', 'getOmsBlob', 'postOmsFormData', 'postFormData',
     ]);
 
     TestBed.configureTestingModule({
@@ -260,10 +260,9 @@ describe('PartyService', () => {
     service.addIdentification({ partyId: 'P1', idValue: 'ID1' } as any).subscribe();
     service.deleteIdentification({ partyId: 'P1', idValue: 'ID1' } as any).subscribe();
     service.getPaymentGatewayConfig().subscribe();
-    service.createUpdatePaymentMethod({ paymentMethodTypeId: 'CARD' }).subscribe();
     service.createCreditCard('P1', { cardNumber: '4111' }).subscribe();
     service.createBankAccount('P1', { bankName: 'Bank' }).subscribe();
-    service.deletePaymentMethod({ paymentMethodId: 'PM1' }).subscribe();
+    service.deletePaymentMethod('P1', 'PM1').subscribe();
     service.createPartyNote({ partyId: 'P1', noteText: 'note' }).subscribe();
     service.updatePartyNote({ partyId: 'P1', noteId: 'N1', noteText: 'updated' }).subscribe();
     service.deletePartyNote({ partyId: 'P1', noteId: 'N1' }).subscribe();
@@ -285,9 +284,9 @@ describe('PartyService', () => {
     expect(apiServiceSpy.put).toHaveBeenCalledWith('/common/parties/P1/notes/N1', jasmine.objectContaining({ note: 'updated' }));
     expect(apiServiceSpy.delete).toHaveBeenCalledWith('/common/parties/P1/notes/N1');
     expect(apiServiceSpy.getOms).toHaveBeenCalledWith('/rest/s1/commerce/paymentGatewayConfigList');
-    expect(apiServiceSpy.postOms).toHaveBeenCalledWith('/rest/s1/commerce/paymentMethod', { paymentMethodTypeId: 'CARD' });
-    expect(apiServiceSpy.postOms).toHaveBeenCalledWith('/parties/P1/payment-methods/credit-cards', { cardNumber: '4111' });
-    expect(apiServiceSpy.postOms).toHaveBeenCalledWith('/parties/P1/payment-methods/bank-accounts', { bankName: 'Bank' });
+    expect(apiServiceSpy.post).toHaveBeenCalledWith('/common/parties/P1/payment-methods/credit-cards', { cardNumber: '4111' });
+    expect(apiServiceSpy.post).toHaveBeenCalledWith('/common/parties/P1/payment-methods/bank-accounts', { bankName: 'Bank' });
+    expect(apiServiceSpy.delete).toHaveBeenCalledWith('/common/parties/P1/payment-methods/PM1');
     expect(apiServiceSpy.postFormData).toHaveBeenCalledWith('/common/parties/P1/contents', formData);
     expect(apiServiceSpy.get).toHaveBeenCalledWith('/common/parties/P1/contents/C1');
   });
@@ -398,21 +397,19 @@ describe('PartyService', () => {
       if (url === '/accounting/payment-method-types') {
         return of([{ paymentMethodTypeId: 'CC' }]);
       }
-      if (url === '/parties/enumerations/GENDER') {
-        return of([{ enumId: '1' }]);
-      }
       throw new Error(`Unexpected URL: ${url}`);
     }) as any);
+    apiServiceSpy.getLookup.and.returnValue(of([{ enumId: '1' }] as any));
 
     service.getPaymentMethodTypes().subscribe((res) => {
       expect(res[0].paymentMethodTypeId).toBe('CC');
     });
-    service.getEnumerations('GENDER').subscribe((res) => {
+    service.getEnumerations('CREDIT_CARD_TYPE').subscribe((res) => {
       expect(res[0].enumId).toBe('1');
     });
 
     expect(apiServiceSpy.getOms).toHaveBeenCalledWith('/accounting/payment-method-types');
-    expect(apiServiceSpy.getOms).toHaveBeenCalledWith('/parties/enumerations/GENDER');
+    expect(apiServiceSpy.getLookup).toHaveBeenCalledWith('enumerations', 'CREDIT_CARD_TYPE');
   });
 
   it('should manage party note endpoints', () => {
@@ -511,16 +508,23 @@ describe('PartyService', () => {
 
   it('should call payment method endpoints', () => {
     apiServiceSpy.getOms.and.returnValue(of({}));
-    apiServiceSpy.postOms.and.returnValue(of({}));
+    apiServiceSpy.get.and.returnValue(of({}));
+    apiServiceSpy.post.and.returnValue(of({}));
+    apiServiceSpy.put.and.returnValue(of({}));
+    apiServiceSpy.delete.and.returnValue(of({}));
 
     service.getPaymentGatewayConfig().subscribe();
-    service.createUpdatePaymentMethod({ a: 1 }).subscribe();
+    service.getPartyPaymentMethods('P1').subscribe();
     service.createBankAccount('P1', { c: 3 }).subscribe();
-    service.deletePaymentMethod({ b: 2 }).subscribe();
+    service.updateBankAccount('P1', 'PM2', { c: 4 }).subscribe();
+    service.updateCreditCard('P1', 'PM3', { d: 5 }).subscribe();
+    service.deletePaymentMethod('P1', 'PM1').subscribe();
 
     expect(apiServiceSpy.getOms).toHaveBeenCalledWith('/rest/s1/commerce/paymentGatewayConfigList');
-    expect(apiServiceSpy.postOms).toHaveBeenCalledWith('/rest/s1/commerce/paymentMethod', { a: 1 });
-    expect(apiServiceSpy.postOms).toHaveBeenCalledWith('/parties/P1/payment-methods/bank-accounts', { c: 3 });
-    expect(apiServiceSpy.postOms).toHaveBeenCalledWith('/rest/s1/commerce/deletePaymentMethod', { b: 2 });
+    expect(apiServiceSpy.get).toHaveBeenCalledWith('/common/parties/P1/payment-methods');
+    expect(apiServiceSpy.post).toHaveBeenCalledWith('/common/parties/P1/payment-methods/bank-accounts', { c: 3 });
+    expect(apiServiceSpy.put).toHaveBeenCalledWith('/common/parties/P1/payment-methods/bank-accounts/PM2', { c: 4 });
+    expect(apiServiceSpy.put).toHaveBeenCalledWith('/common/parties/P1/payment-methods/credit-cards/PM3', { d: 5 });
+    expect(apiServiceSpy.delete).toHaveBeenCalledWith('/common/parties/P1/payment-methods/PM1');
   });
 });

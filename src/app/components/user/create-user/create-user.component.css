@@ -35,6 +35,12 @@
   padding-top: 8px;
 }
 
+/* Security-groups selector spans the full grid row */
+.full-width {
+  grid-column: 1 / -1;
+}
+
+
 /* Mobile */
 @media (max-width: 768px) {
   :host {

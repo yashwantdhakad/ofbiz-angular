@@ -90,7 +90,8 @@ describe('PicklistService', () => {
     apiService.get.and.returnValues(
       of({ data: [{ orderId: 'SO-1' }] } as any),
       of([{ orderId: 'SO-2' }] as any),
-      of({ data: [{ picklistId: 'PK-1' }] } as any)
+      of({ data: [{ picklistId: 'PK-1' }] } as any),
+      of({ data: { picklistId: 'PK-2', picklistBin: { picklistBinId: 'BIN 1' } } } as any)
     );
 
     service.getPicklistOrders({ statusId: 'ORDER_APPROVED', facilityId: 'FAC-1' }).subscribe((result) => {
@@ -98,10 +99,12 @@ describe('PicklistService', () => {
     });
     service.getPicklistOrders({}).subscribe((result) => expect(result).toEqual([{ orderId: 'SO-2' }]));
     service.getPicklistOrdersByOrder('SO 1').subscribe((result) => expect(result).toEqual([{ picklistId: 'PK-1' }]));
+    service.getPicklistByBin('BIN 1').subscribe((result) => expect(result.picklistId).toBe('PK-2'));
 
     expect(apiService.get).toHaveBeenCalledWith('/common/picklists/orders?statusId=ORDER_APPROVED&facilityId=FAC-1');
     expect(apiService.get).toHaveBeenCalledWith('/common/picklists/orders');
     expect(apiService.get).toHaveBeenCalledWith('/common/picklists/by-order/SO%201');
+    expect(apiService.get).toHaveBeenCalledWith('/common/picklists/by-bin/BIN%201');
   });
 
   it('posts picker assignment, mark picked, and shipment creation actions', () => {

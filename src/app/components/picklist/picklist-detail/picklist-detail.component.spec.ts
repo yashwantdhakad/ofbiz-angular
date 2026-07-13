@@ -222,6 +222,15 @@ describe('PicklistDetailComponent', () => {
 
     expect(component.loadPicklist).toHaveBeenCalledWith('PK-1', false);
 
+    picklistServiceSpy.createShipmentFromPicklist.and.returnValue(of({ shipmentIds: ['SHIP-1', 'SHIP-2'] }));
+    routerSpy.navigate.calls.reset();
+
+    component.createShipment();
+
+    expect(snackbarSpy.showSuccess).toHaveBeenCalledWith('PICKLIST.SHIPMENTS_CREATED');
+    expect(component.loadPicklist).toHaveBeenCalledWith('PK-1', false);
+    expect(routerSpy.navigate).not.toHaveBeenCalled();
+
     picklistServiceSpy.createShipmentFromPicklist.and.returnValue(throwError(() => new Error('failed')));
 
     component.createShipment();

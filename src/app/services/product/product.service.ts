@@ -70,11 +70,21 @@ export class ProductService {
     );
   }
 
-  getProductsAutocompleteFromOms(keyword: string, limit: number = 20): Observable<ProductListResponse<ProductAutocompleteItem>> {
+  getProductsAutocompleteFromOms(
+    keyword: string,
+    limit: number = 20,
+    context: { facilityId?: string | null; supplierPartyId?: string | null } = {}
+  ): Observable<ProductListResponse<ProductAutocompleteItem>> {
     const params = new URLSearchParams({
       query: keyword || '',
       limit: String(limit),
     });
+    if (context.facilityId) {
+      params.append('facilityId', context.facilityId);
+    }
+    if (context.supplierPartyId) {
+      params.append('supplierPartyId', context.supplierPartyId);
+    }
     const url = `/common/intra/products/autocomplete?${params.toString()}`;
     return this.apiService.get<any>(url).pipe(
       map((response: any) => {

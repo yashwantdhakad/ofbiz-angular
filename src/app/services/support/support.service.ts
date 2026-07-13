@@ -19,6 +19,7 @@
 import { Injectable } from '@angular/core';
 import { ApiService } from '../common/api.service';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import {
   SupportTicket,
   CreateSupportTicketRequest,
@@ -35,8 +36,10 @@ export class SupportService {
   constructor(private apiService: ApiService) {}
 
   listMyTickets(page: number = 0, size: number = 20): Observable<SupportTicketPageResponse> {
-    const url = `/support/tickets/my?page=${page}&size=${size}`;
-    return this.apiService.getOms<SupportTicketPageResponse>(url);
+    const url = `/common/support/tickets/my?page=${page}&size=${size}`;
+    return this.apiService.get<{ data: SupportTicketPageResponse }>(url).pipe(
+      map(res => res.data)
+    );
   }
 
   listAllTickets(
@@ -45,38 +48,50 @@ export class SupportService {
     page: number = 0,
     size: number = 20
   ): Observable<SupportTicketPageResponse> {
-    let url = `/support/tickets?page=${page}&size=${size}`;
+    let url = `/common/support/tickets?page=${page}&size=${size}`;
     if (statusId) {
       url += `&statusId=${encodeURIComponent(statusId)}`;
     }
     if (typeId) {
       url += `&typeId=${encodeURIComponent(typeId)}`;
     }
-    return this.apiService.getOms<SupportTicketPageResponse>(url);
+    return this.apiService.get<{ data: SupportTicketPageResponse }>(url).pipe(
+      map(res => res.data)
+    );
   }
 
   getTicket(custRequestId: string): Observable<SupportTicket> {
-    const url = `/support/tickets/${encodeURIComponent(custRequestId)}`;
-    return this.apiService.getOms<SupportTicket>(url);
+    const url = `/common/support/tickets/${encodeURIComponent(custRequestId)}`;
+    return this.apiService.get<{ data: { ticket: SupportTicket } }>(url).pipe(
+      map(res => res.data.ticket)
+    );
   }
 
   createTicket(req: CreateSupportTicketRequest): Observable<SupportTicket> {
-    const url = `/support/tickets`;
-    return this.apiService.postOms<SupportTicket>(url, req);
+    const url = `/common/support/tickets`;
+    return this.apiService.post<{ data: { ticket: SupportTicket } }>(url, req).pipe(
+      map(res => res.data.ticket)
+    );
   }
 
   updateStatus(custRequestId: string, req: UpdateTicketStatusRequest): Observable<SupportTicket> {
-    const url = `/support/tickets/${encodeURIComponent(custRequestId)}/status`;
-    return this.apiService.patchOms<SupportTicket>(url, req);
+    const url = `/common/support/tickets/${encodeURIComponent(custRequestId)}/status`;
+    return this.apiService.patch<{ data: { ticket: SupportTicket } }>(url, req).pipe(
+      map(res => res.data.ticket)
+    );
   }
 
   assignTicket(custRequestId: string, req: AssignTicketRequest): Observable<SupportTicket> {
-    const url = `/support/tickets/${encodeURIComponent(custRequestId)}/assign`;
-    return this.apiService.patchOms<SupportTicket>(url, req);
+    const url = `/common/support/tickets/${encodeURIComponent(custRequestId)}/assign`;
+    return this.apiService.patch<{ data: { ticket: SupportTicket } }>(url, req).pipe(
+      map(res => res.data.ticket)
+    );
   }
 
   addComment(custRequestId: string, req: AddCommentRequest): Observable<SupportTicket> {
-    const url = `/support/tickets/${encodeURIComponent(custRequestId)}/comments`;
-    return this.apiService.postOms<SupportTicket>(url, req);
+    const url = `/common/support/tickets/${encodeURIComponent(custRequestId)}/comments`;
+    return this.apiService.post<{ data: { ticket: SupportTicket } }>(url, req).pipe(
+      map(res => res.data.ticket)
+    );
   }
 }

@@ -269,11 +269,14 @@ export class PicklistDetailComponent implements OnInit {
       .subscribe({
         next: (result: any) => {
           this.isLoading.set(false);
-          const shipmentId = result?.shipmentId;
-          if (shipmentId) {
+          const shipmentIds = this.getShipmentIds(result);
+          if (shipmentIds.length === 1) {
             this.snackbarService.showSuccess(this.translate.instant('PICKLIST.SHIPMENT_CREATED'));
-            this.router.navigate(['/shipments/sales', shipmentId]);
+            this.router.navigate(['/shipments/sales', shipmentIds[0]]);
           } else {
+            if (shipmentIds.length > 1) {
+              this.snackbarService.showSuccess(this.translate.instant('PICKLIST.SHIPMENTS_CREATED'));
+            }
             this.loadPicklist(this.picklistId as string, false);
           }
         },
@@ -282,6 +285,13 @@ export class PicklistDetailComponent implements OnInit {
           this.snackbarService.showError(this.translate.instant('PICKLIST.SHIPMENT_CREATE_ERROR'));
         },
       });
+  }
+
+  private getShipmentIds(result: any): string[] {
+    if (Array.isArray(result?.shipmentIds)) {
+      return result.shipmentIds.filter((shipmentId: unknown): shipmentId is string => typeof shipmentId === 'string' && shipmentId.length > 0);
+    }
+    return result?.shipmentId ? [result.shipmentId] : [];
   }
 
   getFacilityLabel(facilityId?: string): string {

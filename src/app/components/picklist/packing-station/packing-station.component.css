@@ -1,0 +1,204 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+.packing-station-shell {
+  margin: 16px;
+}
+
+.scan-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.scan-field {
+  flex: 1 1 420px;
+}
+
+.scan-form button {
+  min-height: 56px;
+}
+
+.station-empty,
+.station-message {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-top: 16px;
+  padding: 24px;
+  border: 1px dashed #d0d5dd;
+  background: #fcfcfd;
+  color: #475467;
+}
+
+.station-message {
+  border-left: 4px solid #b42318;
+  color: #b42318;
+}
+
+.station-empty mat-icon {
+  color: #3f51b5;
+}
+
+.station-empty p {
+  margin: 4px 0 0;
+}
+
+.station-summary {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(420px, 2fr);
+  gap: 16px;
+  margin: 20px 0;
+  padding: 20px;
+  border: 1px solid #d0d5dd;
+  background: #ffffff;
+}
+
+.summary-main h2 {
+  margin: 4px 0;
+  font-size: 30px;
+  line-height: 1.15;
+}
+
+.summary-main p {
+  margin: 0;
+  color: #475467;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #3f51b5;
+}
+
+.summary-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+.summary-metrics div {
+  padding: 12px;
+  border: 1px solid #e4e7ec;
+  background: #f8fafc;
+}
+
+.summary-metrics span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #475467;
+}
+
+.summary-metrics strong {
+  display: block;
+  font-size: 18px;
+  color: #101828;
+  overflow-wrap: anywhere;
+}
+
+.station-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.station-actions button {
+  min-height: 44px;
+}
+
+.station-layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.bin-list {
+  padding: 16px;
+}
+
+.bin-list mat-card-title {
+  display: block;
+  margin-bottom: 12px;
+}
+
+.bin-list button {
+  width: 100%;
+  min-height: 52px;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  border: 1px solid #e4e7ec;
+}
+
+.bin-list button.selected {
+  border-color: #3f51b5;
+  background: #eef2ff;
+}
+
+.bin-list small {
+  color: #475467;
+}
+
+.bin-detail {
+  min-width: 0;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+}
+
+.text-right {
+  text-align: right;
+}
+
+@media (max-width: 960px) {
+  .station-summary,
+  .station-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-metrics {
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .packing-station-shell {
+    margin: 12px;
+  }
+
+  .scan-form {
+    flex-direction: column;
+  }
+
+  .scan-field,
+  .scan-form button {
+    width: 100%;
+  }
+
+  .summary-metrics {
+    grid-template-columns: 1fr;
+  }
+}

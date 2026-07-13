@@ -583,6 +583,12 @@
       <mat-card-content>
         <ul class="custom-list">
           <li class="custom-list-item" *ngFor="let payment of payments; let last = last; trackBy: trackByPayment">
+            <button mat-icon-button type="button" color="warn" class="custom-icon-align"
+              data-testid="customer-detail-delete-payment-method"
+              [attr.aria-label]="'COMMON.DELETE' | translate"
+              (click)="deletePaymentMethodDialog(payment)">
+              <mat-icon>delete_outline</mat-icon>
+            </button>
             <div *ngIf="
                 payment.paymentMethod?.paymentMethodTypeEnumId === 'CREDIT_CARD'
               ">

@@ -70,6 +70,23 @@
             <mat-option [value]="false">{{ 'COMMON.NO' | translate }}</mat-option>
           </mat-select>
         </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'USER.ACCESS_GROUPS' | translate }}</mat-label>
+          <mat-select formControlName="roleIds" multiple>
+            <mat-option
+              *ngFor="let group of securityGroups()"
+              [value]="group.groupId"
+              [title]="group.description || ''"
+            >
+              {{ group.groupName || group.groupId }}<span *ngIf="group.module"> · {{ group.module }}</span>
+            </mat-option>
+          </mat-select>
+          <mat-hint>{{ 'USER.ACCESS_GROUPS_REQUIRED_HINT' | translate }}</mat-hint>
+          <mat-error *ngIf="userForm.get('roleIds')?.hasError('required')">
+            {{ 'USER.ACCESS_GROUPS_REQUIRED' | translate }}
+          </mat-error>
+        </mat-form-field>
       </div>
 
       <div class="form-actions">

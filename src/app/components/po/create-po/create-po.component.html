@@ -178,6 +178,9 @@
             <mat-autocomplete #productAuto="matAutocomplete" [displayWith]="displayProduct" (optionSelected)="onProductSelected($event, i)">
               <mat-option *ngFor="let product of filteredProducts[i] | async; trackBy: trackByProduct" [value]="product">
                 {{ product.productId }} - {{ product.productName }}
+                <span class="option-meta">
+                  {{ 'PO.SUPPLIER_LAST_PRICE' | translate }}: {{ product.supplierLastPrice ?? product.lastPrice ?? 0 }}
+                </span>
               </mat-option>
             </mat-autocomplete>
           </mat-form-field>

@@ -29,6 +29,9 @@ export interface UserLoginInfo {
 export interface UserRole {
   groupId?: string;
   groupName?: string;
+  description?: string;
+  module?: string;
+  level?: string;
 }
 
 export interface UserPermission {
@@ -72,6 +75,9 @@ export interface SecurityGroup {
   groupId?: string;
   groupName?: string;
   description?: string;
+  module?: string;
+  level?: string;
+  sortOrder?: number;
 }
 
 export interface SecurityPermission {
@@ -118,4 +124,3 @@ export interface SecurityFeaturesResponse {
   features: Record<ErpFeature, ErpFeatureAccess>;
   isAdmin: boolean;
 }
-

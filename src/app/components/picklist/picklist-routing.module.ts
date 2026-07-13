@@ -21,9 +21,11 @@ import { RouterModule, Routes } from '@angular/router';
 import { PicklistsComponent } from './picklists/picklists.component';
 import { PicklistCreateComponent } from './picklist-create/picklist-create.component';
 import { PicklistDetailComponent } from './picklist-detail/picklist-detail.component';
+import { PackingStationComponent } from './packing-station/packing-station.component';
 
 const routes: Routes = [
   { path: '', component: PicklistsComponent },
+  { path: 'packing-station', component: PackingStationComponent, data: { title: 'PACKING_STATION.TITLE' } },
   { path: 'create', component: PicklistCreateComponent },
   { path: ':picklistId', component: PicklistDetailComponent },
 ];

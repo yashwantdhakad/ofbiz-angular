@@ -65,6 +65,13 @@
   flex: 0 0 auto;
 }
 
+.option-meta {
+  display: block;
+  color: rgba(0, 0, 0, 0.64);
+  font-size: 12px;
+  line-height: 18px;
+}
+
 /* ─── Mobile ─────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   :host {

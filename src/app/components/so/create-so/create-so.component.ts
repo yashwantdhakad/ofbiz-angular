@@ -230,8 +230,20 @@ export class CreateSOComponent implements OnInit {
     if (productControl) {
       productControl.setValue(selectedProduct);
     }
-    this.applyProductPrice(index, productId);
-    this.applyProductAtp(index, productId);
+    const unitAmountControl = this.items.at(index)?.get('unitAmount');
+    const atpControl = this.items.at(index)?.get('atpTotal');
+    const selectedPrice = this.toNumberOrNull(selectedProduct?.unitPrice);
+    const selectedAtp = this.toNumberOrNull(selectedProduct?.atpTotal ?? selectedProduct?.availableToPromiseTotal);
+    if (unitAmountControl && selectedPrice != null) {
+      unitAmountControl.setValue(selectedPrice);
+    } else {
+      this.applyProductPrice(index, productId);
+    }
+    if (atpControl && selectedAtp != null) {
+      atpControl.setValue(selectedAtp);
+    } else {
+      this.applyProductAtp(index, productId);
+    }
   }
 
   displayProduct(product: any): string {
@@ -525,7 +537,9 @@ export class CreateSOComponent implements OnInit {
         if (!query) {
           return of([]);
         }
-        return this.productService.getProductsAutocompleteFromOms(query).pipe(
+        return this.productService.getProductsAutocompleteFromOms(query, 20, {
+          facilityId: this.orderForm.get('facilityId')?.value || null,
+        }).pipe(
           map((response: any) => response?.documentList || []),
           catchError(() => of([]))
         );
@@ -563,7 +577,11 @@ export class CreateSOComponent implements OnInit {
 
     this.productService.getInventorySummary(productId).subscribe({
       next: (summary: any[]) => {
-        const total = (Array.isArray(summary) ? summary : []).reduce((acc, row) => {
+        const facilityId = this.orderForm.get('facilityId')?.value;
+        const rows = Array.isArray(summary)
+          ? (facilityId ? summary.filter((row) => row?.facilityId === facilityId) : summary)
+          : [];
+        const total = rows.reduce((acc, row) => {
           const value = Number(row?.atpTotal ?? row?.availableToPromiseTotal ?? 0);
           return acc + (Number.isNaN(value) ? 0 : value);
         }, 0);
@@ -573,6 +591,14 @@ export class CreateSOComponent implements OnInit {
         atpControl.setValue(0);
       },
     });
+  }
+
+  private toNumberOrNull(value: unknown): number | null {
+    if (value == null || value === '') {
+      return null;
+    }
+    const numeric = Number(value);
+    return Number.isNaN(numeric) ? null : numeric;
   }
 
   private addOrderItems(orderId: string, orderPrimaryId: string | number, shipGroupSeqId: string): void {

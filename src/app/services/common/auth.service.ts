@@ -54,6 +54,8 @@ interface OfbizTokenResponse {
   providedIn: 'root',
 })
 export class AuthService {
+  private static readonly SUPER_ADMIN_ROLES = new Set(['APP_SUPER_ADMIN', 'SUPER', 'FULLADMIN']);
+
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -126,7 +128,7 @@ export class AuthService {
     if (this.permissionBypass) {
       return true;
     }
-    return this.getRolesFromClaims().includes('APP_SUPER_ADMIN');
+    return this.getRolesFromClaims().some((role) => AuthService.SUPER_ADMIN_ROLES.has(role));
   }
 
   hasPermission(permission: string): boolean {
@@ -254,10 +256,13 @@ export class AuthService {
   }
 
   private normalizeValues(values: unknown): string[] {
-    if (!Array.isArray(values)) {
+    const rawValues = typeof values === 'string'
+      ? values.split(',')
+      : values;
+    if (!Array.isArray(rawValues)) {
       return [];
     }
-    return values
+    return rawValues
       .filter((value): value is string => typeof value === 'string')
       .map((value) => value.trim())
       .filter((value) => value.length > 0)

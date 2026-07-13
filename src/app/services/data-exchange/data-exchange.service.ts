@@ -18,7 +18,9 @@
  */
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ApiService } from '../common/api.service';
+import { base64ToBlob } from '../common/blob.util';
 
 @Injectable({
   providedIn: 'root',
@@ -34,37 +36,49 @@ export class DataExchangeService {
     if (jobType) {
       params.set('jobType', jobType);
     }
-    return this.apiService.getWms(`/data-exchange/jobs?${params.toString()}`);
+    return this.apiService.get(`/common/data-exchange/jobs?${params.toString()}`);
   }
 
   exportCsv(entityType: string): Observable<any> {
-    return this.apiService.postWms('/data-exchange/exports', { entityType });
+    return this.apiService.post('/common/data-exchange/exports', { entityType });
   }
 
-  importCsv(entityType: string, file: File, dryRun: boolean): Observable<any> {
+  validateCsv(entityType: string, file: File): Observable<any> {
     const formData = new FormData();
     formData.append('entityType', entityType);
-    formData.append('file', file);
-    formData.append('dryRun', String(dryRun));
-    return this.apiService.postWmsFormData('/data-exchange/imports', formData);
+    formData.append('uploadedFile', file);
+    return this.apiService.postFormData('/common/data-exchange/validations', formData);
+  }
+
+  importCsv(entityType: string, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('entityType', entityType);
+    formData.append('uploadedFile', file);
+    return this.apiService.postFormData('/common/data-exchange/imports', formData);
   }
 
   downloadResult(jobId: number): Observable<Blob> {
-    return this.apiService.getWmsBlob(`/data-exchange/jobs/${encodeURIComponent(String(jobId))}/result`);
+    return this.downloadCsv(`/common/data-exchange/jobs/${encodeURIComponent(String(jobId))}/result`);
   }
 
   downloadErrors(jobId: number): Observable<Blob> {
-    return this.apiService.getWmsBlob(`/data-exchange/jobs/${encodeURIComponent(String(jobId))}/errors`);
+    return this.downloadCsv(`/common/data-exchange/jobs/${encodeURIComponent(String(jobId))}/errors`);
   }
 
   downloadTemplate(entityType: string): Observable<Blob> {
-    return this.apiService.getWmsBlob(`/data-exchange/templates/${encodeURIComponent(entityType)}`);
+    return this.downloadCsv(`/common/data-exchange/templates/${encodeURIComponent(entityType)}`);
   }
 
   cancelJob(jobId: number): Observable<any> {
-    return this.apiService.postWms(
-      `/async-jobs/DATA_EXCHANGE/${encodeURIComponent(String(jobId))}/cancel`,
-      {}
+    return this.apiService.post(`/common/data-exchange/jobs/${encodeURIComponent(String(jobId))}/cancel`, {});
+  }
+
+  private downloadCsv(endpoint: string): Observable<Blob> {
+    return this.apiService.get<any>(endpoint).pipe(
+      map((response: any) => {
+        const data = response?.data ?? response;
+        return base64ToBlob(data?.fileBytes, data?.mimeType || 'text/csv');
+      })
     );
   }
 }

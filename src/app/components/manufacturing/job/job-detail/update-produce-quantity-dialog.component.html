@@ -19,7 +19,7 @@
 <h2 mat-dialog-title>{{ 'MANUFACTURING.UPDATE_QUANTITY' | translate }}</h2>
 
 <mat-dialog-content>
-  <p class="produce-item-name">{{ data?.productName || data?.productId }}</p>
+  <p class="produce-item-name">{{ data.productName || data.productId }}</p>
   <form [formGroup]="form" class="dialog-form">
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>{{ 'MANUFACTURING.QTY_TO_PRODUCE' | translate }}</mat-label>

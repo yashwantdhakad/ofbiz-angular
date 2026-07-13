@@ -312,7 +312,7 @@ export class UserDetailComponent implements OnInit {
     this.dialog
       .open(ConfirmationDialogComponent, {
         data: {
-          title: this.translate.instant('USER.SECURITY_GROUPS'),
+          title: this.translate.instant('USER.ACCESS_GROUPS'),
           message: this.translate.instant('USER.REMOVE_GROUP_CONFIRM', { groupId: targetGroupId }),
         },
       })

@@ -21,11 +21,13 @@ import { RouterModule, Routes } from '@angular/router';
 import { ChartOfAccountsComponent } from './chart-of-accounts/chart-of-accounts.component';
 import { JournalEntriesComponent } from './journal-entries/journal-entries.component';
 import { ProfitLossComponent } from './profit-loss/profit-loss.component';
+import { ExchangeRatesComponent } from './exchange-rates/exchange-rates.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'chart-of-accounts', pathMatch: 'full' },
   { path: 'chart-of-accounts', component: ChartOfAccountsComponent, data: { title: 'FINANCE.CHART_OF_ACCOUNTS_TITLE' } },
   { path: 'journal-entries', component: JournalEntriesComponent, data: { title: 'FINANCE.JOURNAL_ENTRIES_TITLE' } },
+  { path: 'exchange-rates', component: ExchangeRatesComponent, data: { title: 'FINANCE.EXCHANGE_RATES_TITLE' } },
   { path: 'profit-loss', component: ProfitLossComponent, data: { title: 'Profit & Loss' } },
 ];
 

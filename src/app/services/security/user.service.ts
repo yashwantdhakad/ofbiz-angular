@@ -114,7 +114,7 @@ export class UserService {
 
 
   listRoles(): Observable<SecurityGroup[]> {
-    return this.apiService.get<any>('/common/users/security-groups').pipe(
+    return this.apiService.get<any>('/common/users/access-groups').pipe(
       map((response: any) => {
         const list = response?.data?.resultList ?? response?.resultList;
         return Array.isArray(list) ? (list as SecurityGroup[]) : [];

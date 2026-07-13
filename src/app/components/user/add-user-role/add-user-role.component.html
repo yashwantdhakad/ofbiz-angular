@@ -18,7 +18,7 @@
 -->
 <mat-card class="mat-elevation-z10">
   <mat-card-title mat-dialog-title>
-    {{ 'USER.SECURITY_GROUPS' | translate }}
+    {{ 'USER.ACCESS_GROUPS' | translate }}
   </mat-card-title>
   <mat-card-content mat-dialog-content>
     <form
@@ -27,12 +27,13 @@
       class="roles-form"
     >
       <mat-form-field appearance="outline">
-        <mat-label>{{ 'USER.SECURITY_GROUPS' | translate }}</mat-label>
+        <mat-label>{{ 'USER.ACCESS_GROUPS' | translate }}</mat-label>
         <mat-select formControlName="roleIds" multiple>
-          <mat-option *ngFor="let role of roles()" [value]="role.groupId">
-            {{ role.groupName || role.groupId }}
+          <mat-option *ngFor="let role of roles()" [value]="role.groupId" [title]="role.description || ''">
+            {{ role.groupName || role.groupId }}<span *ngIf="role.module"> · {{ role.module }}</span>
           </mat-option>
         </mat-select>
+        <mat-hint>{{ 'USER.ACCESS_GROUPS_HINT' | translate }}</mat-hint>
       </mat-form-field>
 
       <div class="form-actions">

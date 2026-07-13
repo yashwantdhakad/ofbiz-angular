@@ -18,6 +18,7 @@
  */
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ApiService } from '../common/api.service';
 
 export interface ReportFilters {
@@ -110,31 +111,45 @@ export class ReportService {
   constructor(private apiService: ApiService) {}
 
   getSalesOverview(filters: ReportFilters): Observable<any> {
-    return this.apiService.getOms(`/reports/sales/overview${this.toQueryString(filters, false)}`);
+    return this.apiService.get(`/common/reports/sales/overview${this.toQueryString(filters, false)}`).pipe(
+      map((response: any) => this.unwrap(response)?.overview ?? this.unwrap(response))
+    );
   }
 
   getSalesTrend(filters: ReportFilters): Observable<any[]> {
-    return this.apiService.getOms(`/reports/sales/trend${this.toQueryString(filters, false)}`);
+    return this.apiService.get(`/common/reports/sales/trend${this.toQueryString(filters, false)}`).pipe(
+      map((response: any) => this.toItems(response))
+    );
   }
 
   getTopProducts(filters: ReportFilters, limit: number = 8): Observable<any[]> {
-    return this.apiService.getOms(`/reports/sales/top-products${this.toQueryString(filters, false, { limit: String(limit) })}`);
+    return this.apiService.get(`/common/reports/sales/top-products${this.toQueryString(filters, false, { limit: String(limit) })}`).pipe(
+      map((response: any) => this.toItems(response))
+    );
   }
 
   getSupplierRisk(filters: ReportFilters, limit: number = 10): Observable<any[]> {
-    return this.apiService.getOms(`/reports/sales/supplier-risk${this.toQueryString(filters, false, { limit: String(limit) })}`);
+    return this.apiService.get(`/common/reports/sales/supplier-risk${this.toQueryString(filters, false, { limit: String(limit) })}`).pipe(
+      map((response: any) => this.toItems(response))
+    );
   }
 
   getInventoryOverview(filters: ReportFilters): Observable<any> {
-    return this.apiService.getWms(`/reports/inventory/overview${this.toQueryString(filters, true)}`);
+    return this.apiService.get(`/common/reports/inventory/overview${this.toQueryString(filters, true)}`).pipe(
+      map((response: any) => this.unwrap(response)?.overview ?? this.unwrap(response))
+    );
   }
 
   getLowStockByFacility(limit: number = 8): Observable<any[]> {
-    return this.apiService.getWms(`/reports/inventory/low-stock-by-facility${this.toQueryString({}, true, { limit: String(limit) })}`);
+    return this.apiService.get(`/common/reports/inventory/low-stock-by-facility${this.toQueryString({}, true, { limit: String(limit) })}`).pipe(
+      map((response: any) => this.toItems(response))
+    );
   }
 
   getSupplierReturnSignals(filters: ReportFilters, limit: number = 10): Observable<any[]> {
-    return this.apiService.getWms(`/reports/inventory/supplier-return-signals${this.toQueryString(filters, false, { limit: String(limit) })}`);
+    return this.apiService.get(`/common/reports/inventory/supplier-return-signals${this.toQueryString(filters, false, { limit: String(limit) })}`).pipe(
+      map((response: any) => this.toItems(response))
+    );
   }
 
   getTrialBalance(fromDate?: string | null, toDate?: string | null): Observable<TrialBalanceReportItem[]> {
@@ -147,7 +162,9 @@ export class ReportService {
     }
     const query = params.toString();
     const suffix = query.length > 0 ? `?${query}` : '';
-    return this.apiService.getOms<TrialBalanceReportItem[]>(`/accounting/trial-balance${suffix}`);
+    return this.apiService.get(`/common/reports/accounting/trial-balance${suffix}`).pipe(
+      map((response: any) => this.toItems(response) as TrialBalanceReportItem[])
+    );
   }
 
   getProfitLossReport(fromDate?: string | null, toDate?: string | null): Observable<ProfitLossReport> {
@@ -173,7 +190,9 @@ export class ReportService {
     }
     const query = params.toString();
     const suffix = query.length > 0 ? `?${query}` : '';
-    return this.apiService.getOms<CashflowForecastResponse>(`/reports/cashflow/forecast${suffix}`);
+    return this.apiService.get(`/common/reports/cashflow/forecast${suffix}`).pipe(
+      map((response: any) => this.unwrap(response) as CashflowForecastResponse)
+    );
   }
 
   getVendorPerformance(
@@ -189,7 +208,21 @@ export class ReportService {
       params.append('thruDate', thruDate);
     }
     params.append('limit', String(limit));
-    return this.apiService.getOms<VendorPerformanceResponse>(`/reports/vendors/performance?${params.toString()}`);
+    return this.apiService.get(`/common/reports/vendors/performance?${params.toString()}`).pipe(
+      map((response: any) => this.unwrap(response) as VendorPerformanceResponse)
+    );
+  }
+
+  private unwrap(response: any): any {
+    return response?.data ?? response;
+  }
+
+  private toItems(response: any): any[] {
+    const data = this.unwrap(response);
+    if (Array.isArray(data)) {
+      return data;
+    }
+    return Array.isArray(data?.items) ? data.items : [];
   }
 
   private toQueryString(

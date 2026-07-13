@@ -204,6 +204,11 @@ export interface ProductListResponse<TItem = ProductSummary> {
 
 export interface ProductAutocompleteItem extends ProductSummary {
   productId?: string;
+  unitPrice?: number | string;
+  atpTotal?: number | string;
+  availableToPromiseTotal?: number | string;
+  supplierLastPrice?: number | string;
+  lastPrice?: number | string;
 }
 
 export interface ProductContentDialogData {

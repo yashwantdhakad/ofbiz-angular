@@ -21,7 +21,7 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { finalize } from 'rxjs/operators';
-import { UserCreatePayload, UserDetailResponse } from '@ofbiz/models/user.model';
+import { UserCreatePayload, UserDetailResponse, SecurityGroup } from '@ofbiz/models/user.model';
 import { SnackbarService } from '@ofbiz/services/common/snackbar.service';
 import { UserService } from '@ofbiz/services/security/user.service';
 
@@ -34,6 +34,9 @@ import { UserService } from '@ofbiz/services/security/user.service';
 })
 export class CreateUserComponent {
   readonly isLoading = signal(false);
+  readonly isLoadingGroups = signal(false);
+  readonly securityGroups = signal<SecurityGroup[]>([]);
+
   userForm = this.fb.group({
     userLoginId: ['', Validators.required],
     password: ['', Validators.required],
@@ -41,6 +44,7 @@ export class CreateUserComponent {
     lastName: [''],
     enabled: [true, Validators.required],
     requirePasswordChange: [false],
+    roleIds: [[] as string[], Validators.required],
   });
 
   constructor(
@@ -49,7 +53,21 @@ export class CreateUserComponent {
     private snackbarService: SnackbarService,
     private router: Router,
     private translate: TranslateService
-  ) {}
+  ) {
+    this.loadSecurityGroups();
+  }
+
+  private loadSecurityGroups(): void {
+    this.isLoadingGroups.set(true);
+    this.userService
+      .listRoles()
+      .pipe(finalize(() => this.isLoadingGroups.set(false)))
+      .subscribe({
+        next: (groups) => this.securityGroups.set(groups || []),
+        error: () => this.securityGroups.set([]),
+      });
+  }
+
   createUser(): void {
     if (this.userForm.invalid) {
       this.userForm.markAllAsTouched();
@@ -67,6 +85,7 @@ export class CreateUserComponent {
           this.userForm.reset({
             enabled: true,
             requirePasswordChange: false,
+            roleIds: [],
           });
           if (createdId) {
             this.router.navigate(['/users', createdId]);

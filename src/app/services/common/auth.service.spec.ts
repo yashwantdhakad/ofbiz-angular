@@ -152,8 +152,8 @@ describe('AuthService', () => {
     service.storeLoginSession({
       userLoginId: 'super_admin',
       accessToken: jwt({
-      roles: ['APP_SUPER_ADMIN', 'ORDER_VIEW'],
-      permissions: ['INV_VIEW'],
+        roles: ['APP_SUPER_ADMIN', 'ORDER_VIEW'],
+        permissions: ['INV_VIEW'],
       }),
     });
 
@@ -167,6 +167,20 @@ describe('AuthService', () => {
     expect(service.hasAnyPermission([])).toBeTrue();
     expect(service.hasAnyPermission([' ', 'INV_VIEW'])).toBeTrue();
     expect(service.hasAnyPermission(['MISSING'])).toBeTrue();
+  });
+
+  it('should treat native OFBiz admin groups as super admin roles', () => {
+    service.storeLoginSession({
+      userLoginId: 'admin',
+      accessToken: jwt({
+        roles: ['FULLADMIN'],
+        permissions: [],
+      }),
+    });
+
+    expect(service.isSuperAdmin()).toBeTrue();
+    expect(service.hasPermission('SUPER_ADMIN_ONLY')).toBeTrue();
+    expect(service.hasPermission('MENU_USERS_VIEW')).toBeTrue();
   });
 
   it('should not treat the user login id as super admin without the role claim', () => {
@@ -193,6 +207,17 @@ describe('AuthService', () => {
     expect(service.hasPermission('MFG_VIEW')).toBeTrue();
     expect(service.hasPermission('ORDER_VIEW')).toBeTrue();
     expect(service.isSuperAdmin()).toBeTrue();
+  });
+
+  it('should read comma-separated role and permission claims from OFBiz JWTs', () => {
+    tokenStorage.clearToken();
+    tokenStorage.setToken(jwt({
+      roles: 'FULLADMIN,ORDER_VIEW',
+      permissions: 'MENU_HOME_VIEW,MENU_PICKLISTS_VIEW',
+    }));
+
+    expect(service.isSuperAdmin()).toBeTrue();
+    expect(service.hasPermission('MENU_PICKLISTS_VIEW')).toBeTrue();
   });
 
   it('should return safe defaults when the token payload is malformed', () => {

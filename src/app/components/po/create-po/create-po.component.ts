@@ -51,7 +51,7 @@ import { AddSupplierDialogComponent } from '../add-supplier-dialog/add-supplier-
 import { ReferenceDataStore } from '@ofbiz/services/common/reference-data.store';
 import { PreferredFacilityService } from '@ofbiz/services/common/preferred-facility.service';
 import { FacilityReferenceItem } from '@ofbiz/models/manufacturing.model';
-import { ProductSummary } from '@ofbiz/models/product.model';
+import { ProductAutocompleteItem } from '@ofbiz/models/product.model';
 import { TranslateService } from '@ngx-translate/core';
 
 interface SupplierSummary {
@@ -102,7 +102,7 @@ export class CreatePOComponent implements OnInit {
   customerParties = signal<CustomerPartySummary[]>([]);
   facilities = signal<FacilityReferenceItem[]>([]);
   filteredSuppliers$: Observable<SupplierSummary[]> = of([]);
-  filteredProducts: Observable<ProductSummary[]>[] = [];
+  filteredProducts: Observable<ProductAutocompleteItem[]>[] = [];
   itemTypes = [
     { id: 'INVENTORY_ORDER_ITEM', label: 'Inventory' },
     { id: 'SUPPLIES_ORDER_ITEM', label: 'Supplies' },
@@ -192,7 +192,9 @@ export class CreatePOComponent implements OnInit {
         distinctUntilChanged(),
         switchMap((value) => {
           const name = (value?.productName ?? value ?? '').toString();
-          return this.productService.getProductsAutocompleteFromOms(name).pipe(map(res => res?.documentList || []), catchError(() => of([])));
+          return this.productService.getProductsAutocompleteFromOms(name, 20, {
+            supplierPartyId: this.resolveVendorPartyId(),
+          }).pipe(map(res => res?.documentList || []), catchError(() => of([])));
         })
       );
     }
@@ -204,7 +206,7 @@ export class CreatePOComponent implements OnInit {
     return supplier.name || supplier.partyId || '';
   }
 
-  displayProduct(product: ProductSummary | string | null): string {
+  displayProduct(product: ProductAutocompleteItem | string | null): string {
     if (!product) return '';
     if (typeof product === 'string') return product;
     return product.productName || product.productId || '';
@@ -288,16 +290,23 @@ export class CreatePOComponent implements OnInit {
 
   onProductSelected(event: MatAutocompleteSelectedEvent, index: number): void {
     const product = event.option.value;
-    if (product?.productId) {
-      this.applySupplierPrice(index, product.productId);
+    const productId = product?.productId;
+    if (productId) {
+      const selectedPrice = this.toNumberOrNull(product?.supplierLastPrice ?? product?.lastPrice);
+      const unitAmountControl = this.items.at(index)?.get('unitAmount');
+      if (unitAmountControl && selectedPrice != null) {
+        unitAmountControl.setValue(selectedPrice);
+      } else {
+        this.applySupplierPrice(index, productId);
+      }
     }
   }
 
   private applySupplierPrice(index: number, productId: string): void {
-    const vendorPartyIdValue = this.poForm.get('vendorPartyId')?.value;
-    const vendorPartyId = vendorPartyIdValue?.partyId ?? vendorPartyIdValue;
+    const vendorPartyId = this.resolveVendorPartyId();
     const unitAmountControl = this.items.at(index)?.get('unitAmount');
     if (!vendorPartyId || !unitAmountControl) {
+      unitAmountControl?.setValue(0);
       return;
     }
 
@@ -307,9 +316,12 @@ export class CreatePOComponent implements OnInit {
         const numeric = priceValue != null ? Number(priceValue) : NaN;
         if (!Number.isNaN(numeric)) {
           unitAmountControl.setValue(numeric);
+        } else {
+          unitAmountControl.setValue(0);
         }
       },
       error: () => {
+        unitAmountControl.setValue(0);
       },
     });
   }
@@ -381,7 +393,33 @@ export class CreatePOComponent implements OnInit {
     });
   }
 
-  onSupplierSelected(_event: MatAutocompleteSelectedEvent): void {}
+  onSupplierSelected(_event: MatAutocompleteSelectedEvent): void {
+    this.refreshSupplierPrices();
+  }
+
+  private refreshSupplierPrices(): void {
+    this.items.controls.forEach((control, index) => {
+      const productValue = control.get('productId')?.value;
+      const productId = productValue?.productId ?? productValue;
+      if (productId) {
+        this.applySupplierPrice(index, productId);
+      }
+    });
+  }
+
+  private resolveVendorPartyId(): string | null {
+    const vendorPartyIdValue = this.poForm.get('vendorPartyId')?.value;
+    const vendorPartyId = vendorPartyIdValue?.partyId ?? vendorPartyIdValue;
+    return typeof vendorPartyId === 'string' && vendorPartyId.trim().length > 0 ? vendorPartyId.trim() : null;
+  }
+
+  private toNumberOrNull(value: unknown): number | null {
+    if (value == null || value === '') {
+      return null;
+    }
+    const numeric = Number(value);
+    return Number.isNaN(numeric) ? null : numeric;
+  }
 
   trackBySupplier = (_: number, supplier: SupplierSummary): string | number =>
     supplier?.partyId ?? _;
@@ -391,7 +429,7 @@ export class CreatePOComponent implements OnInit {
 
   trackByFormIndex = (index: number): number => index;
 
-  trackByProduct = (_: number, product: ProductSummary): string | number =>
+  trackByProduct = (_: number, product: ProductAutocompleteItem): string | number =>
     product?.productId ?? _;
 
   trackByItemType = (_: number, type: { id: string }): string => type.id;

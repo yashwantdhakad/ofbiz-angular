@@ -54,14 +54,23 @@ export class DataExchangeComponent implements OnInit, OnDestroy {
 
   exportEntityType = 'PRODUCT';
   importEntityType = 'PRODUCT';
-  importDryRun = signal(true);
   importFile = signal<File | null>(null);
 
   jobs = signal<ExchangeJob[]>([]);
   loadingJobs = signal(false);
   runningExport = signal(false);
   runningImport = signal(false);
+  validatingImport = signal(false);
+  validationJob = signal<ExchangeJob | null>(null);
   selectedFileName = computed(() => this.importFile()?.name || '');
+  canImport = computed(() => {
+    const validation = this.validationJob();
+    return !!this.importFile()
+      && !!validation
+      && (validation.status || '').toUpperCase() === 'COMPLETED'
+      && !(validation.failedRows || 0)
+      && !this.hasActiveImportForEntity(this.importEntityType);
+  });
   private refreshTimer: ReturnType<typeof setInterval> | null = null;
 
   displayedColumns = [
@@ -144,17 +153,56 @@ export class DataExchangeComponent implements OnInit, OnDestroy {
   onImportFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.importFile.set(input.files && input.files.length > 0 ? input.files[0] : null);
+    this.validationJob.set(null);
+  }
+
+  onImportEntityChanged(entityType: string): void {
+    this.importEntityType = entityType;
+    this.validationJob.set(null);
+  }
+
+  validateImport(): void {
+    const file = this.importFile();
+    if (!file) {
+      return;
+    }
+    this.validatingImport.set(true);
+    this.dataExchangeService
+      .validateCsv(this.importEntityType, file)
+      .pipe(
+        timeout(30000),
+        finalize(() => {
+          this.validatingImport.set(false);
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (response: any) => {
+          const job = (response?.data?.job ?? response?.job ?? null) as ExchangeJob | null;
+          this.validationJob.set(job);
+          this.loadJobs();
+          const failedRows = job?.failedRows || 0;
+          this.snackbarService.showSuccess(
+            this.translate.instant(failedRows ? 'DATA_EXCHANGE.VALIDATION_FAILED' : 'DATA_EXCHANGE.VALIDATION_PASSED')
+          );
+        },
+        error: (err) => {
+          console.error('Validation failed', err);
+          this.validationJob.set(null);
+          this.snackbarService.showError(this.translate.instant('DATA_EXCHANGE.VALIDATION_ERROR'));
+        },
+      });
   }
 
   runImport(): void {
     const file = this.importFile();
-    if (!file || this.hasActiveImportForEntity(this.importEntityType)) {
+    if (!file || !this.canImport()) {
       return;
     }
 
     this.runningImport.set(true);
     this.dataExchangeService
-      .importCsv(this.importEntityType, file, this.importDryRun())
+      .importCsv(this.importEntityType, file)
       .pipe(
         timeout(20000),
         finalize(() => {
@@ -165,6 +213,7 @@ export class DataExchangeComponent implements OnInit, OnDestroy {
       .subscribe({
         next: () => {
           this.importFile.set(null);
+          this.validationJob.set(null);
           this.loadJobs();
           this.snackbarService.showSuccess(this.translate.instant('DATA_EXCHANGE.IMPORT_STARTED'));
         },
@@ -177,8 +226,16 @@ export class DataExchangeComponent implements OnInit, OnDestroy {
 
   clearImportFile(fileInput?: HTMLInputElement | null): void {
     this.importFile.set(null);
+    this.validationJob.set(null);
     if (fileInput) {
       fileInput.value = '';
+    }
+  }
+
+  downloadValidationErrors(): void {
+    const job = this.validationJob();
+    if (job?.hasErrorFile) {
+      this.downloadErrors(job);
     }
   }
 

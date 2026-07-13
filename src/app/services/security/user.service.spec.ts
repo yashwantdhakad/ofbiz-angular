@@ -86,12 +86,12 @@ describe('UserService', () => {
     expect(apiService.get).toHaveBeenCalledWith('/common/users/availability?userLoginId=test.user');
   });
 
-  it('loads roles from either a raw array or resultList wrapper', () => {
+  it('loads curated ERP access groups from either a raw array or resultList wrapper', () => {
     apiService.get.and.returnValue(of({ data: { resultList: [{ groupId: 'USER' }] } } as any));
     service.listRoles().subscribe((result) => {
       expect(result).toEqual([{ groupId: 'USER' }] as any);
     });
-    expect(apiService.get).toHaveBeenCalledWith('/common/users/security-groups');
+    expect(apiService.get).toHaveBeenCalledWith('/common/users/access-groups');
   });
 
   it('filters permissions to MENU_ entries and sorts them', () => {

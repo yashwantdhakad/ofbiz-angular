@@ -36,7 +36,7 @@
       <h3>{{ 'DATA_EXCHANGE.IMPORT_CSV' | translate }}</h3>
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>{{ 'DATA_EXCHANGE.ENTITY' | translate }}</mat-label>
-        <mat-select [(ngModel)]="importEntityType">
+        <mat-select [ngModel]="importEntityType" (ngModelChange)="onImportEntityChanged($event)">
           <mat-option *ngFor="let entity of importEntityTypes" [value]="entity">{{ getEntityLabel(entity) }}</mat-option>
         </mat-select>
       </mat-form-field>
@@ -56,9 +56,19 @@
         {{ 'DATA_EXCHANGE.SELECTED_FILE' | translate }}: {{ selectedFileName() }}
       </div>
 
-      <mat-checkbox [ngModel]="importDryRun()" (ngModelChange)="importDryRun.set($event)">
-        {{ 'DATA_EXCHANGE.DRY_RUN' | translate }}
-      </mat-checkbox>
+      <div class="validation-result" *ngIf="validationJob() as validation">
+        <div>
+          <strong>{{ 'DATA_EXCHANGE.VALIDATION_RESULT' | translate }}</strong>
+          <span>
+            {{ 'DATA_EXCHANGE.TOTAL' | translate }}: {{ validation.totalRows || 0 }},
+            {{ 'DATA_EXCHANGE.SUCCESS' | translate }}: {{ validation.successRows || 0 }},
+            {{ 'DATA_EXCHANGE.FAILED' | translate }}: {{ validation.failedRows || 0 }}
+          </span>
+        </div>
+        <button mat-stroked-button color="warn" type="button" *ngIf="validation.hasErrorFile" (click)="downloadValidationErrors()">
+          {{ 'DATA_EXCHANGE.DOWNLOAD_ERRORS' | translate }}
+        </button>
+      </div>
 
       <div class="upsert-hint">
         <div class="upsert-title">{{ 'DATA_EXCHANGE.UPSERT_KEYS_TITLE' | translate }}</div>
@@ -74,9 +84,14 @@
         {{ 'DATA_EXCHANGE.ACTIVE_IMPORT_WARNING' | translate }}
       </div>
 
-      <button mat-raised-button color="primary" (click)="runImport()" [disabled]="runningImport() || !importFile() || hasActiveImportForEntity(importEntityType)">
-        {{ runningImport() ? ('DATA_EXCHANGE.IMPORTING' | translate) : ('DATA_EXCHANGE.IMPORT' | translate) }}
-      </button>
+      <div class="import-actions">
+        <button mat-stroked-button color="primary" type="button" (click)="validateImport()" [disabled]="validatingImport() || !importFile()">
+          {{ validatingImport() ? ('DATA_EXCHANGE.VALIDATING' | translate) : ('DATA_EXCHANGE.VALIDATE' | translate) }}
+        </button>
+        <button mat-raised-button color="primary" (click)="runImport()" [disabled]="runningImport() || !canImport()">
+          {{ runningImport() ? ('DATA_EXCHANGE.IMPORTING' | translate) : ('DATA_EXCHANGE.IMPORT' | translate) }}
+        </button>
+      </div>
     </mat-card>
   </div>
 </mat-card>

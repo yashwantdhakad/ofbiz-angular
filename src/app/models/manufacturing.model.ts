@@ -425,6 +425,7 @@ export interface BomDetail {
   revisionStatus?: string;
   revisionUpdatedAt?: string;
   revisionNote?: string;
+  revisionHistoryCount?: number;
   components?: BomComponent[];
   documents?: BomDocumentRecord[];
   [key: string]: unknown;

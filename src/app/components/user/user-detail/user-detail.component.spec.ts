@@ -310,7 +310,7 @@ describe('UserDetailComponent', () => {
 
     expect(dialogSpy.open).toHaveBeenCalledWith(ConfirmationDialogComponent, {
       data: {
-        title: 'USER.SECURITY_GROUPS',
+        title: 'USER.ACCESS_GROUPS',
         message: 'USER.REMOVE_GROUP_CONFIRM',
       },
     });

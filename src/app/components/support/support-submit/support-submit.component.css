@@ -16,44 +16,53 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-.form-container {
-  max-width: 650px;
-  margin: 30px auto;
-  padding: 24px;
-}
 
-.form-title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 24px;
-  text-align: center;
-}
-
-.full-width {
+/* ── Match the create-user UI pattern ── */
+.submit-form {
   width: 100%;
 }
 
-.row {
-  display: flex;
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
-  margin-bottom: 16px;
 }
 
-.col {
-  flex: 1;
+.form-grid mat-form-field {
+  width: 100%;
 }
 
-.actions {
+/* Subject and Description span both columns */
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-actions {
   display: flex;
-  justify-content: flex-end;
   gap: 12px;
-  margin-top: 24px;
+  padding-top: 8px;
 }
 
-mat-card {
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  background: #ffffff;
-  border: 1px solid #f1f5f9;
+/* Mobile */
+@media (max-width: 768px) {
+  :host {
+    display: block;
+    padding: 8px;
+  }
+
+  mat-card-header,
+  mat-card-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .form-actions button {
+    width: 100%;
+    min-height: 48px;
+  }
 }

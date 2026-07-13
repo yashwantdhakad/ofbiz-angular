@@ -576,6 +576,29 @@ export class CustomerDetailComponent implements OnInit {
       });
   }
 
+  deletePaymentMethodDialog(payment: PartyPaymentSummary): void {
+    const paymentMethodId = payment?.paymentMethod?.paymentMethodId ?? payment?.paymentMethodId;
+    const partyId = this.partyId;
+    if (!paymentMethodId || !partyId) {
+      return;
+    }
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      data: {
+        title: this.translate.instant('CUSTOMER.PAYMENT_METHOD'),
+        message: this.translate.instant('COMMON.DELETE_CONFIRMATION'),
+      },
+    });
+    dialogRef.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((result: boolean) => {
+      if (result) {
+        this.partyService.deletePaymentMethod(partyId, String(paymentMethodId))
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe(() => {
+            this.refreshCustomerSilently(partyId);
+          });
+      }
+    });
+  }
+
   addUpdateNoteDialog(params: Partial<PartyNote> | null = null): void {
     const noteData = {
       ...params,

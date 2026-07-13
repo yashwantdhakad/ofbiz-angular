@@ -91,6 +91,13 @@ export class PicklistService {
     );
   }
 
+  getPicklistByBin(picklistBinId: string): Observable<any> {
+    const url = `/common/picklists/by-bin/${encodeURIComponent(picklistBinId)}`;
+    return this.apiService.get<any>(url).pipe(
+      map((res) => res?.data ?? res)
+    );
+  }
+
   assignPicker(picklistId: string, partyId: string): Observable<any> {
     const url = '/common/picklist-roles';
     const payload = {

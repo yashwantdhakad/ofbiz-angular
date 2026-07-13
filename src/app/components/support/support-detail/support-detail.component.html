@@ -16,80 +16,101 @@
  specific language governing permissions and limitations
  under the License.
 -->
-<div style="padding:24px;" *ngIf="!loading && ticket">
-  <!-- Header bar -->
-  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:24px;">
-    <div>
+
+<!-- Loading state -->
+<div *ngIf="loading" class="spinner-center">
+  <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+</div>
+
+<ng-container *ngIf="!loading && ticket">
+
+  <!-- Page header bar -->
+  <div class="detail-page-header">
+    <div class="detail-header-left">
       <button mat-icon-button routerLink="/support/tickets" matTooltip="Back to My Tickets">
         <mat-icon>arrow_back</mat-icon>
       </button>
-      <span style="font-size:20px; font-weight:600; color:#1e293b; margin-left:8px;">
-        {{ ticket.custRequestName }}
-      </span>
-      <span class="status-chip" [class]="getStatusClass(ticket.statusId)" style="margin-left:12px;">
-        {{ ticket.statusId }}
-      </span>
+      <h1 class="detail-title">{{ ticket.custRequestName }}</h1>
+      <span class="badge" [ngClass]="getStatusClass(ticket.statusId)">{{ ticket.statusId }}</span>
     </div>
-    <span style="color:#94a3b8; font-size:13px;">{{ ticket.custRequestId }}</span>
+    <span class="detail-id">{{ ticket.custRequestId }}</span>
   </div>
 
-  <div style="display:grid; grid-template-columns:1fr 380px; gap:24px;">
+  <!-- Two-column layout -->
+  <div class="detail-layout">
 
-    <!-- LEFT: Ticket details + Comments -->
-    <div>
-      <mat-card style="border-radius:12px; margin-bottom:20px;">
-        <mat-card-content style="padding:20px;">
-          <h3 style="font-size:15px; font-weight:600; color:#475569; margin:0 0 16px;">Ticket Details</h3>
+    <!-- ── LEFT column: details + comments ───────────────────────────── -->
+    <div class="detail-left">
+
+      <!-- Ticket detail card -->
+      <mat-card class="mat-elevation-z4 detail-card">
+        <mat-card-header>
+          <mat-card-title>Ticket Details</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
           <div class="detail-grid">
-            <div class="detail-label">Type</div>
-            <div>{{ ticket.custRequestTypeName || ticket.custRequestTypeId }}</div>
-            <div class="detail-label">Priority</div>
-            <div>{{ ticket.priority }}</div>
-            <div class="detail-label">Submitted By</div>
-            <div>{{ ticket.fromPartyId }}</div>
-            <div class="detail-label">Assigned To</div>
-            <div>{{ ticket.assignedToPartyId || 'Unassigned' }}</div>
-            <div class="detail-label">Opened</div>
-            <div>{{ ticket.openDateTime | date:'medium' }}</div>
-            <div class="detail-label" *ngIf="ticket.closedDateTime">Closed</div>
-            <div *ngIf="ticket.closedDateTime">{{ ticket.closedDateTime | date:'medium' }}</div>
-            <div class="detail-label" *ngIf="ticket.reason">Resolution</div>
-            <div *ngIf="ticket.reason">{{ ticket.reason }}</div>
+            <span class="dl">Type</span>
+            <span>{{ ticket.custRequestTypeName || ticket.custRequestTypeId }}</span>
+
+            <span class="dl">Priority</span>
+            <span><span class="badge" [ngClass]="getPriorityClass(ticket.priority)">{{ ticket.priority }}</span></span>
+
+            <span class="dl">Submitted By</span>
+            <span>{{ ticket.fromPartyId }}</span>
+
+            <span class="dl">Assigned To</span>
+            <span>{{ ticket.assignedToPartyId || 'Unassigned' }}</span>
+
+            <span class="dl">Opened</span>
+            <span>{{ ticket.openDateTime | date:'medium' }}</span>
+
+            <ng-container *ngIf="ticket.closedDateTime">
+              <span class="dl">Closed</span>
+              <span>{{ ticket.closedDateTime | date:'medium' }}</span>
+            </ng-container>
+
+            <ng-container *ngIf="ticket.reason">
+              <span class="dl">Resolution</span>
+              <span>{{ ticket.reason }}</span>
+            </ng-container>
           </div>
-          <mat-divider style="margin:16px 0;"></mat-divider>
-          <h4 style="font-size:13px; font-weight:600; color:#475569; margin:0 0 8px;">Description</h4>
-          <p style="color:#334155; white-space:pre-wrap; margin:0;">{{ ticket.description }}</p>
+
+          <mat-divider class="section-divider"></mat-divider>
+          <h4 class="section-subtitle">Description</h4>
+          <p class="description-text">{{ ticket.description }}</p>
         </mat-card-content>
       </mat-card>
 
-      <!-- Comment Thread -->
-      <mat-card style="border-radius:12px;">
-        <mat-card-content style="padding:20px;">
-          <h3 style="font-size:15px; font-weight:600; color:#475569; margin:0 0 16px;">
-            Comments ({{ ticket.comments?.length || 0 }})
-          </h3>
-          <div *ngIf="ticket.comments && ticket.comments.length > 0; else noComments">
+      <!-- Comments card -->
+      <mat-card class="mat-elevation-z4 detail-card">
+        <mat-card-header>
+          <mat-card-title>Comments ({{ ticket.comments?.length || 0 }})</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <ng-container *ngIf="ticket.comments && ticket.comments.length > 0; else noComments">
             <div *ngFor="let c of ticket.comments" class="comment-item">
               <div class="comment-meta">
-                <mat-icon style="font-size:18px; width:18px; height:18px; color:#64748b;">person</mat-icon>
+                <mat-icon class="comment-icon">person</mat-icon>
                 <strong>{{ c.createdBy }}</strong>
-                <span style="color:#94a3b8; font-size:12px; margin-left:8px;">{{ c.noteDate | date:'medium' }}</span>
+                <span class="comment-date">{{ c.noteDate | date:'medium' }}</span>
               </div>
               <p class="comment-text">{{ c.noteText }}</p>
             </div>
-          </div>
+          </ng-container>
           <ng-template #noComments>
-            <p style="color:#94a3b8; text-align:center; padding:20px 0;">No comments yet.</p>
+            <p class="muted-text">No comments yet.</p>
           </ng-template>
 
-          <!-- Add Comment Form -->
-          <mat-divider style="margin:16px 0;"></mat-divider>
+          <mat-divider class="section-divider"></mat-divider>
+
+          <!-- Add comment -->
           <form [formGroup]="commentForm" (ngSubmit)="onAddComment()">
-            <mat-form-field appearance="outline" style="width:100%;">
+            <mat-form-field appearance="outline" class="full-width">
               <mat-label>Add a comment</mat-label>
-              <textarea matInput formControlName="commentText" rows="3" placeholder="Type your comment..."></textarea>
+              <textarea matInput formControlName="commentText" rows="3"
+                        placeholder="Type your comment..."></textarea>
             </mat-form-field>
-            <div style="display:flex; justify-content:flex-end;">
+            <div class="action-right">
               <button mat-raised-button color="primary" type="submit"
                       [disabled]="commentForm.invalid || saving">
                 <mat-icon>send</mat-icon> Post Comment
@@ -100,28 +121,30 @@
       </mat-card>
     </div>
 
-    <!-- RIGHT: Admin actions + Status History -->
-    <div *ngIf="isAdmin">
-      <!-- Change Status -->
-      <mat-card style="border-radius:12px; margin-bottom:16px;">
-        <mat-card-content style="padding:20px;">
-          <h3 style="font-size:15px; font-weight:600; color:#475569; margin:0 0 16px;">
-            <mat-icon style="vertical-align:middle; font-size:18px;">update</mat-icon>
-            Update Status
-          </h3>
+    <!-- ── RIGHT column: admin actions (visible to admins only) ──────── -->
+    <div class="detail-right" *ngIf="isAdmin">
+
+      <!-- Update Status -->
+      <mat-card class="mat-elevation-z4 detail-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon class="card-title-icon">update</mat-icon> Update Status
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
           <form [formGroup]="statusForm" (ngSubmit)="onUpdateStatus()">
-            <mat-form-field appearance="outline" style="width:100%;">
+            <mat-form-field appearance="outline" class="full-width">
               <mat-label>Status</mat-label>
               <mat-select formControlName="statusId">
                 <mat-option *ngFor="let s of statusOptions" [value]="s.value">{{ s.label }}</mat-option>
               </mat-select>
             </mat-form-field>
-            <mat-form-field appearance="outline" style="width:100%;">
+            <mat-form-field appearance="outline" class="full-width">
               <mat-label>Resolution Note (optional)</mat-label>
               <textarea matInput formControlName="resolutionNote" rows="2"></textarea>
             </mat-form-field>
             <button mat-raised-button color="accent" type="submit"
-                    [disabled]="statusForm.invalid || saving" style="width:100%;">
+                    [disabled]="statusForm.invalid || saving" class="full-width-btn">
               Save Status
             </button>
           </form>
@@ -129,19 +152,20 @@
       </mat-card>
 
       <!-- Assign Ticket -->
-      <mat-card style="border-radius:12px; margin-bottom:16px;">
-        <mat-card-content style="padding:20px;">
-          <h3 style="font-size:15px; font-weight:600; color:#475569; margin:0 0 16px;">
-            <mat-icon style="vertical-align:middle; font-size:18px;">person_add</mat-icon>
-            Assign Ticket
-          </h3>
+      <mat-card class="mat-elevation-z4 detail-card">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon class="card-title-icon">person_add</mat-icon> Assign Ticket
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
           <form [formGroup]="assignForm" (ngSubmit)="onAssign()">
-            <mat-form-field appearance="outline" style="width:100%;">
+            <mat-form-field appearance="outline" class="full-width">
               <mat-label>Assign To (Login ID)</mat-label>
-              <input matInput formControlName="assigneeLoginId" placeholder="dev_user_login">
+              <input matInput formControlName="assigneeLoginId" placeholder="dev_user_login" />
             </mat-form-field>
             <button mat-raised-button color="primary" type="submit"
-                    [disabled]="assignForm.invalid || saving" style="width:100%;">
+                    [disabled]="assignForm.invalid || saving" class="full-width-btn">
               Assign
             </button>
           </form>
@@ -149,14 +173,17 @@
       </mat-card>
 
       <!-- Status History -->
-      <mat-card style="border-radius:12px;" *ngIf="ticket.statusHistory && ticket.statusHistory.length > 0">
-        <mat-card-content style="padding:20px;">
-          <h3 style="font-size:15px; font-weight:600; color:#475569; margin:0 0 12px;">Status History</h3>
+      <mat-card class="mat-elevation-z4 detail-card"
+                *ngIf="ticket.statusHistory && ticket.statusHistory.length > 0">
+        <mat-card-header>
+          <mat-card-title>Status History</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
           <div *ngFor="let h of ticket.statusHistory" class="history-item">
-            <mat-icon style="font-size:14px; width:14px; height:14px; color:#64748b;">circle</mat-icon>
+            <mat-icon class="history-icon">circle</mat-icon>
             <div>
-              <strong style="font-size:13px;">{{ h.statusId }}</strong>
-              <div style="font-size:12px; color:#94a3b8;">{{ h.statusDatetime | date:'medium' }}</div>
+              <strong class="history-status">{{ h.statusId }}</strong>
+              <div class="history-date">{{ h.statusDatetime | date:'medium' }}</div>
             </div>
           </div>
         </mat-card-content>
@@ -164,8 +191,4 @@
     </div>
 
   </div>
-</div>
-
-<div *ngIf="loading" style="text-align:center; padding:80px;">
-  <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-</div>
+</ng-container>

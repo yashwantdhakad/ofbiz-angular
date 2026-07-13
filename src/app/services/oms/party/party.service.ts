@@ -386,22 +386,34 @@ export class PartyService {
     return this.apiService.getOms(url);
   }
 
-  createUpdatePaymentMethod(params: Record<string, unknown>): Observable<unknown> {
-    return this.apiService.postOms('/rest/s1/commerce/paymentMethod', params);
+  getPartyPaymentMethods(partyId: string): Observable<unknown> {
+    const url = `/common/parties/${encodeURIComponent(partyId)}/payment-methods`;
+    return this.apiService.get(url);
   }
 
   createCreditCard(partyId: string, payload: Record<string, unknown>): Observable<unknown> {
-    const url = `/parties/${encodeURIComponent(partyId)}/payment-methods/credit-cards`;
-    return this.apiService.postOms(url, payload);
+    const url = `/common/parties/${encodeURIComponent(partyId)}/payment-methods/credit-cards`;
+    return this.apiService.post(url, payload);
+  }
+
+  updateCreditCard(partyId: string, paymentMethodId: string, payload: Record<string, unknown>): Observable<unknown> {
+    const url = `/common/parties/${encodeURIComponent(partyId)}/payment-methods/credit-cards/${encodeURIComponent(paymentMethodId)}`;
+    return this.apiService.put(url, payload);
   }
 
   createBankAccount(partyId: string, payload: Record<string, unknown>): Observable<unknown> {
-    const url = `/parties/${encodeURIComponent(partyId)}/payment-methods/bank-accounts`;
-    return this.apiService.postOms(url, payload);
+    const url = `/common/parties/${encodeURIComponent(partyId)}/payment-methods/bank-accounts`;
+    return this.apiService.post(url, payload);
   }
 
-  deletePaymentMethod(params: Record<string, unknown>): Observable<unknown> {
-    return this.apiService.postOms('/rest/s1/commerce/deletePaymentMethod', params);
+  updateBankAccount(partyId: string, paymentMethodId: string, payload: Record<string, unknown>): Observable<unknown> {
+    const url = `/common/parties/${encodeURIComponent(partyId)}/payment-methods/bank-accounts/${encodeURIComponent(paymentMethodId)}`;
+    return this.apiService.put(url, payload);
+  }
+
+  deletePaymentMethod(partyId: string, paymentMethodId: string): Observable<unknown> {
+    const url = `/common/parties/${encodeURIComponent(partyId)}/payment-methods/${encodeURIComponent(paymentMethodId)}`;
+    return this.apiService.delete(url);
   }
 
   createPartyNote(params: PartyNotePayload): Observable<unknown> {
@@ -484,7 +496,7 @@ export class PartyService {
   }
 
   getEnumerations(enumTypeId: string): Observable<EnumerationItem[]> {
-    return this.apiService.getOms<EnumerationItem[]>(`/parties/enumerations/${enumTypeId}`);
+    return this.apiService.getLookup<EnumerationItem>('enumerations', enumTypeId);
   }
 
   private extractPartyDetail(

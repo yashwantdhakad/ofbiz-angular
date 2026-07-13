@@ -166,4 +166,13 @@ export class SupportDetailComponent implements OnInit {
     };
     return map[statusId] || '';
   }
+
+  getPriorityClass(priority: string): string {
+    switch ((priority || '').toUpperCase()) {
+      case 'CRITICAL': return 'priority-critical';
+      case 'HIGH':     return 'priority-high';
+      case 'MEDIUM':   return 'priority-medium';
+      default:         return 'priority-low';
+    }
+  }
 }

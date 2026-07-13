@@ -27,14 +27,25 @@
     <mat-card-header class="card-header-with-action">
       <mat-card-title>{{ 'REPORTS.TITLE' | translate }}</mat-card-title>
       <span class="spacer"></span>
-      <button mat-stroked-button type="button" routerLink="/reports/cashflow-forecast">
-        <mat-icon>account_balance_wallet</mat-icon>
-        {{ 'MENU.CASHFLOW_FORECAST' | translate }}
+      <button mat-stroked-button type="button" [matMenuTriggerFor]="reportMenu" class="report-menu-button">
+        <mat-icon>analytics</mat-icon>
+        {{ 'REPORTS.MORE_REPORTS' | translate }}
+        <mat-icon>expand_more</mat-icon>
       </button>
-      <button mat-stroked-button type="button" routerLink="/reports/vendor-performance">
-        <mat-icon>local_shipping</mat-icon>
-        {{ 'MENU.VENDOR_PERFORMANCE' | translate }}
-      </button>
+      <mat-menu #reportMenu="matMenu">
+        <button mat-menu-item routerLink="/reports/cashflow-forecast">
+          <mat-icon>account_balance_wallet</mat-icon>
+          <span>{{ 'MENU.CASHFLOW_FORECAST' | translate }}</span>
+        </button>
+        <button mat-menu-item routerLink="/reports/vendor-performance">
+          <mat-icon>local_shipping</mat-icon>
+          <span>{{ 'MENU.VENDOR_PERFORMANCE' | translate }}</span>
+        </button>
+        <button mat-menu-item routerLink="/reports/trial-balance">
+          <mat-icon>account_balance</mat-icon>
+          <span>{{ 'MENU.TRIAL_BALANCE' | translate }}</span>
+        </button>
+      </mat-menu>
     </mat-card-header>
     <mat-card-content>
       <div class="filter-row">

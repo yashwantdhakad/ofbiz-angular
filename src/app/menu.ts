@@ -48,10 +48,72 @@ export const menuItems = [
           permissions: ['ADMIN'],
           erpFeature: 'SECURITY'
         }
+      },
+      {
+        path: '/data-exchange',
+        name: 'MENU.DATA_EXCHANGE',
+        nav: ['side'],
+        meta: {
+          title: 'MENU.DATA_EXCHANGE',
+          requiredAuth: true,
+          permissions: ['ADMIN'],
+          erpFeature: 'SECURITY'
+        }
       }
     ]
   },
-  // Reports menu is temporarily hidden until better support is available later.
+  {
+    name: 'MENU.REPORTS',
+    nav: ['side'],
+    meta: {
+      title: 'MENU.REPORTS',
+      icon: 'analytics',
+      requiredAuth: true,
+      permissions: ['ADMIN']
+    },
+    children: [
+      {
+        path: '/reports',
+        name: 'MENU.REPORT_DASHBOARD',
+        nav: ['side'],
+        meta: {
+          title: 'MENU.REPORT_DASHBOARD',
+          requiredAuth: true,
+          permissions: ['ADMIN']
+        }
+      },
+      {
+        path: '/reports/cashflow-forecast',
+        name: 'MENU.CASHFLOW_FORECAST',
+        nav: ['side'],
+        meta: {
+          title: 'MENU.CASHFLOW_FORECAST',
+          requiredAuth: true,
+          permissions: ['ADMIN']
+        }
+      },
+      {
+        path: '/reports/vendor-performance',
+        name: 'MENU.VENDOR_PERFORMANCE',
+        nav: ['side'],
+        meta: {
+          title: 'MENU.VENDOR_PERFORMANCE',
+          requiredAuth: true,
+          permissions: ['ADMIN']
+        }
+      },
+      {
+        path: '/reports/trial-balance',
+        name: 'MENU.TRIAL_BALANCE',
+        nav: ['side'],
+        meta: {
+          title: 'MENU.TRIAL_BALANCE',
+          requiredAuth: true,
+          permissions: ['ADMIN']
+        }
+      }
+    ]
+  },
 
   {
     name: 'MENU.RELATIONSHIPS',
@@ -238,6 +300,17 @@ export const menuItems = [
         nav: ['side'],
         meta: {
           title: 'MENU.SHIPMENTS',
+          requiredAuth: true,
+          permissions: ['ADMIN'],
+          erpFeature: 'WMS'
+        }
+      },
+      {
+        path: '/picklists/packing-station',
+        name: 'MENU.PACKING_STATION',
+        nav: ['side'],
+        meta: {
+          title: 'MENU.PACKING_STATION',
           requiredAuth: true,
           permissions: ['ADMIN'],
           erpFeature: 'WMS'
@@ -505,6 +578,17 @@ export const menuItems = [
         nav: ['side'],
         meta: {
           title: 'MENU.JOURNAL_ENTRIES',
+          requiredAuth: true,
+          permissions: ['ADMIN'],
+          erpFeature: 'ACCT'
+        }
+      },
+      {
+        path: '/finance/exchange-rates',
+        name: 'MENU.EXCHANGE_RATES',
+        nav: ['side'],
+        meta: {
+          title: 'MENU.EXCHANGE_RATES',
           requiredAuth: true,
           permissions: ['ADMIN'],
           erpFeature: 'ACCT'

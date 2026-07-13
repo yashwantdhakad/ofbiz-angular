@@ -29,6 +29,8 @@ import { ChartOfAccountsComponent } from './chart-of-accounts/chart-of-accounts.
 import { GlAccountDialogComponent } from './gl-account-dialog/gl-account-dialog.component';
 import { JournalEntriesComponent } from './journal-entries/journal-entries.component';
 import { JournalEntryDialogComponent } from './journal-entry-dialog/journal-entry-dialog.component';
+import { ExchangeRatesComponent } from './exchange-rates/exchange-rates.component';
+import { ExchangeRateDialogComponent } from './exchange-rate-dialog/exchange-rate-dialog.component';
 
 @NgModule({
   declarations: [
@@ -36,6 +38,8 @@ import { JournalEntryDialogComponent } from './journal-entry-dialog/journal-entr
     GlAccountDialogComponent,
     JournalEntriesComponent,
     JournalEntryDialogComponent,
+    ExchangeRatesComponent,
+    ExchangeRateDialogComponent,
   ],
   imports: [
     CommonModule,

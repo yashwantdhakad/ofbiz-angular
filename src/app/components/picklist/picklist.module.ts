@@ -31,6 +31,7 @@ import { PicklistCreateComponent } from './picklist-create/picklist-create.compo
 import { PicklistCreateItemsDialogComponent } from './picklist-create/picklist-create-items-dialog.component';
 import { PicklistDetailComponent } from './picklist-detail/picklist-detail.component';
 import { PicklistAssignPickerDialogComponent } from './picklist-detail/picklist-assign-picker-dialog.component';
+import { PackingStationComponent } from './packing-station/packing-station.component';
 import { MaterialModule } from '../../components/common/material/material.module';
 import { StatusHistoryIconComponent } from '../common/status-history/status-history-icon.component';
 
@@ -42,6 +43,7 @@ import { StatusHistoryIconComponent } from '../common/status-history/status-hist
     PicklistOrderItemsDialogComponent,
     PicklistCreateComponent,
     PicklistCreateItemsDialogComponent,
+    PackingStationComponent,
   ],
   imports: [
     CommonModule,

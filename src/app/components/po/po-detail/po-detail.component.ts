@@ -1043,7 +1043,7 @@ export class PODetailComponent implements OnInit {
           this.silentRefresh();
         }
         const newId = (created as Record<string, unknown>)?.['id'];
-        if (newId != null) {
+        if ((newId !== null && newId !== undefined)) {
           this.router.navigate([`/pos/${newId}`]);
         }
       },
@@ -1081,7 +1081,7 @@ export class PODetailComponent implements OnInit {
     this.orderService.reorderOrder(this.orderId).subscribe({
       next: (created) => {
         const newId = (created as Record<string, unknown>)?.['id'];
-        if (newId != null) {
+        if ((newId !== null && newId !== undefined)) {
           this.router.navigate([`/pos/${newId}`]);
         }
       },

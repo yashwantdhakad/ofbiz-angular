@@ -78,7 +78,7 @@ export class TimesheetFormComponent implements OnInit {
     }
     const payload = this.toPayload();
     this.isLoading.set(true);
-    const request = this.mode() === 'edit' && this.timesheetId() != null
+    const request = this.mode() === 'edit' && this.timesheetId() !== null
       ? this.timesheetService.updateTimesheet(this.timesheetId() as number, payload)
       : this.timesheetService.createTimesheet(payload);
     request.subscribe({

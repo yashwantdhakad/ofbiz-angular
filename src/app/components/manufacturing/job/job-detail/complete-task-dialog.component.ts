@@ -66,13 +66,13 @@ export class CompleteTaskDialogComponent {
       return;
     }
     const payload: { actualHours?: number; actualSetupHours?: number; hourlyRate?: number } = {};
-    if (this.form.value.actualHours != null) {
+    if ((this.form.value.actualHours !== null && this.form.value.actualHours !== undefined)) {
       payload.actualHours = Number(this.form.value.actualHours);
     }
-    if (this.form.value.actualSetupHours != null) {
+    if ((this.form.value.actualSetupHours !== null && this.form.value.actualSetupHours !== undefined)) {
       payload.actualSetupHours = Number(this.form.value.actualSetupHours);
     }
-    if (this.form.value.hourlyRate != null) {
+    if ((this.form.value.hourlyRate !== null && this.form.value.hourlyRate !== undefined)) {
       payload.hourlyRate = Number(this.form.value.hourlyRate);
     }
 

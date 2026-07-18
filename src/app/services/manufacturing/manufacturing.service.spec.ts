@@ -296,52 +296,12 @@ describe('ManufacturingService', () => {
       apiServiceSpy.delete.and.returnValue(of({ data: {} }));
     });
 
-    it('getRoutings builds paged URL', () => {
-      service.getRoutings(1, 20, 'cut').subscribe();
-      expect(apiServiceSpy.get).toHaveBeenCalledWith('/common/routings?page=0&size=20&queryString=cut');
-    });
-
-    it('builds routing CRUD URLs', () => {
-      service.getRouting('ROUTING/1').subscribe();
-      service.createRouting({ workEffortName: 'New routing' } as any).subscribe();
-      service.updateRouting('ROUTING/1', { description: 'Updated' } as any).subscribe();
-
-      expect(apiServiceSpy.get).toHaveBeenCalledWith('/common/routings/ROUTING%2F1');
-      expect(apiServiceSpy.post).toHaveBeenCalledWith('/common/routings',
-        { workEffortName: 'New routing', workEffortTypeId: 'ROUTING' });
-      expect(apiServiceSpy.put).toHaveBeenCalledWith('/common/routings/ROUTING%2F1', { description: 'Updated' });
-    });
-
-    it('builds operation and deliverable item URLs', () => {
-      service.addOperation('ROUTING1', { operationName: 'Cut' }).subscribe();
-      service.deleteOperation('ROUTING1', 'OP_1').subscribe();
-      service.addDeliverableItem('ROUTING1', { productId: 'PROD_1' } as any).subscribe();
-      service.updateDeliverableItem('ROUTING1', 8, { quantity: 5 } as any).subscribe();
-      service.deleteDeliverableItem('ROUTING1', 8).subscribe();
+    it('builds operation detail URLs', () => {
       service.getOperationDetail('OP/1').subscribe();
       service.updateOperation('OP/1', { operationName: 'Weld' } as any).subscribe();
 
-      expect(apiServiceSpy.post).toHaveBeenCalledWith('/common/routings/ROUTING1/operations', { operationName: 'Cut' });
-      expect(apiServiceSpy.delete).toHaveBeenCalledWith('/common/routings/ROUTING1/operations/OP_1');
-      expect(apiServiceSpy.post).toHaveBeenCalledWith('/common/routings/ROUTING1/deliverable-items', { productId: 'PROD_1' });
-      expect(apiServiceSpy.put).toHaveBeenCalledWith('/common/routings/ROUTING1/deliverable-items/8', { quantity: 5 });
-      expect(apiServiceSpy.delete).toHaveBeenCalledWith('/common/routings/ROUTING1/deliverable-items/8');
       expect(apiServiceSpy.get).toHaveBeenCalledWith('/common/routings/operations/OP%2F1');
       expect(apiServiceSpy.put).toHaveBeenCalledWith('/common/routings/operations/OP%2F1', { operationName: 'Weld' });
-    });
-
-    it('builds routing content URLs', () => {
-      apiServiceSpy.postFormData.and.returnValue(of({ data: {} }));
-      const formData = new FormData();
-
-      service.addRoutingContent('ROUTING/1', formData, 'IMAGE').subscribe();
-      service.deleteRoutingContent('ROUTING/1', 'CONT/7').subscribe();
-      service.downloadRoutingContent('ROUTING/1', 'CONTENT/1').subscribe();
-
-      expect(apiServiceSpy.postFormData).toHaveBeenCalledWith(
-        '/common/routings/ROUTING%2F1/contents?workEffortContentTypeId=IMAGE', formData);
-      expect(apiServiceSpy.delete).toHaveBeenCalledWith('/common/routings/ROUTING%2F1/contents/CONT%2F7');
-      expect(apiServiceSpy.get).toHaveBeenCalledWith('/common/routings/ROUTING%2F1/contents/CONTENT%2F1');
     });
   });
 

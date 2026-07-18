@@ -247,7 +247,7 @@ export class CategoryDetailComponent implements OnInit {
   getValue(element: CategoryProduct, key: string): string {
     const keys = key.split('.');
     if (!(keys[0] in element)) return '';
-    const result = keys.reduce((o: unknown, k: string) => (o != null ? (o as Record<string, unknown>)[k] : undefined), element as unknown);
-    return result == null ? '' : String(result);
+    const result = keys.reduce((o: unknown, k: string) => ((o !== null && o !== undefined) ? (o as Record<string, unknown>)[k] : undefined), element as unknown);
+    return result === null || result === undefined ? '' : String(result);
   }
 }

@@ -22,7 +22,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { finalize } from 'rxjs/operators';
 import { TranslateService } from '@ngx-translate/core';
-import { ManufacturingService } from '@ofbiz/services/manufacturing/manufacturing.service';
+import { RoutingService } from '@ofbiz/services/manufacturing/routing.service';
 import { SnackbarService } from '@ofbiz/services/common/snackbar.service';
 import { AddDeliverableItemDialogComponent } from '../add-deliverable-item-dialog/add-deliverable-item-dialog.component';
 import { AddOperationDialogComponent } from '../add-operation-dialog/add-operation-dialog.component';
@@ -64,7 +64,7 @@ export class RoutingDetailComponent implements OnInit {
     private dialog: MatDialog,
     private snackbarService: SnackbarService,
     private translate: TranslateService,
-    private manufacturingService: ManufacturingService
+    private routingService: RoutingService
   ) { }
 
   ngOnInit(): void {
@@ -93,7 +93,7 @@ export class RoutingDetailComponent implements OnInit {
       if (!result) {
         return;
       }
-      this.manufacturingService.updateRouting(id, result as unknown as Partial<import('@ofbiz/models/manufacturing.model').RoutingDetailData>)
+      this.routingService.updateRouting(id, result as unknown as Partial<import('@ofbiz/models/manufacturing.model').RoutingDetailData>)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
@@ -121,7 +121,7 @@ export class RoutingDetailComponent implements OnInit {
       if (!result) {
         return;
       }
-      this.manufacturingService.addOperation(id, result as unknown as Record<string, unknown>)
+      this.routingService.addOperation(id, result as unknown as Record<string, unknown>)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
@@ -149,7 +149,7 @@ export class RoutingDetailComponent implements OnInit {
       if (!confirmed) {
         return;
       }
-      this.manufacturingService.deleteOperation(id, operationId)
+      this.routingService.deleteOperation(id, operationId)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
@@ -171,7 +171,7 @@ export class RoutingDetailComponent implements OnInit {
       if (!result) {
         return;
       }
-      this.manufacturingService.addDeliverableItem(id, result as unknown as Partial<import('@ofbiz/models/manufacturing.model').RoutingDeliverableItem>)
+      this.routingService.addDeliverableItem(id, result as unknown as Partial<import('@ofbiz/models/manufacturing.model').RoutingDeliverableItem>)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
@@ -196,7 +196,7 @@ export class RoutingDetailComponent implements OnInit {
       if (!result) {
         return;
       }
-      this.manufacturingService.updateDeliverableItem(id, item.id!, result as unknown as Partial<import('@ofbiz/models/manufacturing.model').RoutingDeliverableItem>)
+      this.routingService.updateDeliverableItem(id, item.id!, result as unknown as Partial<import('@ofbiz/models/manufacturing.model').RoutingDeliverableItem>)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
@@ -223,7 +223,7 @@ export class RoutingDetailComponent implements OnInit {
       if (!confirmed) {
         return;
       }
-      this.manufacturingService.deleteDeliverableItem(id, item.id!)
+      this.routingService.deleteDeliverableItem(id, item.id!)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
@@ -245,7 +245,7 @@ export class RoutingDetailComponent implements OnInit {
       if (!result) {
         return;
       }
-      this.manufacturingService
+      this.routingService
         .addRoutingContent(id, result.formData, result.workEffortContentTypeId)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
@@ -273,7 +273,7 @@ export class RoutingDetailComponent implements OnInit {
       if (!confirmed) {
         return;
       }
-      this.manufacturingService.deleteRoutingContent(id, item.contentId!)
+      this.routingService.deleteRoutingContent(id, item.contentId!)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
@@ -290,7 +290,7 @@ export class RoutingDetailComponent implements OnInit {
     if (!item?.contentId) {
       return;
     }
-    this.manufacturingService.downloadRoutingContent(id, item.contentId)
+    this.routingService.downloadRoutingContent(id, item.contentId)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (blob) => {
@@ -322,7 +322,7 @@ export class RoutingDetailComponent implements OnInit {
       this.isLoading.set(true);
     }
     const id = this.workEffortId();
-    this.manufacturingService
+    this.routingService
       .getRoutingDetail(id)
       .pipe(
         finalize(() => {

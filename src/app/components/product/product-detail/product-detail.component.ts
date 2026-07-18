@@ -378,7 +378,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   }
 
   deleteProductFeature(item: ProductFeatureRecord): void {
-    if (!this.productId || item.id == null) {
+    if (!this.productId || item.id === undefined) {
       return;
     }
     const featureApplicationId = item.id;
@@ -616,7 +616,7 @@ export class ProductDetailComponent implements OnInit, OnDestroy {
   }
 
   deleteProductPrice(item: ProductPrice): void {
-    if (!this.productId || item.productPriceId == null) {
+    if (!this.productId || item.productPriceId === undefined) {
       return;
     }
     this.deleteProductPriceDialog({

@@ -81,11 +81,11 @@ export class ProductShippingConfigDialogComponent {
   }
 
   private toInput(value: any): string {
-    return value == null ? '' : String(value);
+    return value === null || value === undefined ? '' : String(value);
   }
 
   private toNumberOrNull(value: any): number | null {
-    if (value == null || value === '') {
+    if (value === null || value === undefined || value === '') {
       return null;
     }
     const parsed = Number(value);

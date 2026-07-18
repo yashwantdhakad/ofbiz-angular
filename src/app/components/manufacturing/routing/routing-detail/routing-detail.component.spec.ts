@@ -30,19 +30,19 @@ import { EditRoutingDialogComponent } from '../edit-routing-dialog/edit-routing-
 import { RoutingApiResponse } from '@ofbiz/models/manufacturing.model';
 import { RenderSchedulerService } from '@ofbiz/services/common/render-scheduler.service';
 import { SnackbarService } from '@ofbiz/services/common/snackbar.service';
-import { ManufacturingService } from '@ofbiz/services/manufacturing/manufacturing.service';
+import { RoutingService } from '@ofbiz/services/manufacturing/routing.service';
 import { RoutingDetailComponent } from './routing-detail.component';
 
 describe('RoutingDetailComponent', () => {
   let component: RoutingDetailComponent;
   let fixture: ComponentFixture<RoutingDetailComponent>;
-  let manufacturingServiceSpy: jasmine.SpyObj<ManufacturingService>;
+  let routingServiceSpy: jasmine.SpyObj<RoutingService>;
   let dialogSpy: jasmine.SpyObj<MatDialog>;
   let snackbarServiceSpy: jasmine.SpyObj<SnackbarService>;
   let routerSpy: jasmine.SpyObj<Router>;
 
   beforeEach(async () => {
-    manufacturingServiceSpy = jasmine.createSpyObj<ManufacturingService>('ManufacturingService', [
+    routingServiceSpy = jasmine.createSpyObj<RoutingService>('RoutingService', [
       'getRoutingDetail',
       'updateRouting',
       'addOperation',
@@ -82,7 +82,7 @@ describe('RoutingDetailComponent', () => {
         { provide: Router, useValue: routerSpy },
         { provide: MatDialog, useValue: dialogSpy },
         { provide: SnackbarService, useValue: snackbarServiceSpy },
-        { provide: ManufacturingService, useValue: manufacturingServiceSpy },
+        { provide: RoutingService, useValue: routingServiceSpy },
         { provide: RenderSchedulerService, useValue: renderSchedulerSpy },
         { provide: TranslateService, useValue: translateSpy },
       ],
@@ -114,7 +114,7 @@ describe('RoutingDetailComponent', () => {
         },
       },
     };
-    manufacturingServiceSpy.getRoutingDetail.and.returnValues(of(response), throwError(() => new Error('load failed')));
+    routingServiceSpy.getRoutingDetail.and.returnValues(of(response), throwError(() => new Error('load failed')));
 
     fixture.detectChanges();
 
@@ -148,11 +148,11 @@ describe('RoutingDetailComponent', () => {
   });
 
   it('updates routing and refreshes after edit dialog save, and reports errors', () => {
-    manufacturingServiceSpy.getRoutingDetail.and.returnValues(
+    routingServiceSpy.getRoutingDetail.and.returnValues(
       of({ routing: { workEffortId: 'ROU100', workEffortName: 'Original Routing' } }),
       of({ routing: { workEffortId: 'ROU100', workEffortName: 'Updated Routing' } })
     );
-    manufacturingServiceSpy.updateRouting.and.returnValues(of({} as any), throwError(() => new Error('update failed')));
+    routingServiceSpy.updateRouting.and.returnValues(of({} as any), throwError(() => new Error('update failed')));
     dialogSpy.open.and.returnValues(
       { afterClosed: () => of({ workEffortName: 'Updated Routing', description: 'Updated', quantityToProduce: '10' }) } as any,
       { afterClosed: () => of({ workEffortName: 'Broken' }) } as any
@@ -162,13 +162,13 @@ describe('RoutingDetailComponent', () => {
     component.openEditRoutingDialog();
 
     expect(dialogSpy.open.calls.mostRecent().args[0]).toBe(EditRoutingDialogComponent);
-    expect(manufacturingServiceSpy.updateRouting).toHaveBeenCalledWith('ROU100', {
+    expect(routingServiceSpy.updateRouting).toHaveBeenCalledWith('ROU100', {
       workEffortName: 'Updated Routing',
       description: 'Updated',
       quantityToProduce: '10',
     });
     expect(snackbarServiceSpy.showSuccess).toHaveBeenCalledWith('MANUFACTURING.ROUTING_UPDATED_SUCCESS');
-    expect(manufacturingServiceSpy.getRoutingDetail).toHaveBeenCalledTimes(2);
+    expect(routingServiceSpy.getRoutingDetail).toHaveBeenCalledTimes(2);
 
     component.openEditRoutingDialog();
 
@@ -176,8 +176,8 @@ describe('RoutingDetailComponent', () => {
   });
 
   it('opens the add operation dialog with the next sequence and handles success/error', () => {
-    manufacturingServiceSpy.getRoutingDetail.and.returnValue(of({ routing: { workEffortId: 'ROU100' } }));
-    manufacturingServiceSpy.addOperation.and.returnValues(of({} as any), throwError(() => new Error('add failed')));
+    routingServiceSpy.getRoutingDetail.and.returnValue(of({ routing: { workEffortId: 'ROU100' } }));
+    routingServiceSpy.addOperation.and.returnValues(of({} as any), throwError(() => new Error('add failed')));
     dialogSpy.open.and.returnValues(
       {
         afterClosed: () =>
@@ -197,7 +197,7 @@ describe('RoutingDetailComponent', () => {
 
     expect(dialogSpy.open.calls.mostRecent().args[0]).toBe(AddOperationDialogComponent);
     expect(dialogSpy.open.calls.mostRecent().args[1]).toEqual(jasmine.objectContaining({ data: { sequenceNum: '40' } }));
-    expect(manufacturingServiceSpy.addOperation).toHaveBeenCalledWith('ROU100', jasmine.any(Object));
+    expect(routingServiceSpy.addOperation).toHaveBeenCalledWith('ROU100', jasmine.any(Object));
     expect(snackbarServiceSpy.showSuccess).toHaveBeenCalledWith('MANUFACTURING.OPERATION_ADDED_SUCCESS');
 
     component.openAddOperationDialog();
@@ -205,8 +205,8 @@ describe('RoutingDetailComponent', () => {
   });
 
   it('guards and deletes operations with confirmation', () => {
-    manufacturingServiceSpy.getRoutingDetail.and.returnValue(of({ routing: { workEffortId: 'ROU100' } }));
-    manufacturingServiceSpy.deleteOperation.and.returnValues(of({} as any), throwError(() => new Error('delete failed')));
+    routingServiceSpy.getRoutingDetail.and.returnValue(of({ routing: { workEffortId: 'ROU100' } }));
+    routingServiceSpy.deleteOperation.and.returnValues(of({} as any), throwError(() => new Error('delete failed')));
     component.workEffortId.set('ROU100');
 
     const initialOpenCount = dialogSpy.open.calls.count();
@@ -216,11 +216,11 @@ describe('RoutingDetailComponent', () => {
     openDialogResult(false);
     component.removeOperation({ workEffortId: 'OP-1' } as any);
     expect(dialogSpy.open.calls.mostRecent().args[0]).toBe(ConfirmationDialogComponent);
-    expect(manufacturingServiceSpy.deleteOperation).not.toHaveBeenCalled();
+    expect(routingServiceSpy.deleteOperation).not.toHaveBeenCalled();
 
     openDialogResult(true);
     component.removeOperation({ operationWorkEffortId: 'OP-2' } as any);
-    expect(manufacturingServiceSpy.deleteOperation).toHaveBeenCalledWith('ROU100', 'OP-2');
+    expect(routingServiceSpy.deleteOperation).toHaveBeenCalledWith('ROU100', 'OP-2');
     expect(snackbarServiceSpy.showSuccess).toHaveBeenCalledWith('MANUFACTURING.OPERATION_REMOVED_SUCCESS');
 
     openDialogResult(true);
@@ -229,16 +229,16 @@ describe('RoutingDetailComponent', () => {
   });
 
   it('handles deliverable item add/edit/remove branches', () => {
-    manufacturingServiceSpy.getRoutingDetail.and.returnValue(of({ routing: { workEffortId: 'ROU100' } }));
-    manufacturingServiceSpy.addDeliverableItem.and.returnValues(of({} as any), throwError(() => new Error('add failed')));
-    manufacturingServiceSpy.updateDeliverableItem.and.returnValues(of({} as any), throwError(() => new Error('update failed')));
-    manufacturingServiceSpy.deleteDeliverableItem.and.returnValues(of({} as any), throwError(() => new Error('delete failed')));
+    routingServiceSpy.getRoutingDetail.and.returnValue(of({ routing: { workEffortId: 'ROU100' } }));
+    routingServiceSpy.addDeliverableItem.and.returnValues(of({} as any), throwError(() => new Error('add failed')));
+    routingServiceSpy.updateDeliverableItem.and.returnValues(of({} as any), throwError(() => new Error('update failed')));
+    routingServiceSpy.deleteDeliverableItem.and.returnValues(of({} as any), throwError(() => new Error('delete failed')));
     component.workEffortId.set('ROU100');
 
     dialogSpy.open.and.returnValue({ afterClosed: () => of({ productId: 'P-1', estimatedQuantity: '4' }) } as any);
     component.openAddDeliverableDialog();
     expect(dialogSpy.open.calls.mostRecent().args[0]).toBe(AddDeliverableItemDialogComponent);
-    expect(manufacturingServiceSpy.addDeliverableItem).toHaveBeenCalledWith('ROU100', jasmine.any(Object));
+    expect(routingServiceSpy.addDeliverableItem).toHaveBeenCalledWith('ROU100', jasmine.any(Object));
     expect(snackbarServiceSpy.showSuccess).toHaveBeenCalledWith('MANUFACTURING.DELIVERABLE_ADDED_SUCCESS');
 
     dialogSpy.open.and.returnValue({ afterClosed: () => of({ productId: 'P-1', estimatedQuantity: '4' }) } as any);
@@ -252,7 +252,7 @@ describe('RoutingDetailComponent', () => {
     openDialogResult({ productId: 'P-1', estimatedQuantity: '4' });
     component.openEditDeliverableDialog({ id: 7 } as any);
     expect(dialogSpy.open.calls.mostRecent().args[0]).toBe(AddDeliverableItemDialogComponent);
-    expect(manufacturingServiceSpy.updateDeliverableItem).toHaveBeenCalledWith(
+    expect(routingServiceSpy.updateDeliverableItem).toHaveBeenCalledWith(
       'ROU100',
       7,
       jasmine.any(Object)
@@ -270,11 +270,11 @@ describe('RoutingDetailComponent', () => {
     openDialogResult(false);
     component.removeDeliverableItem({ id: 9 } as any);
     expect(dialogSpy.open.calls.mostRecent().args[0]).toBe(ConfirmationDialogComponent);
-    expect(manufacturingServiceSpy.deleteDeliverableItem).not.toHaveBeenCalledWith('ROU100', 9);
+    expect(routingServiceSpy.deleteDeliverableItem).not.toHaveBeenCalledWith('ROU100', 9);
 
     openDialogResult(true);
     component.removeDeliverableItem({ id: 10 } as any);
-    expect(manufacturingServiceSpy.deleteDeliverableItem).toHaveBeenCalledWith('ROU100', 10);
+    expect(routingServiceSpy.deleteDeliverableItem).toHaveBeenCalledWith('ROU100', 10);
     expect(snackbarServiceSpy.showSuccess).toHaveBeenCalledWith('MANUFACTURING.DELIVERABLE_REMOVED_SUCCESS');
 
     openDialogResult(true);
@@ -283,16 +283,16 @@ describe('RoutingDetailComponent', () => {
   });
 
   it('handles content add/open/remove branches', fakeAsync(() => {
-    manufacturingServiceSpy.getRoutingDetail.and.returnValue(of({ routing: { workEffortId: 'ROU100' } }));
-    manufacturingServiceSpy.addRoutingContent.and.returnValues(of({} as any), throwError(() => new Error('add failed')));
-    manufacturingServiceSpy.deleteRoutingContent.and.returnValues(of({} as any), throwError(() => new Error('delete failed')));
-    manufacturingServiceSpy.downloadRoutingContent.and.returnValues(of(new Blob(['file'])), throwError(() => new Error('open failed')));
+    routingServiceSpy.getRoutingDetail.and.returnValue(of({ routing: { workEffortId: 'ROU100' } }));
+    routingServiceSpy.addRoutingContent.and.returnValues(of({} as any), throwError(() => new Error('add failed')));
+    routingServiceSpy.deleteRoutingContent.and.returnValues(of({} as any), throwError(() => new Error('delete failed')));
+    routingServiceSpy.downloadRoutingContent.and.returnValues(of(new Blob(['file'])), throwError(() => new Error('open failed')));
     component.workEffortId.set('ROU100');
 
     dialogSpy.open.and.returnValue({ afterClosed: () => of({ formData: { title: 'Spec' }, workEffortContentTypeId: 'PDF' }) } as any);
     component.openAddContentDialog('PDF');
     expect(dialogSpy.open.calls.mostRecent().args[0]).toBe(AddRoutingContentDialogComponent);
-    expect(manufacturingServiceSpy.addRoutingContent).toHaveBeenCalledWith('ROU100', jasmine.any(Object), jasmine.any(String));
+    expect(routingServiceSpy.addRoutingContent).toHaveBeenCalledWith('ROU100', jasmine.any(Object), jasmine.any(String));
     expect(snackbarServiceSpy.showSuccess).toHaveBeenCalledWith('MANUFACTURING.CONTENT_ADDED_SUCCESS');
 
     dialogSpy.open.and.returnValue({ afterClosed: () => of({ formData: { title: 'Spec' }, workEffortContentTypeId: 'PDF' }) } as any);
@@ -300,7 +300,7 @@ describe('RoutingDetailComponent', () => {
     expect(snackbarServiceSpy.showError).toHaveBeenCalledWith('MANUFACTURING.CONTENT_ADDED_ERROR');
 
     component.openContent({} as any);
-    expect(manufacturingServiceSpy.downloadRoutingContent).not.toHaveBeenCalled();
+    expect(routingServiceSpy.downloadRoutingContent).not.toHaveBeenCalled();
 
     const createObjectUrlSpy = spyOn(URL, 'createObjectURL').and.returnValue('blob:url');
     const revokeObjectUrlSpy = spyOn(URL, 'revokeObjectURL');
@@ -309,7 +309,7 @@ describe('RoutingDetailComponent', () => {
     component.openContent({ contentId: 'CNT-1' } as any);
     tick(10000);
 
-    expect(manufacturingServiceSpy.downloadRoutingContent).toHaveBeenCalledWith('ROU100', 'CNT-1');
+    expect(routingServiceSpy.downloadRoutingContent).toHaveBeenCalledWith('ROU100', 'CNT-1');
     expect(createObjectUrlSpy).toHaveBeenCalled();
     expect(windowOpenSpy).toHaveBeenCalledWith('blob:url', '_blank', 'noopener');
     expect(revokeObjectUrlSpy).toHaveBeenCalledWith('blob:url');
@@ -324,11 +324,11 @@ describe('RoutingDetailComponent', () => {
     openDialogResult(false);
     component.removeContent({ contentId: 'CNT1' } as any);
     expect(dialogSpy.open.calls.mostRecent().args[0]).toBe(ConfirmationDialogComponent);
-    expect(manufacturingServiceSpy.deleteRoutingContent).not.toHaveBeenCalledWith('ROU100', 'CNT1');
+    expect(routingServiceSpy.deleteRoutingContent).not.toHaveBeenCalledWith('ROU100', 'CNT1');
 
     openDialogResult(true);
     component.removeContent({ contentId: 'CNT2' } as any);
-    expect(manufacturingServiceSpy.deleteRoutingContent).toHaveBeenCalledWith('ROU100', 'CNT2');
+    expect(routingServiceSpy.deleteRoutingContent).toHaveBeenCalledWith('ROU100', 'CNT2');
     expect(snackbarServiceSpy.showSuccess).toHaveBeenCalledWith('MANUFACTURING.CONTENT_REMOVED_SUCCESS');
 
     openDialogResult(true);

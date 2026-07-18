@@ -18,7 +18,7 @@
  */
 import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { ManufacturingService } from '../../../../services/manufacturing/manufacturing.service';
+import { RoutingService } from '../../../../services/manufacturing/routing.service';
 import { PageEvent } from '@angular/material/paginator';
 import { of } from 'rxjs';
 import { catchError, finalize, timeout } from 'rxjs/operators';
@@ -48,7 +48,7 @@ export class RoutingsComponent implements OnInit {
   isLoading = signal<boolean>(false);
 
   constructor(
-    private manufacturingService: ManufacturingService,
+    private routingService: RoutingService,
     private router: Router,
     private renderScheduler: RenderSchedulerService
   ) { }
@@ -61,7 +61,7 @@ export class RoutingsComponent implements OnInit {
     this.renderScheduler.deferMacrotask(() => {
       this.isLoading.set(true);
     });
-    this.manufacturingService
+    this.routingService
       .getRoutings(
         this.pagination().pageIndex,
         this.pagination().pageSize,

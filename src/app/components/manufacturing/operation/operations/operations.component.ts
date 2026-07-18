@@ -111,8 +111,7 @@ export class OperationsComponent implements OnInit {
       })
       .pipe(
         timeout(15000),
-        catchError((error) => {
-          console.error('Error loading operations:', error);
+        catchError((_error) => {
           return of([]);
         }),
         finalize(() => {

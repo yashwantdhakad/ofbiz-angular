@@ -1091,7 +1091,7 @@ export class SODetailComponent implements OnInit {
     this.orderService.reorderOrder(this.orderId).subscribe({
       next: (created) => {
         const newId = (created as Record<string, unknown>)?.['id'];
-        if (newId != null) {
+        if ((newId !== null && newId !== undefined)) {
           this.router.navigate([`/orders/${newId}`]);
         }
       },
@@ -1113,7 +1113,7 @@ export class SODetailComponent implements OnInit {
           this.silentRefresh();
         }
         const newId = (created as Record<string, unknown>)?.['id'];
-        if (newId == null) {
+        if (newId === null || newId === undefined) {
           return;
         }
         const newRouteId = String(newId);

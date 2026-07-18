@@ -173,7 +173,7 @@ export class JournalEntriesComponent implements OnInit {
   }
 
   selectTransaction(transaction: AcctgTrans): void {
-    if (transaction?.id != null) {
+    if ((transaction?.id !== null && transaction?.id !== undefined)) {
       this.selectedTransactionId.set(transaction.id);
     }
   }

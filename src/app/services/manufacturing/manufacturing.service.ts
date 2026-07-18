@@ -37,9 +37,6 @@ import {
   JobUpdatePayload,
   OperationDetailResponse,
   EditOperationDialogResult,
-  RoutingApiResponse,
-  RoutingDeliverableItem,
-  RoutingDetailData,
   WorkEffortListResponse,
   WorkEffortLookupItem,
 } from '@ofbiz/models/manufacturing.model';
@@ -420,102 +417,6 @@ export class ManufacturingService {
   deleteJobCost(workEffortId: string, costId: number): Observable<unknown> {
     return this.apiService.delete<any>(`/common/jobs/${encodeURIComponent(workEffortId)}/costs/${costId}`).pipe(
       map((response: any) => this.unwrapServiceData(response))
-    );
-  }
-
-  // Routing methods
-  getRoutings(pageIndex: number, pageSize: number, keyword: string, deliverableProductId?: string): Observable<WorkEffortListResponse> {
-    const params = new URLSearchParams();
-    params.append('page', (pageIndex - 1).toString());
-    params.append('size', pageSize.toString());
-    params.append('queryString', keyword || '');
-    if (deliverableProductId) {
-      params.append('deliverableProductId', deliverableProductId);
-    }
-    return this.apiService.get<any>(`/common/routings?${params.toString()}`).pipe(
-      map((response: any) => ({
-        resultList: this.extractServiceList(response),
-        documentList: this.extractServiceList(response),
-        totalElements: response?.data?.totalCount ?? response?.totalCount ?? this.extractServiceList(response).length,
-        documentListCount: response?.data?.documentListCount ?? response?.documentListCount ?? this.extractServiceList(response).length,
-      } as WorkEffortListResponse))
-    );
-  }
-
-  getRouting(workEffortId: string): Observable<RoutingApiResponse> {
-    return this.apiService.get<any>(`/common/routings/${encodeURIComponent(workEffortId)}`).pipe(
-      map((response: any) => this.unwrapServiceData<RoutingApiResponse>(response))
-    );
-  }
-
-  getRoutingDetail(workEffortId: string): Observable<RoutingApiResponse> {
-    return this.getRouting(workEffortId);
-  }
-
-  createRouting(params: Partial<RoutingDetailData>): Observable<unknown> {
-    return this.apiService.post<any>('/common/routings', { ...params, workEffortTypeId: 'ROUTING' }).pipe(
-      map((response: any) => this.unwrapServiceData(response))
-    );
-  }
-
-  updateRouting(workEffortId: string, params: Partial<RoutingDetailData>): Observable<unknown> {
-    return this.apiService.put<any>(`/common/routings/${encodeURIComponent(workEffortId)}`, params).pipe(
-      map((response: any) => this.unwrapServiceData(response))
-    );
-  }
-
-  // Operation methods
-  addOperation(workEffortId: string, params: Record<string, unknown>): Observable<unknown> {
-    return this.apiService.post<any>(`/common/routings/${encodeURIComponent(workEffortId)}/operations`, params).pipe(
-      map((response: any) => this.unwrapServiceData(response))
-    );
-  }
-
-  deleteOperation(workEffortId: string, operationId: string): Observable<unknown> {
-    return this.apiService.delete<any>(`/common/routings/${encodeURIComponent(workEffortId)}/operations/${operationId}`).pipe(
-      map((response: any) => this.unwrapServiceData(response))
-    );
-  }
-
-  // Deliverable item methods
-  addDeliverableItem(workEffortId: string, params: Partial<RoutingDeliverableItem>): Observable<unknown> {
-    return this.apiService.post<any>(`/common/routings/${encodeURIComponent(workEffortId)}/deliverable-items`, params).pipe(
-      map((response: any) => this.unwrapServiceData(response))
-    );
-  }
-
-  updateDeliverableItem(workEffortId: string, wegsId: number, params: Partial<RoutingDeliverableItem>): Observable<unknown> {
-    return this.apiService.put<any>(`/common/routings/${encodeURIComponent(workEffortId)}/deliverable-items/${wegsId}`, params).pipe(
-      map((response: any) => this.unwrapServiceData(response))
-    );
-  }
-
-  deleteDeliverableItem(workEffortId: string, wegsId: number): Observable<unknown> {
-    return this.apiService.delete<any>(`/common/routings/${encodeURIComponent(workEffortId)}/deliverable-items/${wegsId}`).pipe(
-      map((response: any) => this.unwrapServiceData(response))
-    );
-  }
-
-  addRoutingContent(workEffortId: string, formData: FormData, workEffortContentTypeId: string = 'DOCUMENT'): Observable<unknown> {
-    const url = `/common/routings/${encodeURIComponent(workEffortId)}/contents?workEffortContentTypeId=${encodeURIComponent(workEffortContentTypeId)}`;
-    return this.apiService.postFormData(url, formData).pipe(
-      map((response: any) => this.unwrapServiceData(response))
-    );
-  }
-
-  deleteRoutingContent(workEffortId: string, contentId: string): Observable<unknown> {
-    return this.apiService.delete<any>(`/common/routings/${encodeURIComponent(workEffortId)}/contents/${encodeURIComponent(contentId)}`).pipe(
-      map((response: any) => this.unwrapServiceData(response))
-    );
-  }
-
-  downloadRoutingContent(workEffortId: string, contentId: string): Observable<Blob> {
-    const url = `/common/routings/${encodeURIComponent(workEffortId)}/contents/${encodeURIComponent(contentId)}`;
-    return this.apiService.get<any>(url).pipe(
-      map((response: any) => base64ToBlob(
-        response?.data?.fileBytes,
-        response?.data?.mimeType || 'application/octet-stream'
-      ))
     );
   }
 

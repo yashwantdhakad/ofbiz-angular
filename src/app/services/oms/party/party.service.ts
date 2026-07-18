@@ -38,6 +38,18 @@ import {
   SupplierDetailResponse,
   TelecomNumber,
 } from '@ofbiz/models/party.model';
+import {
+  extractPartyDetail,
+  normalizeClassificationPayload,
+  normalizeContactMechPayload,
+  normalizeCustomerDetailResponse,
+  normalizeEmailPayload,
+  normalizeIdentificationPayload,
+  normalizeNotePayload,
+  normalizePhonePayload,
+  normalizePostalAddressPayload,
+  normalizeSupplierDetailResponse,
+} from './party-normalization';
 
 interface OfbizResponse<T> {
   data?: T;
@@ -170,7 +182,7 @@ export class PartyService {
   getCustomer(partyId: string): Observable<CustomerDetailResponse> {
     const url = `/common/customers/${encodeURIComponent(partyId)}`;
     return this.apiService.get<OfbizResponse<CustomerDetailResponse>>(url).pipe(
-      map((response) => this.normalizeCustomerDetailResponse(response?.data ?? {}))
+      map((response) => normalizeCustomerDetailResponse(response?.data ?? {}))
     );
   }
 
@@ -238,7 +250,7 @@ export class PartyService {
   getSupplier(partyId: string): Observable<SupplierDetailResponse> {
     const url = `/common/suppliers/${encodeURIComponent(partyId)}`;
     return this.apiService.get<{ data?: SupplierDetailResponse }>(url).pipe(
-      map((response) => this.normalizeSupplierDetailResponse(response?.data ?? {}))
+      map((response) => normalizeSupplierDetailResponse(response?.data ?? {}))
     );
   }
 
@@ -263,12 +275,12 @@ export class PartyService {
   }
 
   addPostalAddress(partyId: string | number, payload: Partial<PostalAddress>): Observable<unknown> {
-    const body = this.normalizePostalAddressPayload(payload);
+    const body = normalizePostalAddressPayload(payload);
     return this.apiService.post(`/common/parties/${encodeURIComponent(String(partyId))}/addresses`, body);
   }
 
   updatePostalAddress(partyId: string | number, contactMechId: string | number, payload: Partial<PostalAddress>): Observable<unknown> {
-    const body = this.normalizePostalAddressPayload(payload);
+    const body = normalizePostalAddressPayload(payload);
     return this.apiService.put(
       `/common/parties/${encodeURIComponent(String(partyId))}/addresses/${encodeURIComponent(String(contactMechId))}`,
       body
@@ -276,13 +288,13 @@ export class PartyService {
   }
 
   addAddress(params: PartyContactMechPayload): Observable<unknown> {
-    const body = this.normalizeContactMechPayload(params, { removePartyId: true, removeContactMechId: true });
+    const body = normalizeContactMechPayload(params, { removePartyId: true, removeContactMechId: true });
     const partyId = encodeURIComponent(params.partyId || '');
     return this.apiService.post(`/common/parties/${partyId}/addresses`, body);
   }
 
   updateAddress(params: PartyContactMechPayload): Observable<unknown> {
-    const body = this.normalizeContactMechPayload(params, { removePartyId: true, removeContactMechId: true });
+    const body = normalizeContactMechPayload(params, { removePartyId: true, removeContactMechId: true });
     const partyId = encodeURIComponent(params.partyId || '');
     const contactMechId = encodeURIComponent(params.contactMechId || '');
     return this.apiService.put(`/common/parties/${partyId}/addresses/${contactMechId}`, body);
@@ -303,7 +315,7 @@ export class PartyService {
   }
 
   addEmail(params: PartyContactMechPayload): Observable<unknown> {
-    const body = this.normalizeEmailPayload(params);
+    const body = normalizeEmailPayload(params);
     if (params.contactMechId) {
       return this.updatePartyEmail(params);
     }
@@ -312,13 +324,13 @@ export class PartyService {
   }
 
   addPhone(params: PartyContactMechPayload): Observable<unknown> {
-    const body = this.normalizePhonePayload(params);
+    const body = normalizePhonePayload(params);
     const partyId = encodeURIComponent(params.partyId || '');
     return this.apiService.post(`/common/parties/${partyId}/phones`, body);
   }
 
   updatePhoneNumber(params: PartyContactMechPayload): Observable<unknown> {
-    const body = this.normalizePhonePayload(params);
+    const body = normalizePhonePayload(params);
     const partyId = encodeURIComponent(params.partyId || '');
     const contactMechId = encodeURIComponent(params.contactMechId || '');
     return this.apiService.put(`/common/parties/${partyId}/phones/${contactMechId}`, body);
@@ -366,19 +378,19 @@ export class PartyService {
   }
 
   deleteClassification(params: PartyClassificationPayload): Observable<unknown> {
-    return this.apiService.post('/services/restDeletePartyClassification', this.normalizeClassificationPayload(params));
+    return this.apiService.post('/services/restDeletePartyClassification', normalizeClassificationPayload(params));
   }
 
   addClassification(params: PartyClassificationPayload): Observable<unknown> {
-    return this.apiService.post('/services/restCreatePartyClassification', this.normalizeClassificationPayload(params));
+    return this.apiService.post('/services/restCreatePartyClassification', normalizeClassificationPayload(params));
   }
 
   addIdentification(params: PartyIdentificationPayload): Observable<unknown> {
-    return this.apiService.post('/services/restCreatePartyIdentification', this.normalizeIdentificationPayload(params));
+    return this.apiService.post('/services/restCreatePartyIdentification', normalizeIdentificationPayload(params));
   }
 
   deleteIdentification(params: PartyIdentificationPayload): Observable<unknown> {
-    return this.apiService.post('/services/restDeletePartyIdentification', this.normalizeIdentificationPayload(params));
+    return this.apiService.post('/services/restDeletePartyIdentification', normalizeIdentificationPayload(params));
   }
 
   getPaymentGatewayConfig(): Observable<unknown> {
@@ -418,13 +430,13 @@ export class PartyService {
 
   createPartyNote(params: PartyNotePayload): Observable<unknown> {
     const partyId = encodeURIComponent(params.partyId || '');
-    return this.apiService.post(`/common/parties/${partyId}/notes`, this.normalizeNotePayload(params));
+    return this.apiService.post(`/common/parties/${partyId}/notes`, normalizeNotePayload(params));
   }
 
   updatePartyNote(params: PartyNotePayload): Observable<unknown> {
     const partyId = encodeURIComponent(params.partyId || '');
     const noteId = encodeURIComponent(params.noteId || '');
-    return this.apiService.put(`/common/parties/${partyId}/notes/${noteId}`, this.normalizeNotePayload(params));
+    return this.apiService.put(`/common/parties/${partyId}/notes/${noteId}`, normalizeNotePayload(params));
   }
 
   deletePartyNote(params: PartyNotePayload): Observable<unknown> {
@@ -458,7 +470,7 @@ export class PartyService {
     const url = `${basePath}/${encodeURIComponent(partyId)}`;
     return this.apiService.get<OfbizResponse<any>>(url).pipe(
       map((response: any) => {
-        const detail = this.extractPartyDetail(response, partyType);
+        const detail = extractPartyDetail(response, partyType);
         const list: PostalAddress[] = Array.isArray(detail?.['postalAddressList']) ? detail['postalAddressList'] as PostalAddress[] : [];
         if (!contactMechPurposeId) {
           return list;
@@ -479,7 +491,7 @@ export class PartyService {
     const url = `${basePath}/${encodeURIComponent(partyId)}`;
     return this.apiService.get<OfbizResponse<any>>(url).pipe(
       map((response: any) => {
-        const detail = this.extractPartyDetail(response, partyType);
+        const detail = extractPartyDetail(response, partyType);
         const list: TelecomNumber[] = Array.isArray(detail?.['telecomNumberList']) ? detail['telecomNumberList'] as TelecomNumber[] : [];
         if (!contactMechPurposeId) {
           return list;
@@ -499,234 +511,12 @@ export class PartyService {
     return this.apiService.getLookup<EnumerationItem>('enumerations', enumTypeId);
   }
 
-  private extractPartyDetail(
-    response: unknown,
-    partyType: 'customer' | 'supplier'
-  ): Record<string, unknown> {
-    const payload = response as OfbizResponse<Record<string, unknown>> | Record<string, unknown>;
-    if (payload && typeof payload === 'object' && 'data' in payload) {
-      const data = (payload as OfbizResponse<Record<string, unknown>>).data;
-      if (data && typeof data === 'object') {
-        return partyType === 'supplier'
-          ? (data['supplierDetail'] as Record<string, unknown> || {})
-          : (data['customerDetail'] as Record<string, unknown> || {});
-      }
-    }
-    const raw = payload as Record<string, unknown>;
-    return partyType === 'supplier'
-      ? (raw?.['supplierDetail'] as Record<string, unknown> || {})
-      : (raw?.['customerDetail'] as Record<string, unknown> || {});
-  }
-
-  private normalizeCustomerDetailResponse(response: CustomerDetailResponse | Record<string, unknown>): CustomerDetailResponse {
-    const data = response && typeof response === 'object' ? response : {};
-    const detail = (data as CustomerDetailResponse).customerDetail;
-    if (!detail) {
-      return data as CustomerDetailResponse;
-    }
-    return {
-      ...data,
-      customerDetail: this.normalizePartyDetail(detail as any),
-    } as CustomerDetailResponse;
-  }
-
-  private normalizeSupplierDetailResponse(response: SupplierDetailResponse | Record<string, unknown>): SupplierDetailResponse {
-    const data = response && typeof response === 'object' ? response : {};
-    const detail = (data as SupplierDetailResponse).supplierDetail;
-    if (!detail) {
-      return data as SupplierDetailResponse;
-    }
-    return {
-      ...data,
-      supplierDetail: this.normalizePartyDetail(detail as any),
-    } as SupplierDetailResponse;
-  }
-
-  private normalizePartyDetail<T extends Record<string, unknown>>(detail: T): T {
-    return {
-      ...detail,
-      postalAddressList: this.normalizeContactMechList(detail['postalAddressList']),
-      emailAddressList: this.normalizeContactMechList(detail['emailAddressList']),
-      telecomNumberList: this.normalizeContactMechList(detail['telecomNumberList']),
-      partyNoteList: this.normalizePartyNoteList(detail['partyNoteList']),
-    } as T;
-  }
-
-  private normalizeContactMechList<T>(list: T): T {
-    if (!Array.isArray(list)) {
-      return list;
-    }
-    return list.map((item) => this.normalizeContactMechResult(item)) as T;
-  }
-
-  private normalizePartyNoteList<T>(list: T): T {
-    if (!Array.isArray(list)) {
-      return list;
-    }
-    return list.map((item) => {
-      if (!item || typeof item !== 'object') {
-        return item;
-      }
-      const result = { ...(item as Record<string, unknown>) };
-      if (result['noteText'] == null) {
-        result['noteText'] = result['noteInfo'] ?? result['noteName'] ?? result['internalNote'] ?? '';
-      }
-      if (result['noteDate'] == null && result['noteDateTime'] != null) {
-        result['noteDate'] = result['noteDateTime'];
-      }
-      if (result['userId'] == null) {
-        result['userId'] = result['createdBy'] ?? result['createdByUserLogin'] ?? result['noteParty'];
-      }
-      return result;
-    }) as T;
-  }
-
-  private normalizeContactMechResult<T extends Record<string, unknown>>(item: T): T {
-    if (!item || typeof item !== 'object') {
-      return item;
-    }
-    const result = { ...item } as Record<string, unknown>;
-    if (result['contactMechPurposeId'] == null && result['contactMechPurposeTypeId'] != null) {
-      result['contactMechPurposeId'] = result['contactMechPurposeTypeId'];
-    }
-    if (result['contactMechPurposeTypeId'] == null && result['contactMechPurposeId'] != null) {
-      result['contactMechPurposeTypeId'] = result['contactMechPurposeId'];
-    }
-    return result as T;
-  }
-
-  private normalizeContactMechPayload(
-    params: PartyContactMechPayload,
-    options: { removePartyId?: boolean; removeContactMechId?: boolean } = {}
-  ): Record<string, unknown> {
-    const {
-      partyId,
-      contactMechId,
-      contactMechPurposeId,
-      contactMechPurposeTypeId,
-      ...body
-    } = params as PartyContactMechPayload & { contactMechPurposeTypeId?: string };
-
-    const resolvedPurposeTypeId = contactMechPurposeTypeId ?? contactMechPurposeId;
-    const result: Record<string, unknown> = {
-      ...body,
-      ...(resolvedPurposeTypeId != null ? { contactMechPurposeTypeId: resolvedPurposeTypeId } : {}),
-    };
-    if (!options.removePartyId && partyId != null) {
-      result['partyId'] = partyId;
-    }
-    if (!options.removeContactMechId && contactMechId != null) {
-      result['contactMechId'] = contactMechId;
-    }
-    return result;
-  }
-
-  private normalizeEmailPayload(params: PartyContactMechPayload): Record<string, unknown> {
-    const {
-      contactMechId,
-      contactMechPurposeId,
-      contactMechPurposeTypeId,
-      ...body
-    } = params as PartyContactMechPayload & { contactMechPurposeTypeId?: string };
-    const purposeTypeId = this.normalizeEmailPurposeTypeId(contactMechPurposeTypeId ?? contactMechPurposeId);
-    return {
-      ...body,
-      ...(contactMechId != null ? { contactMechId } : {}),
-      ...(purposeTypeId != null ? { contactMechPurposeTypeId: purposeTypeId } : {}),
-    };
-  }
-
   private updatePartyEmail(params: PartyContactMechPayload): Observable<unknown> {
     const partyId = encodeURIComponent(params.partyId || '');
     const contactMechId = encodeURIComponent(params.contactMechId || '');
     return this.apiService.put(
       `/common/parties/${partyId}/emails/${contactMechId}`,
-      this.normalizeEmailPayload(params)
+      normalizeEmailPayload(params)
     );
-  }
-
-  private normalizePhonePayload(params: PartyContactMechPayload): Record<string, unknown> {
-    const {
-      contactMechId,
-      contactMechPurposeId,
-      contactMechPurposeTypeId,
-      ...body
-    } = params as PartyContactMechPayload & { contactMechPurposeTypeId?: string };
-    const purposeTypeId = this.normalizePhonePurposeTypeId(contactMechPurposeTypeId ?? contactMechPurposeId);
-    return {
-      ...body,
-      ...(contactMechId != null ? { contactMechId } : {}),
-      ...(purposeTypeId != null ? { contactMechPurposeTypeId: purposeTypeId } : {}),
-    };
-  }
-
-  private normalizeNotePayload(params: PartyNotePayload): Record<string, unknown> {
-    const { noteText, ...body } = params;
-    return {
-      ...body,
-      ...(noteText != null ? { note: noteText } : {}),
-    };
-  }
-
-  private normalizePostalAddressPayload(payload: Partial<PostalAddress>): Record<string, unknown> {
-    const {
-      contactMechPurposeId,
-      contactMechPurposeTypeId,
-      ...body
-    } = payload as Partial<PostalAddress> & { contactMechPurposeTypeId?: string };
-
-    const resolvedPurposeTypeId = contactMechPurposeTypeId ?? contactMechPurposeId;
-    return {
-      ...body,
-      ...(resolvedPurposeTypeId != null ? { contactMechPurposeTypeId: resolvedPurposeTypeId } : {}),
-    };
-  }
-
-  private normalizeEmailPurposeTypeId(value?: unknown): string | undefined {
-    const purpose = typeof value === 'string' ? value : undefined;
-    switch (purpose) {
-      case 'SHIPPING_EMAIL':
-        return 'PRIMARY_EMAIL';
-      case 'PAYMENT_EMAIL':
-        return 'BILLING_EMAIL';
-      default:
-        return purpose || undefined;
-    }
-  }
-
-  private normalizePhonePurposeTypeId(value?: unknown): string | undefined {
-    const purpose = typeof value === 'string' ? value : undefined;
-    if (purpose === 'PHONE_SHIPPING') {
-      return 'PHONE_SHIP_ORIG';
-    }
-    return purpose || undefined;
-  }
-
-  private normalizeIdentificationPayload(params: PartyIdentificationPayload & { partyIdTypeEnumId?: string }): Record<string, unknown> {
-    const {
-      partyIdTypeEnumId,
-      partyIdentificationTypeId,
-      ...body
-    } = params as PartyIdentificationPayload & { partyIdTypeEnumId?: string; partyIdentificationTypeId?: string };
-
-    const resolvedTypeId = partyIdentificationTypeId ?? partyIdTypeEnumId;
-    return {
-      ...body,
-      ...(resolvedTypeId != null ? { partyIdentificationTypeId: resolvedTypeId } : {}),
-    };
-  }
-
-  private normalizeClassificationPayload(params: PartyClassificationPayload & { partyClassificationId?: string }): Record<string, unknown> {
-    const {
-      partyClassificationId,
-      partyClassificationGroupId,
-      ...body
-    } = params as PartyClassificationPayload & { partyClassificationId?: string; partyClassificationGroupId?: string };
-
-    const resolvedGroupId = partyClassificationGroupId ?? partyClassificationId;
-    return {
-      ...body,
-      ...(resolvedGroupId != null ? { partyClassificationGroupId: resolvedGroupId } : {}),
-    };
   }
 }

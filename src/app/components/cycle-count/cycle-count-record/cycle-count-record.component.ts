@@ -124,7 +124,7 @@ export class CycleCountRecordComponent implements OnInit {
     this.saving.set(true);
     const payload = this.detail().items.map((item: any) => ({
       inventoryCountItemSeqId: item.inventoryCountItemSeqId,
-      countedQuantity: item.countedQuantity == null ? null : Number(item.countedQuantity),
+      countedQuantity: item.countedQuantity === null || item.countedQuantity === undefined ? null : Number(item.countedQuantity),
     }));
     const sessionId = this.sessionId()?.get('sessionId') || '';
 
@@ -152,7 +152,7 @@ export class CycleCountRecordComponent implements OnInit {
     const sessionId = this.sessionId()?.get('sessionId') || '';
     this.cycleCountService.updateCounts(sessionId, [{
       inventoryCountItemSeqId: item.inventoryCountItemSeqId,
-      countedQuantity: item.countedQuantity == null ? null : Number(item.countedQuantity),
+      countedQuantity: item.countedQuantity === null || item.countedQuantity === undefined ? null : Number(item.countedQuantity),
     }]).pipe(
       finalize(() => {
         this.savingRowSeqId.set(null);
@@ -171,7 +171,7 @@ export class CycleCountRecordComponent implements OnInit {
 
   submit(): void {
     const hasCountedItems = Array.isArray(this.detail()?.items)
-      && this.detail().items.some((item: any) => item?.countedQuantity != null);
+      && this.detail().items.some((item: any) => (item?.countedQuantity !== null && item?.countedQuantity !== undefined));
     if (!hasCountedItems) {
       this.snackbar.showError(this.translate.instant('CYCLE_COUNT.SUBMIT_REQUIRES_COUNT'));
       return;

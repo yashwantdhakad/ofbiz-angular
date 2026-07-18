@@ -16,26 +16,18 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { MenuItem } from './menu/menu-item.model';
-import { homeMenu, reportsMenu, settingsMenu, supportMenu } from './menu/core.menu';
-import { catalogMenu, ordersMenu, relationshipsMenu } from './menu/commerce.menu';
-import { manufacturingMenu, planningMenu, warehouseMenu } from './menu/operations.menu';
-import { accountingMenu, financeMenu } from './menu/finance.menu';
+export interface MenuItemMeta {
+  title: string;
+  icon?: string;
+  requiredAuth: boolean;
+  permissions: string[];
+  erpFeature?: string;
+}
 
-export type { MenuItem, MenuItemMeta } from './menu/menu-item.model';
-
-// Project menu is temporarily hidden and will be fully implemented later.
-export const menuItems: MenuItem[] = [
-  homeMenu,
-  settingsMenu,
-  reportsMenu,
-  relationshipsMenu,
-  catalogMenu,
-  ordersMenu,
-  warehouseMenu,
-  manufacturingMenu,
-  planningMenu,
-  accountingMenu,
-  financeMenu,
-  supportMenu
-];
+export interface MenuItem {
+  path?: string;
+  name: string;
+  nav: string[];
+  meta: MenuItemMeta;
+  children?: MenuItem[];
+}

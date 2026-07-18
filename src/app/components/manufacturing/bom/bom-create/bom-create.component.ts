@@ -246,8 +246,7 @@ export class BomCreateComponent implements OnInit {
           this.router.navigate(['/boms', parentProductId]);
         });
       },
-      error: (error) => {
-        console.error('[BOM Create] submit failed', error);
+      error: (_error) => {
         this.renderScheduler.deferMacrotask(() => {
           this.isSaving.set(false);
         });

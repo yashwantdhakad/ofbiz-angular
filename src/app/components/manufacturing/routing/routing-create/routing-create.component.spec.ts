@@ -24,31 +24,31 @@ import { of, throwError } from 'rxjs';
 import { TranslateService } from '@ngx-translate/core';
 
 import { RoutingCreateComponent } from './routing-create.component';
-import { ManufacturingService } from '../../../../services/manufacturing/manufacturing.service';
+import { RoutingService } from '../../../../services/manufacturing/routing.service';
 import { SnackbarService } from '@ofbiz/services/common/snackbar.service';
 
 describe('RoutingCreateComponent', () => {
   let component: RoutingCreateComponent;
   let fixture: ComponentFixture<RoutingCreateComponent>;
-  let manufacturingServiceSpy: jasmine.SpyObj<ManufacturingService>;
+  let routingServiceSpy: jasmine.SpyObj<RoutingService>;
   let routerSpy: jasmine.SpyObj<Router>;
   let snackbarSpy: jasmine.SpyObj<SnackbarService>;
   let translateSpy: jasmine.SpyObj<TranslateService>;
 
   beforeEach(async () => {
-    manufacturingServiceSpy = jasmine.createSpyObj('ManufacturingService', ['createRouting']);
+    routingServiceSpy = jasmine.createSpyObj('RoutingService', ['createRouting']);
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     snackbarSpy = jasmine.createSpyObj('SnackbarService', ['showSuccess', 'showError']);
     translateSpy = jasmine.createSpyObj('TranslateService', ['instant']);
     translateSpy.instant.and.callFake((key: string) => key);
 
-    manufacturingServiceSpy.createRouting.and.returnValue(of({ workEffortId: 'ROUTING-1' }));
+    routingServiceSpy.createRouting.and.returnValue(of({ workEffortId: 'ROUTING-1' }));
 
     await TestBed.configureTestingModule({
       declarations: [RoutingCreateComponent],
       imports: [ReactiveFormsModule],
       providers: [
-        { provide: ManufacturingService, useValue: manufacturingServiceSpy },
+        { provide: RoutingService, useValue: routingServiceSpy },
         { provide: Router, useValue: routerSpy },
         { provide: SnackbarService, useValue: snackbarSpy },
         { provide: TranslateService, useValue: translateSpy },
@@ -74,7 +74,7 @@ describe('RoutingCreateComponent', () => {
     component.routingForm.patchValue({ workEffortName: '' });
     component.createRouting();
 
-    expect(manufacturingServiceSpy.createRouting).not.toHaveBeenCalled();
+    expect(routingServiceSpy.createRouting).not.toHaveBeenCalled();
     expect(component.isSubmitting()).toBeFalse();
   });
 
@@ -87,7 +87,7 @@ describe('RoutingCreateComponent', () => {
 
     component.createRouting();
 
-    expect(manufacturingServiceSpy.createRouting).toHaveBeenCalledWith(jasmine.objectContaining({
+    expect(routingServiceSpy.createRouting).toHaveBeenCalledWith(jasmine.objectContaining({
       workEffortTypeId: 'ROUTING',
       currentStatusId: 'ROU_ACTIVE',
       workEffortName: 'Assembly Route',
@@ -101,7 +101,7 @@ describe('RoutingCreateComponent', () => {
   });
 
   it('should fall back to the list page when createRouting returns no id', () => {
-    manufacturingServiceSpy.createRouting.and.returnValue(of({}));
+    routingServiceSpy.createRouting.and.returnValue(of({}));
     component.routingForm.patchValue({
       workEffortName: 'Route without id',
       description: '',
@@ -115,7 +115,7 @@ describe('RoutingCreateComponent', () => {
   });
 
   it('should show an error when createRouting fails and clear submitting state', () => {
-    manufacturingServiceSpy.createRouting.and.returnValue(throwError(() => new Error('boom')));
+    routingServiceSpy.createRouting.and.returnValue(throwError(() => new Error('boom')));
     component.routingForm.patchValue({
       workEffortName: 'Broken Route',
       description: 'Fail path',

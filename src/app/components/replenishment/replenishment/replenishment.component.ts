@@ -121,8 +121,7 @@ export class ReplenishmentComponent implements OnInit, OnDestroy {
           this.snackbarService.showSuccess(this.translate.instant('REPLENISHMENT.RUN_SUBMITTED_SUCCESS'));
           this.loadRuns();
         },
-        error: (err) => {
-          console.error('Failed to submit MRP run', err);
+        error: (_err) => {
           this.snackbarService.showError(this.translate.instant('REPLENISHMENT.RUN_SUBMITTED_ERROR'));
         },
       });

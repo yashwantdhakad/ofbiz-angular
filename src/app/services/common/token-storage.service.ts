@@ -124,11 +124,11 @@ export class TokenStorageService {
 
   isRequirePasswordChange(): boolean {
     const fromSession = sessionStorage.getItem(this.REQUIRE_PASSWORD_CHANGE_KEY);
-    if (fromSession != null) {
+    if (fromSession !== null) {
       return fromSession === 'true';
     }
     const fromCookie = this.readLegacyCookie(this.REQUIRE_PASSWORD_CHANGE_KEY);
-    if (fromCookie != null) {
+    if (fromCookie !== null) {
       sessionStorage.setItem(this.REQUIRE_PASSWORD_CHANGE_KEY, fromCookie);
       this.clearLegacyCookie(this.REQUIRE_PASSWORD_CHANGE_KEY);
     }
@@ -162,7 +162,7 @@ export class TokenStorageService {
   }
 
   private clearLegacyCookie(key: string): void {
-    document.cookie = `${key}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+    document.cookie = `${key}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT; SameSite=Strict; Secure`;
   }
 
 }

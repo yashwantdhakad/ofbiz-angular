@@ -34,7 +34,7 @@ export class UserDatePipe implements PipeTransform {
     timezone?: string,
     locale?: string
   ): string | null {
-    if (value == null || value === '') {
+    if (value === null || value === undefined || value === '') {
       return null;
     }
     const resolvedTimeZone = timezone || this.resolveUserTimeZone();

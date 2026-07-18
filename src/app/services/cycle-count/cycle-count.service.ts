@@ -113,8 +113,8 @@ export class CycleCountService {
     if (params.sectionId) query.set('sectionId', params.sectionId);
     if (params.levelId) query.set('levelId', params.levelId);
     if (params.positionId) query.set('positionId', params.positionId);
-    if (params.notScannedInLastDays != null) query.set('notScannedInLastDays', String(params.notScannedInLastDays));
-    if (params.scheduledInNextDays != null) query.set('scheduledInNextDays', String(params.scheduledInNextDays));
+    if ((params.notScannedInLastDays !== null && params.notScannedInLastDays !== undefined)) query.set('notScannedInLastDays', String(params.notScannedInLastDays));
+    if ((params.scheduledInNextDays !== null && params.scheduledInNextDays !== undefined)) query.set('scheduledInNextDays', String(params.scheduledInNextDays));
 
     return this.apiService.get<any>(`/common/cycle-count/pending-locations?${query.toString()}`).pipe(
       map((res) => (res?.data ?? res) as CycleCountPendingLocationListResponse)

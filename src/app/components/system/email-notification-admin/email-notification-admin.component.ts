@@ -95,7 +95,7 @@ export class EmailNotificationAdminComponent implements OnInit {
         this.templates.set(templates || []);
         this.isTemplatesLoading.set(false);
         const selectedId = this.selectedTemplateId();
-        const selected = (templates || []).find((item) => selectedId != null && item.id === selectedId) || (templates || [])[0] || null;
+        const selected = (templates || []).find((item) => selectedId !== null && item.id === selectedId) || (templates || [])[0] || null;
         if (selected) {
           this.selectTemplate(selected);
         } else {

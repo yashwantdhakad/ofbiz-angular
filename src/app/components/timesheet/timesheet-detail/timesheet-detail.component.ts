@@ -57,7 +57,7 @@ export class TimesheetDetailComponent implements OnInit {
   }
 
   load(): void {
-    if (this.id == null) {
+    if (this.id === null) {
       return;
     }
     this.isLoading.set(true);
@@ -87,7 +87,7 @@ export class TimesheetDetailComponent implements OnInit {
   }
 
   deleteTimesheet(): void {
-    if (this.id == null) {
+    if (this.id === null) {
       return;
     }
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
@@ -97,7 +97,7 @@ export class TimesheetDetailComponent implements OnInit {
       },
     });
     dialogRef.afterClosed().subscribe((confirmed) => {
-      if (!confirmed || this.id == null) {
+      if (!confirmed || this.id === null) {
         return;
       }
       this.timesheetService.deleteTimesheet(this.id).subscribe({
@@ -137,7 +137,7 @@ export class TimesheetDetailComponent implements OnInit {
   }
 
   private runWorkflow(requestFactory: () => ReturnType<TimesheetService['submitTimesheet']>): void {
-    if (this.id == null) {
+    if (this.id === null) {
       return;
     }
     requestFactory().subscribe({

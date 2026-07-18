@@ -116,8 +116,7 @@ export class OperationCreateComponent implements OnInit {
           this.router.navigate(['/operations']);
         }
       },
-      error: (error) => {
-        console.error('Error creating operation:', error);
+      error: (_error) => {
         this.snackbarService.showError(this.translate.instant('MANUFACTURING.CREATE_OPERATION_ERROR'));
         this.isSubmitting.set(false);
       },

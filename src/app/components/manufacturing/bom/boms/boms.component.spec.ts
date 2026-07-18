@@ -89,11 +89,9 @@ describe('BomsComponent', () => {
 
   it('should handle list load failure and helper branches', () => {
     manufacturingService.getBoms.and.returnValue(throwError(() => new Error('failed')));
-    spyOn(console, 'error');
 
     component.loadBoms();
 
-    expect(console.error).toHaveBeenCalled();
     expect(component.boms()).toEqual([]);
     expect(component.pages()).toBe(0);
     expect(component.isLoading()).toBeFalse();

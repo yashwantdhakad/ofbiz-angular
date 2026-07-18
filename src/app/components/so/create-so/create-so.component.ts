@@ -234,12 +234,12 @@ export class CreateSOComponent implements OnInit {
     const atpControl = this.items.at(index)?.get('atpTotal');
     const selectedPrice = this.toNumberOrNull(selectedProduct?.unitPrice);
     const selectedAtp = this.toNumberOrNull(selectedProduct?.atpTotal ?? selectedProduct?.availableToPromiseTotal);
-    if (unitAmountControl && selectedPrice != null) {
+    if (unitAmountControl && selectedPrice !== null) {
       unitAmountControl.setValue(selectedPrice);
     } else {
       this.applyProductPrice(index, productId);
     }
-    if (atpControl && selectedAtp != null) {
+    if (atpControl && selectedAtp !== null) {
       atpControl.setValue(selectedAtp);
     } else {
       this.applyProductAtp(index, productId);
@@ -561,7 +561,7 @@ export class CreateSOComponent implements OnInit {
           prices.find((price: any) => price?.productPriceTypeId === 'LIST_PRICE') ||
           prices[0];
         const priceValue = preferred?.price;
-        const numeric = priceValue != null ? Number(priceValue) : NaN;
+        const numeric = (priceValue !== null && priceValue !== undefined) ? Number(priceValue) : NaN;
         if (!Number.isNaN(numeric)) {
           unitAmountControl.setValue(numeric);
         }
@@ -578,9 +578,10 @@ export class CreateSOComponent implements OnInit {
     this.productService.getInventorySummary(productId).subscribe({
       next: (summary: any[]) => {
         const facilityId = this.orderForm.get('facilityId')?.value;
-        const rows = Array.isArray(summary)
-          ? (facilityId ? summary.filter((row) => row?.facilityId === facilityId) : summary)
-          : [];
+        let rows: any[] = [];
+        if (Array.isArray(summary)) {
+          rows = facilityId ? summary.filter((row) => row?.facilityId === facilityId) : summary;
+        }
         const total = rows.reduce((acc, row) => {
           const value = Number(row?.atpTotal ?? row?.availableToPromiseTotal ?? 0);
           return acc + (Number.isNaN(value) ? 0 : value);
@@ -594,7 +595,7 @@ export class CreateSOComponent implements OnInit {
   }
 
   private toNumberOrNull(value: unknown): number | null {
-    if (value == null || value === '') {
+    if (value === null || value === undefined || value === '') {
       return null;
     }
     const numeric = Number(value);

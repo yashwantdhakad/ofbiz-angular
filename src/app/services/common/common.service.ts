@@ -287,7 +287,7 @@ export class CommonService {
       let values: string[] = [];
       if (Array.isArray(rawValue)) {
         values = rawValue.map(String);
-      } else if (rawValue != null) {
+      } else if (rawValue !== undefined) {
         values = String(rawValue).split(',').map((val) => val.trim()).filter(Boolean);
       }
 

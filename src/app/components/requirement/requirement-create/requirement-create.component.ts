@@ -136,7 +136,7 @@ export class RequirementCreateComponent implements OnInit {
         this.isLoading.set(false);
         this.snackbarService.showSuccess(this.translate.instant('REQUIREMENT.CREATE_SUCCESS'));
         const createdId = createdRequirement?.id;
-        if (createdId != null && createdId !== '') {
+        if ((createdId !== null && createdId !== undefined) && createdId !== '') {
           this.router.navigate(['/requirements', createdId]);
           return;
         }

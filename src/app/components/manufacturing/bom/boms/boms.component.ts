@@ -85,8 +85,7 @@ export class BomsComponent implements OnInit {
       )
       .pipe(
         timeout(15000),
-        catchError((error) => {
-          console.error('Error loading BOMs:', error);
+        catchError((_error) => {
           return of({ documentList: [], documentListCount: 0 });
         }),
         map((response: any) => ({

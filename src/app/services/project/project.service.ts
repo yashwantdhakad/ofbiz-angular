@@ -126,7 +126,7 @@ export class ProjectService {
   }
 
   getMetrics(projectId: string, actualCost?: number): Observable<ProjectCostMetrics> {
-    const query = actualCost == null || Number.isNaN(actualCost) ? '' : `?actualCost=${encodeURIComponent(String(actualCost))}`;
+    const query = actualCost === undefined || Number.isNaN(actualCost) ? '' : `?actualCost=${encodeURIComponent(String(actualCost))}`;
     return this.apiService.getWms<ProjectCostMetrics>(`/projects/${encodeURIComponent(projectId)}/metrics${query}`);
   }
 
@@ -158,7 +158,7 @@ export class ProjectService {
     if (params.facilityId) {
       search.append('facilityId', params.facilityId);
     }
-    if (params.limit != null) {
+    if (params.limit !== undefined) {
       search.append('limit', String(params.limit));
     }
     const query = search.toString();

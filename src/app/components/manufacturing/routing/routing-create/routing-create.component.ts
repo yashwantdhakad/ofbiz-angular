@@ -19,7 +19,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ManufacturingService } from '../../../../services/manufacturing/manufacturing.service';
+import { RoutingService } from '../../../../services/manufacturing/routing.service';
 import { TranslateService } from '@ngx-translate/core';
 import { SnackbarService } from '@ofbiz/services/common/snackbar.service';
 
@@ -36,7 +36,7 @@ export class RoutingCreateComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private manufacturingService: ManufacturingService,
+    private routingService: RoutingService,
     private router: Router,
     private snackbarService: SnackbarService,
     private translate: TranslateService
@@ -71,7 +71,7 @@ export class RoutingCreateComponent implements OnInit {
       revisionNumber: 1
     };
 
-    this.manufacturingService.createRouting(payload).subscribe({
+    this.routingService.createRouting(payload).subscribe({
       next: (response) => {
         this.snackbarService.showSuccess(this.translate.instant('MANUFACTURING.CREATE_ROUTING_SUCCESS'));
 

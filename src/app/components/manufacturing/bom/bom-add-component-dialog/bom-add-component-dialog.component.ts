@@ -109,7 +109,7 @@ export class BomAddComponentDialogComponent implements OnInit {
     this.renderScheduler.deferMacrotask(() => {
       this.isSaving.set(true);
     });
-    if (this.isEdit && this.assocId != null) {
+    if (this.isEdit && this.assocId !== null) {
       const payload = {
         ...this.associationKey,
         quantity: String(this.quantity || 1),
@@ -124,8 +124,7 @@ export class BomAddComponentDialogComponent implements OnInit {
             this.dialogRef.close(true);
           });
         },
-        error: (error) => {
-          console.error('[BOM Add Component] update error', error);
+        error: (_error) => {
           this.renderScheduler.deferMacrotask(() => {
             this.isSaving.set(false);
           });

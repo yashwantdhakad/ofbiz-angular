@@ -314,7 +314,7 @@ export class AssetDetailComponent implements OnInit {
       return false;
     }
 
-    if (item.receiptId != null && String(item.receiptId).trim() !== '') {
+    if ((item.receiptId !== null && item.receiptId !== undefined) && String(item.receiptId).trim() !== '') {
       return true;
     }
 
@@ -446,7 +446,7 @@ export class AssetDetailComponent implements OnInit {
     dialogRef.afterClosed()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((payload: InspectionNoteDialogResult | null) => {
-        if (payload == null || !this.assetId) {
+        if (!payload || !this.assetId) {
           return;
         }
         this.isInspectionUpdating.set(true);

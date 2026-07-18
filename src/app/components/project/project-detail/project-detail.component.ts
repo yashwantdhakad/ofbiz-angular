@@ -58,7 +58,7 @@ export class ProjectDetailComponent implements OnInit {
       const projectId = params.get('id') || '';
       this.projectId.set(projectId);
       const cost = this.route.snapshot.queryParams?.['actualCost'];
-      this.actualCost.set(cost == null || cost === '' ? null : Number(cost));
+      this.actualCost.set(cost === null || cost === undefined || cost === '' ? null : Number(cost));
       if (projectId) {
         this.loadProject(projectId);
       }

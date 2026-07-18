@@ -71,7 +71,7 @@ export class AsyncServicesComponent implements OnInit {
   }
 
   onCancel(item: AsyncJob): void {
-    if (!item || !item.cancellable || !item.serviceType || item.id == null) {
+    if (!item || !item.cancellable || !item.serviceType || typeof item.id !== 'number') {
       return;
     }
     this.cancellingId.set(item.id);

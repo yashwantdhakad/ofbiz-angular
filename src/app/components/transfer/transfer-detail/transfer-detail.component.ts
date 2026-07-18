@@ -403,7 +403,7 @@ export class TransferDetailComponent implements OnInit {
         shippingInstructions: part?.shippingInstructions || '',
       },
     }).afterClosed().subscribe((value: string | null) => {
-      if (value == null || value.trim() === '') return;
+      if (!value || value.trim() === '') return;
       this.orderService
         .updateShippingInstructions(this.orderId!, orderPartSeqId, value.trim())
         .pipe(takeUntilDestroyed(this.destroyRef))

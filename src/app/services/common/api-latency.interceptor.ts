@@ -80,7 +80,7 @@ function logSlowApiRequest(
   }
 
   const backendMs = parseDuration(response.headers.get('X-Backend-Duration-Ms'));
-  const networkOverheadMs = backendMs == null ? null : Math.max(totalMs - backendMs, 0);
+  const networkOverheadMs = backendMs === null ? null : Math.max(totalMs - backendMs, 0);
   const sample = {
     requestId,
     method: request.method,

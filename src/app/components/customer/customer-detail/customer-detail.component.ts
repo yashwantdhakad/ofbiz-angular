@@ -341,7 +341,7 @@ export class CustomerDetailComponent implements OnInit {
 
   addClassificationDialog(params: Partial<PartyClassification> | null = null): void {
     const classificationData =
-      params && params.classificationTypeEnumId == null
+      params && params.classificationTypeEnumId === undefined
         ? { partyId: this.partyId }
         : { ...params, partyId: this.partyId };
 

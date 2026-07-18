@@ -218,7 +218,7 @@ export class CreateJobComponent implements OnInit {
     const effectiveMultiplier = Number.isNaN(multiplier) || multiplier <= 0 ? 1 : multiplier;
     this.consumeItemsArray.controls.forEach((control) => {
       const baseValue = control.get('baseQuantity')?.value;
-      if (baseValue === '' || baseValue == null) {
+      if (baseValue === '' || baseValue === null || baseValue === undefined) {
         return;
       }
       const base = Number(baseValue);

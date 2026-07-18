@@ -60,7 +60,7 @@ export class ConsumableItemComponent implements OnInit {
     const { workEffortId, productId, estimatedQuantity, id } =
       this.data?.consumableData ?? {};
     this.wegsId = typeof id === 'number' ? id : undefined;
-    this.isEdit = this.wegsId != null;
+    this.isEdit = this.wegsId !== undefined;
 
     this.addConsumableForm = this.fb.group({
       workEffortId: [workEffortId],
@@ -116,7 +116,7 @@ export class ConsumableItemComponent implements OnInit {
       estimatedQuantity: values.estimatedQuantity,
     };
 
-    const request$ = this.isEdit && this.wegsId != null
+    const request$ = this.isEdit && this.wegsId !== undefined
       ? this.manufacturingService.updateConsumable(values.workEffortId, this.wegsId, payload)
       : this.manufacturingService.addConsumable(values.workEffortId, payload);
     request$.pipe(

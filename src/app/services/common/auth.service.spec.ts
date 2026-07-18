@@ -123,7 +123,11 @@ describe('AuthService', () => {
 
   it('should error when refresh token is missing', async () => {
     tokenStorage.clearToken();
-    await expectAsync(firstValueFrom(service.refreshToken())).toBeRejectedWithError('Refresh token is missing');
+    const error = await firstValueFrom(service.refreshToken()).then(
+      () => null,
+      (reason: Error) => reason
+    );
+    expect(error?.message).toBe('Refresh token is missing');
   });
 
   it('should store login session fields in one boundary', () => {

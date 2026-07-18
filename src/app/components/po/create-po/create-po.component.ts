@@ -294,7 +294,7 @@ export class CreatePOComponent implements OnInit {
     if (productId) {
       const selectedPrice = this.toNumberOrNull(product?.supplierLastPrice ?? product?.lastPrice);
       const unitAmountControl = this.items.at(index)?.get('unitAmount');
-      if (unitAmountControl && selectedPrice != null) {
+      if (unitAmountControl && selectedPrice !== null) {
         unitAmountControl.setValue(selectedPrice);
       } else {
         this.applySupplierPrice(index, productId);
@@ -313,7 +313,7 @@ export class CreatePOComponent implements OnInit {
     this.supplierProductService.getLatestByPartyAndProduct(vendorPartyId, productId).subscribe({
       next: (supplierProduct: SupplierProductSummary) => {
         const priceValue = supplierProduct?.lastPrice;
-        const numeric = priceValue != null ? Number(priceValue) : NaN;
+        const numeric = (priceValue !== null && priceValue !== undefined) ? Number(priceValue) : NaN;
         if (!Number.isNaN(numeric)) {
           unitAmountControl.setValue(numeric);
         } else {
@@ -414,7 +414,7 @@ export class CreatePOComponent implements OnInit {
   }
 
   private toNumberOrNull(value: unknown): number | null {
-    if (value == null || value === '') {
+    if (value === null || value === undefined || value === '') {
       return null;
     }
     const numeric = Number(value);

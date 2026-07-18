@@ -144,8 +144,7 @@ export class BomDetailComponent implements OnInit {
         tap((productId) => (this.productId = productId)),
         switchMap((productId) =>
           this.loadBom(productId).pipe(
-            catchError((error) => {
-              console.error('[BOM Detail] load failed', error);
+            catchError((_error) => {
               return of(void 0);
             })
           )

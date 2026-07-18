@@ -60,7 +60,7 @@ export class FixedAssetEditDialogComponent {
   ) {}
 
   save(): void {
-    if (this.form.invalid || this.isSaving() || this.data.asset.id == null) {
+    if (this.form.invalid || this.isSaving() || this.data.asset.id === undefined) {
       this.form.markAllAsTouched();
       return;
     }
